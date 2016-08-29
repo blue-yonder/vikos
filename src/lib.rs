@@ -29,23 +29,31 @@ mod thea{
         fn coefficent(& mut self, coefficent : u32) -> & mut Self::Target;
     }
 
+    /// Changes all coefficents of model based on their derivation of the cost function at features
+    ///
+    /// Can be used to implement stochastic or batch gradient descent
+    pub fn gradient_descent_step<M : Model>(model : &mut M, features : &M::Input, truth : M::Target, learning_rate : M::Target)
+    {
+        let two = M::Target::one() + M::Target::one();
+        let prediction = model.predict(&features);
+        let error = prediction - truth;
+
+        for ci in 0..model.num_coefficents(){
+            *model.coefficent(ci) = *model.coefficent(ci) - learning_rate * two * error * model.gradient(ci, features);
+        }
+    }
+
     /// Trains a model
     pub fn stochastic_gradient_descent<M, H>(start : M, history : H, learning_rate : M::Target) -> M
         where M : Model,
         H : Iterator<Item=(M::Input, M::Target)>
     {
-        let two = M::Target::one() + M::Target::one();
         let mut last = start;
         let mut next = last.clone();
         
-        for event in history{
-            let prediction = next.predict(&event.0);
-            let error = prediction - event.1;
+        for (features, truth) in history{
 
-            for ci in 0..next.num_coefficents(){
-                *next.coefficent(ci) = *last.coefficent(ci) - learning_rate * two * error * last.gradient(ci, &event.0);
-            }
-
+            gradient_descent_step(& mut next, &features, truth, learning_rate);
             last = next.clone();
         }
 
@@ -143,7 +151,8 @@ mod tests {
     fn estimate_mean() {
 
         use thea::model::Constant;
-        use thea::Model;
+        use thea::gradient_descent_step
+;
 
         let history = [((), 3f64), ((), 4.0), ((), 5.0)];
 
@@ -151,14 +160,10 @@ mod tests {
 
         let learning_rate = 0.05;
 
-        for &event in history.iter().cycle().take(60){
-            let prediction = model.predict(&event.0);
-            let error = prediction - event.1;
+        for &(features, truth) in history.iter().cycle().take(60){
 
-            for ci in 0..model.num_coefficents(){
-                * model.coefficent(ci) -= learning_rate * 2. * error * model.gradient(ci, &event.0);
-            }
-
+            gradient_descent_step
+    (& mut model, &features, truth, learning_rate);
             println!("model: {:?}", model);
         }
 
@@ -178,7 +183,7 @@ mod tests {
 
         let learning_rate = 0.2;
 
-        let model = stochastic_gradient_descent(start, history.iter().cycle().take(20).cloned(), 0.2); 
+        let model = stochastic_gradient_descent(start, history.iter().cycle().take(20).cloned(), learning_rate); 
 
         assert!(model.m < 1.1);
         assert!(model.m > 0.9);
@@ -190,7 +195,8 @@ mod tests {
     fn linear_stochastic_gradient_descent_iter() {
 
         use thea::model::Linear;
-        use thea::Model;
+        use thea::gradient_descent_step
+;
 
         let history = [(0f64, 3f64), (1.0, 4.0), (2.0, 5.0)];
 
@@ -198,35 +204,17 @@ mod tests {
 
         let learning_rate = 0.2;
 
-        // for &event in history.iter().cycle().take(20){
-        //     let prediction = model.predict(&event.0);
-        //     let error = prediction - event.1;
+        for &(features, truth) in history.iter().cycle().take(20){
 
-        //     for ci in 0..model.num_coefficents(){
-        //         * model.coefficent(ci) -= learning_rate * 2. * error * model.gradient(ci, &event.0);
-        //     }
+            gradient_descent_step
+    (& mut model, &features, truth, learning_rate);
 
-        //     println!("model: {:?}", model);
-        // }
-
-        let model_it = history.iter().cycle().take(20).scan(& mut model, |m, &(features, truth)|{
-            let prediction = m.predict(&features);
-            let error = prediction - truth;
-
-            for ci in 0..m.num_coefficents(){
-                * m.coefficent(ci) -= learning_rate * 2. * error * m.gradient(ci, &features);
-            }
-
-            Some(m.clone())
-        });
-
-        for model in model_it{
             println!("model: {:?}", model);
         }
 
-        // assert!(model.m < 1.1);
-        // assert!(model.m > 0.9);
-        // assert!(model.c < 3.1);
-        // assert!(model.c > 2.9);
+        assert!(model.m < 1.1);
+        assert!(model.m > 0.9);
+        assert!(model.c < 3.1);
+        assert!(model.c > 2.9);
     }
 }
