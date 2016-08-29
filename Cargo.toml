@@ -1,0 +1,7 @@
+[package]
+name = "thea"
+version = "0.1.0"
+authors = ["Markus Klein <markus.klein@blue-yonder.com>"]
+
+[dependencies]
+num = "0.1"
