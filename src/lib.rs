@@ -1,145 +1,74 @@
 extern crate num;
 
-pub mod thea{
+use std::iter::Iterator;
+use num::Num;
 
-    use std::iter::Iterator;
-    use num::Num;
-    use num::One;
+/// A Model is defines how to predict a target from an input
+///
+/// A model usually depends on several coefficents whose values
+/// are derived using a training algorithm 
+pub trait Model : Clone{
+    /// Input features
+    type Input;
+    /// Target type
+    type Target : Num + Copy;
 
-    /// A Model is defines how to predict a target from an input
+    /// Predicts a target for the inputs based on the internal coefficents
+    fn predict(&self, &Self::Input) -> Self::Target;
+
+    /// The number of internal coefficents this model depends on
+    fn num_coefficents(&self) -> u32;
+
+    /// Value predict derived by the n-th `coefficent` at `input`
+    fn gradient(&self, coefficent : u32, input : &Self::Input) -> Self::Target;
+
+    /// Mutable reference to the n-th `coefficent`
+    fn coefficent(& mut self, coefficent : u32) -> & mut Self::Target;
+}
+
+/// Cost functions those value is supposed be minimized by the training algorithm
+pub trait Cost{
+
+    type Error : Num + Copy;
+
+    /// Value of the cost function derived by the n-th coefficent at x expressed in E(x) and dY(x)/dx
     ///
-    /// A model usually depends on several coefficents whose values
-    /// are derived using a training algorithm 
-    pub trait Model : Clone{
-        /// Input features
-        type Input;
-        /// Target type
-        type Target : Num + One + Copy;
- 
-        /// Predicts a target for the inputs based on the internal coefficents
-        fn predict(&self, &Self::Input) -> Self::Target;
+    /// This method is called by SGD based training algorithm in order to
+    /// determine the delta of the coefficents
+    fn gradient(&self, error : Self::Error, gradient_error_by_coefficent : Self::Error) -> Self::Error;
+}
 
-        /// The number of internal coefficents this model depends on
-        fn num_coefficents(&self) -> u32;
+/// Changes all coefficents of model based on their derivation of the cost function at features
+///
+/// Can be used to implement stochastic or batch gradient descent
+pub fn gradient_descent_step<C : Cost, M : Model<Target=C::Error>>(cost : &C, model : &mut M, features : &M::Input, truth : M::Target, learning_rate : M::Target)
+{
+    let prediction = model.predict(&features);
+    let error = prediction - truth;
 
-        /// Value predict derived by the n-th `coefficent` at `input`
-        fn gradient(&self, coefficent : u32, input : &Self::Input) -> Self::Target;
-
-        /// Mutable reference to the n-th `coefficent`
-        fn coefficent(& mut self, coefficent : u32) -> & mut Self::Target;
-    }
-
-    /// Changes all coefficents of model based on their derivation of the cost function at features
-    ///
-    /// Can be used to implement stochastic or batch gradient descent
-    pub fn gradient_descent_step<M : Model>(model : &mut M, features : &M::Input, truth : M::Target, learning_rate : M::Target)
-    {
-        let two = M::Target::one() + M::Target::one();
-        let prediction = model.predict(&features);
-        let error = prediction - truth;
-
-        for ci in 0..model.num_coefficents(){
-            *model.coefficent(ci) = *model.coefficent(ci) - learning_rate * two * error * model.gradient(ci, features);
-        }
-    }
-
-    /// Trains a model
-    pub fn stochastic_gradient_descent<M, H>(start : M, history : H, learning_rate : M::Target) -> M
-        where M : Model,
-        H : Iterator<Item=(M::Input, M::Target)>
-    {
-        let mut next = start.clone();        
-        for (features, truth) in history{
-
-            gradient_descent_step(& mut next, &features, truth, learning_rate);
-        }
-
-        next
-    }
-
-    pub mod model{
-
-        use thea::Model;
-
-        /// Constant Model
-        ///
-        /// This model predicts a number. The cost function used during training decides
-        /// wether this number is a mean, median or something else.
-        #[derive(Debug, Clone)]
-        pub struct Constant{
-            /// Any prediction made by this model will have the value of `c`
-            pub c : f64
-        }
-
-        impl Model for Constant{
-            type Input = ();
-            type Target = f64;
-
-            fn predict(&self, _: &()) -> f64{
-                self.c
-            }
-
-            fn num_coefficents(&self) -> u32{
-                1
-            }
-
-            fn gradient(&self, coefficent : u32, _ : &()) -> f64{
-                match coefficent{
-                    0 => 1.0,
-                    _ => panic!("coefficent index out of range")
-                }
-            }
-
-            fn coefficent(& mut self, coefficent : u32) -> & mut f64{
-                match coefficent{
-                    0 => & mut self.c,
-                    _ => panic!("coefficent index out of range")
-                }
-            }
-        }
-
-        /// Linear model
-        ///
-        /// Models the target as `y = m * x + c`
-        #[derive(Debug, Clone)]
-        pub struct Linear{
-            /// Slope
-            pub m : f64,
-            /// Offset
-            pub c : f64
-        }
-
-        impl Model for Linear{
-
-            type Input = f64;
-            type Target = f64;
-
-            fn predict(&self, input : &f64) -> f64{
-                self.m * *input + self.c
-            }
-
-            fn num_coefficents(&self) -> u32{
-                2
-            }
-
-            fn gradient(&self, coefficent : u32, input : &f64) -> f64{
-                match coefficent{
-                    0 => *input,
-                    1 => 1.0,
-                    _ => panic!("coefficent index out of range")
-                }
-            }
-
-            fn coefficent(& mut self, coefficent : u32) -> & mut f64{
-                match coefficent{
-                    0 => & mut self.m,
-                    1 => & mut self.c,
-                    _ => panic!("coefficent index out of range")
-                }
-            }
-        }
+    for ci in 0..model.num_coefficents(){
+        *model.coefficent(ci) = *model.coefficent(ci) - learning_rate * cost.gradient(error, model.gradient(ci, features));
     }
 }
+
+/// Trains a model
+pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, learning_rate : M::Target) -> M
+    where C : Cost,
+    M : Model<Target=C::Error>,
+    H : Iterator<Item=(M::Input, M::Target)>
+{
+
+    let mut next = start.clone();        
+    for (features, truth) in history{
+
+        gradient_descent_step(cost, & mut next, &features, truth, learning_rate);
+    }
+
+    next
+}
+
+pub mod model;
+pub mod cost;
 
 #[cfg(test)]
 mod tests {
@@ -147,12 +76,13 @@ mod tests {
     #[test]
     fn estimate_mean() {
 
-        use thea::model::Constant;
-        use thea::gradient_descent_step
-;
+        use model::Constant;
+        use cost::LeastSquares;
+        use gradient_descent_step;
 
         let history = [((), 3f64), ((), 4.0), ((), 5.0)];
 
+        let cost = LeastSquares{};
         let mut model = Constant{c : 0.0};
 
         let learning_rate_start = 2.0;
@@ -163,7 +93,7 @@ mod tests {
         for (count_step, &(features, truth)) in history.iter().cycle().take(num_steps).enumerate(){
 
             let adapted_learning_rate = learning_rate_stop + learning_rate_gradient * (num_steps - count_step) as f64;
-            gradient_descent_step(& mut model, &features, truth, learning_rate_gradient);
+            gradient_descent_step(&cost, & mut model, &features, truth, learning_rate_gradient);
             println!("model: {:?}, learning_rate: {:?}", model, adapted_learning_rate);
         }
 
@@ -174,8 +104,9 @@ mod tests {
     #[test]
     fn linear_stochastic_gradient_descent() {
 
-        use thea::model::Linear;
-        use thea::stochastic_gradient_descent;
+        use cost::LeastSquares;
+        use model::Linear;
+        use stochastic_gradient_descent;
 
         let history = [(0f64, 3f64), (1.0, 4.0), (2.0, 5.0)];
 
@@ -183,7 +114,8 @@ mod tests {
 
         let learning_rate = 0.2;
 
-        let model = stochastic_gradient_descent(start, history.iter().cycle().take(20).cloned(), learning_rate); 
+        let cost = LeastSquares{};
+        let model = stochastic_gradient_descent(&cost, start, history.iter().cycle().take(20).cloned(), learning_rate); 
 
         assert!(model.m < 1.1);
         assert!(model.m > 0.9);
@@ -194,21 +126,20 @@ mod tests {
     #[test]
     fn linear_stochastic_gradient_descent_iter() {
 
-        use thea::model::Linear;
-        use thea::gradient_descent_step
-;
+        use model::Linear;
+        use gradient_descent_step;
+        use cost::LeastSquares;
 
         let history = [(0f64, 3f64), (1.0, 4.0), (2.0, 5.0)];
 
+        let cost = LeastSquares{};
         let mut model = Linear{m : 0.0, c : 0.0};
 
         let learning_rate = 0.2;
 
         for &(features, truth) in history.iter().cycle().take(20){
 
-            gradient_descent_step
-    (& mut model, &features, truth, learning_rate);
-
+            gradient_descent_step(&cost, & mut model, &features, truth, learning_rate);
             println!("model: {:?}", model);
         }
 
