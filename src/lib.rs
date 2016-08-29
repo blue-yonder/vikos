@@ -1,6 +1,6 @@
 extern crate num;
 
-mod thea{
+pub mod thea{
 
     use std::iter::Iterator;
     use num::Num;
@@ -48,13 +48,10 @@ mod thea{
         where M : Model,
         H : Iterator<Item=(M::Input, M::Target)>
     {
-        let mut last = start;
-        let mut next = last.clone();
-        
+        let mut next = start.clone();        
         for (features, truth) in history{
 
             gradient_descent_step(& mut next, &features, truth, learning_rate);
-            last = next.clone();
         }
 
         next
@@ -78,7 +75,7 @@ mod thea{
             type Input = ();
             type Target = f64;
 
-            fn predict(&self, input: &()) -> f64{
+            fn predict(&self, _: &()) -> f64{
                 self.c
             }
 
@@ -86,7 +83,7 @@ mod thea{
                 1
             }
 
-            fn gradient(&self, coefficent : u32, input : &()) -> f64{
+            fn gradient(&self, coefficent : u32, _ : &()) -> f64{
                 match coefficent{
                     0 => 1.0,
                     _ => panic!("coefficent index out of range")
@@ -158,13 +155,16 @@ mod tests {
 
         let mut model = Constant{c : 0.0};
 
-        let learning_rate = 0.05;
+        let learning_rate_start = 2.0;
+        let learning_rate_stop = 0.02;
+        let num_steps = 60;
+        let learning_rate_gradient = (learning_rate_start - learning_rate_stop) / (num_steps as f64);
 
-        for &(features, truth) in history.iter().cycle().take(60){
+        for (count_step, &(features, truth)) in history.iter().cycle().take(num_steps).enumerate(){
 
-            gradient_descent_step
-    (& mut model, &features, truth, learning_rate);
-            println!("model: {:?}", model);
+            let adapted_learning_rate = learning_rate_stop + learning_rate_gradient * (num_steps - count_step) as f64;
+            gradient_descent_step(& mut model, &features, truth, learning_rate_gradient);
+            println!("model: {:?}, learning_rate: {:?}", model, adapted_learning_rate);
         }
 
         assert!(model.c < 4.1);
