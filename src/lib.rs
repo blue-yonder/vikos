@@ -1,3 +1,9 @@
+//! A machine learning library for supervised regression trainings
+//!
+//! This library wants to enable its user to write training algorithms
+//! independent of the model trained or the cost function tried to
+//! minimize.
+//! Consequently its two main traits are currently `Model` and `Cost`.
 extern crate num;
 
 use std::iter::Iterator;
@@ -86,9 +92,9 @@ mod tests {
         let cost = LeastAbsoluteDeviation{};
         let mut model = Constant{c : 0.0};
 
-        let learning_rate_start = 0.2;
-        let learning_rate_stop = 0.01;
-        let num_steps = 1000;
+        let learning_rate_start = 0.4;
+        let learning_rate_stop = 0.001;
+        let num_steps = 200;
         let learning_rate_gradient = (learning_rate_start - learning_rate_stop) / (num_steps as f64);
 
         for (count_step, &truth) in history.iter().cycle().take(num_steps).enumerate(){
@@ -115,7 +121,7 @@ mod tests {
         let cost = LeastSquares{};
         let mut model = Constant{c : 0.0};
 
-        let learning_rate_start = 0.2;
+        let learning_rate_start = 0.4;
         let learning_rate_stop = 0.001;
         let num_steps = 60;
         let learning_rate_gradient = (learning_rate_start - learning_rate_stop) / (num_steps as f64);

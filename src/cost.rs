@@ -18,6 +18,7 @@ impl Cost for LeastSquares{
 /// Pass an instance of this Type to a training algorithm to optimize for C=|Error|
 ///
 /// Optimizing a `model::Constant` for LeastSquares should yield the median
+/// Gradient for error == 0 is set to 0
 pub struct LeastAbsoluteDeviation;
 
 impl Cost for LeastAbsoluteDeviation{
