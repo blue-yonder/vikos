@@ -1,7 +1,7 @@
 [package]
 name = "vikos"
 version = "0.1.0"
-authors = ["Markus Klein <markus.klein@blue-yonder.com>"]
+authors = ["Markus Klein <markus-klein@live.de>"]
 
 [dependencies]
 num = "0.1"

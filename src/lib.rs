@@ -4,6 +4,9 @@
 //! independent of the model trained or the cost function tried to
 //! minimize.
 //! Consequently its two main traits are currently `Model` and `Cost`.
+//! The two submodules `model` and `cost` provide ready to use
+//! implementations of said traits.
+
 extern crate num;
 
 use std::iter::Iterator;
