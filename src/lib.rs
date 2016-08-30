@@ -74,31 +74,61 @@ pub mod cost;
 mod tests {
 
     #[test]
+    fn estimate_median() {
+
+        use model::Constant;
+        use cost::LeastAbsoluteDeviation;
+        use gradient_descent_step;
+
+        let features = ();
+        let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //median is seven
+
+        let cost = LeastAbsoluteDeviation{};
+        let mut model = Constant{c : 0.0};
+
+        let learning_rate_start = 0.2;
+        let learning_rate_stop = 0.01;
+        let num_steps = 1000;
+        let learning_rate_gradient = (learning_rate_start - learning_rate_stop) / (num_steps as f64);
+
+        for (count_step, &truth) in history.iter().cycle().take(num_steps).enumerate(){
+
+            let adapted_learning_rate = learning_rate_stop + learning_rate_gradient * (num_steps - count_step) as f64;
+            gradient_descent_step(&cost, & mut model, &features, truth, adapted_learning_rate);
+            println!("model: {:?}, learning_rate: {:?}", model, adapted_learning_rate);
+        }
+
+        assert!(model.c < 7.1);
+        assert!(model.c > 6.9);
+    }
+
+    #[test]
     fn estimate_mean() {
 
         use model::Constant;
         use cost::LeastSquares;
         use gradient_descent_step;
 
-        let history = [((), 3f64), ((), 4.0), ((), 5.0)];
+        let features = ();
+        let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
 
         let cost = LeastSquares{};
         let mut model = Constant{c : 0.0};
 
-        let learning_rate_start = 2.0;
-        let learning_rate_stop = 0.02;
+        let learning_rate_start = 0.2;
+        let learning_rate_stop = 0.001;
         let num_steps = 60;
         let learning_rate_gradient = (learning_rate_start - learning_rate_stop) / (num_steps as f64);
 
-        for (count_step, &(features, truth)) in history.iter().cycle().take(num_steps).enumerate(){
+        for (count_step, &truth) in history.iter().cycle().take(num_steps).enumerate(){
 
             let adapted_learning_rate = learning_rate_stop + learning_rate_gradient * (num_steps - count_step) as f64;
-            gradient_descent_step(&cost, & mut model, &features, truth, learning_rate_gradient);
+            gradient_descent_step(&cost, & mut model, &features, truth, adapted_learning_rate);
             println!("model: {:?}, learning_rate: {:?}", model, adapted_learning_rate);
         }
 
-        assert!(model.c < 4.1);
-        assert!(model.c > 3.9);
+        assert!(model.c < 9.1);
+        assert!(model.c > 8.9);
     }
 
     #[test]
