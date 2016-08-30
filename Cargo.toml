@@ -2,6 +2,7 @@
 name = "vikos"
 version = "0.1.0"
 authors = ["Markus Klein <markus-klein@live.de>"]
+description = "A machine learning library for supervised regression trainings"
 
 [dependencies]
 num = "0.1"
