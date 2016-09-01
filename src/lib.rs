@@ -78,6 +78,7 @@ pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, l
 
 pub mod model;
 pub mod cost;
+pub mod linear_algebra;
 
 #[cfg(test)]
 mod tests {
@@ -184,6 +185,32 @@ mod tests {
 
         assert!(model.m < 1.1);
         assert!(model.m > 0.9);
+        assert!(model.c < 3.1);
+        assert!(model.c > 2.9);
+    }
+
+    #[test]
+    fn linear_sgd_2d()
+    {
+        use cost::LeastSquares;
+        use model::Linear;
+        use stochastic_gradient_descent;
+
+        let history = [([0.0, 7.0], 17.0), ([1.0, 2.0], 8.0), ([2.0, -2.0], 1.0)];
+
+        let start = Linear{m : [0.0, 0.0], c : 0.0};
+
+        let learning_rate = 0.05;
+
+        let cost = LeastSquares{};
+        let model = stochastic_gradient_descent(&cost, start, history.iter().cycle().take(100000).cloned(), learning_rate); 
+
+        println!("{:?}", model);
+
+        assert!(model.m[0] < 1.1);
+        assert!(model.m[0] > 0.9);
+        assert!(model.m[1] < 2.1);
+        assert!(model.m[1] > 1.9);
         assert!(model.c < 3.1);
         assert!(model.c > 2.9);
     }

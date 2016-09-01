@@ -1,4 +1,5 @@
 use Model;
+use linear_algebra::Vector;
 
 /// Constant Model
 ///
@@ -41,39 +42,42 @@ impl Model for Constant{
 ///
 /// Models the target as `y = m * x + c`
 #[derive(Debug, Clone)]
-pub struct Linear{
+pub struct Linear<V : Vector>{
     /// Slope
-    pub m : f64,
+    pub m : V,
     /// Offset
-    pub c : f64
+    pub c : V::Scalar
 }
 
-impl Model for Linear{
+impl<V : Vector> Model for Linear<V>{
 
-    type Input = f64;
-    type Target = f64;
+    type Input = V;
+    type Target = V::Scalar;
 
-    fn predict(&self, input : &f64) -> f64{
-        self.m * *input + self.c
+    fn predict(&self, input : &V) -> V::Scalar{
+        self.m.dot(input) + self.c
     }
 
     fn num_coefficents(&self) -> u32{
-        2
+        self.m.dimension() + 1
     }
 
-    fn gradient(&self, coefficent : u32, input : &f64) -> f64{
-        match coefficent{
-            0 => *input,
-            1 => 1.0,
-            _ => panic!("coefficent index out of range")
+    fn gradient(&self, coefficent : u32, input : &V) -> V::Scalar{
+
+        use num::One;
+
+        if coefficent == self.m.dimension(){
+            V::Scalar::one() //c
+        } else {
+            input.at(coefficent)
         }
     }
 
-    fn coefficent(& mut self, coefficent : u32) -> & mut f64{
-        match coefficent{
-            0 => & mut self.m,
-            1 => & mut self.c,
-            _ => panic!("coefficent index out of range")
+    fn coefficent(& mut self, coefficent : u32) -> & mut V::Scalar{
+        if coefficent == self.m.dimension(){
+            & mut self.c
+        } else {
+            self.m.mut_at(coefficent)
         }
     }
 }
