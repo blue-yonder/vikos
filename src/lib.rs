@@ -203,7 +203,7 @@ mod tests {
         let learning_rate = 0.05;
 
         let cost = LeastSquares{};
-        let model = stochastic_gradient_descent(&cost, start, history.iter().cycle().take(100000).cloned(), learning_rate); 
+        let model = stochastic_gradient_descent(&cost, start, history.iter().cycle().take(20000).cloned(), learning_rate); 
 
         println!("{:?}", model);
 
