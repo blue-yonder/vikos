@@ -31,4 +31,4 @@ Contributing
 
 Want to help out? Just create an issue, pull request or contact markus.klein@blue-yonder.com
 
-[rustup]:  www.rustup.rs
+[rustup]:  http:://www.rustup.rs
