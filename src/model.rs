@@ -19,18 +19,18 @@ impl Model for Constant{
         self.c
     }
 
-    fn num_coefficents(&self) -> u32{
+    fn num_coefficents(&self) -> usize{
         1
     }
 
-    fn gradient(&self, coefficent : u32, _ : &()) -> f64{
+    fn gradient(&self, coefficent : usize, _ : &()) -> f64{
         match coefficent{
             0 => 1.0,
             _ => panic!("coefficent index out of range")
         }
     }
 
-    fn coefficent(& mut self, coefficent : u32) -> & mut f64{
+    fn coefficent(& mut self, coefficent : usize) -> & mut f64{
         match coefficent{
             0 => & mut self.c,
             _ => panic!("coefficent index out of range")
@@ -58,11 +58,11 @@ impl<V : Vector> Model for Linear<V>{
         self.m.dot(input) + self.c
     }
 
-    fn num_coefficents(&self) -> u32{
+    fn num_coefficents(&self) -> usize{
         self.m.dimension() + 1
     }
 
-    fn gradient(&self, coefficent : u32, input : &V) -> V::Scalar{
+    fn gradient(&self, coefficent : usize, input : &V) -> V::Scalar{
 
         use num::One;
 
@@ -73,7 +73,7 @@ impl<V : Vector> Model for Linear<V>{
         }
     }
 
-    fn coefficent(& mut self, coefficent : u32) -> & mut V::Scalar{
+    fn coefficent(& mut self, coefficent : usize) -> & mut V::Scalar{
         if coefficent == self.m.dimension(){
             & mut self.c
         } else {
