@@ -21,6 +21,7 @@ Documention
 -----------
 
 As this crate is not published yet, you still need to build the documentation yourself.
+
 1. Use [rustup] to setup rust.
 2. Clone this crate
 3. run `cargo doc`
