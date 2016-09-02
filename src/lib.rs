@@ -20,7 +20,7 @@ pub trait Model : Clone{
     /// Input features
     type Input;
     /// Target type
-    type Target : Num + Copy + One;
+    type Target : Num + One + Copy;
 
     /// Predicts a target for the inputs based on the internal coefficents
     fn predict(&self, &Self::Input) -> Self::Target;
@@ -103,7 +103,13 @@ pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, l
 }
 
 /// Trains a model
-pub fn inert_stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, learning_rate : M::Target, inertia : M::Target) -> M
+pub fn inert_stochastic_gradient_descent<C, M, H>(
+    cost : &C,
+    start : M,
+    history : H,
+    learning_rate : M::Target,
+    inertia : M::Target
+) -> M
     where C : Cost,
     M : Model<Target=C::Error>,
     H : Iterator<Item=(M::Input, M::Target)>
@@ -135,7 +141,7 @@ mod tests {
         use gradient_descent_step;
 
         let features = ();
-        let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //median is seven
+        let history = [1.0, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //median is seven
 
         let cost = LeastAbsoluteDeviation{};
         let mut model = Constant{c : 0.0};
