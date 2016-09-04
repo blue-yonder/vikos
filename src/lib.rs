@@ -10,7 +10,7 @@
 extern crate num;
 
 use std::iter::Iterator;
-use num::{Zero, One, Num};
+use num::{Zero, One, Float};
 
 /// A Model is defines how to predict a target from an input
 ///
@@ -20,7 +20,7 @@ pub trait Model : Clone{
     /// Input features
     type Input;
     /// Target type
-    type Target : Num + One + Copy;
+    type Target : Float;
 
     /// Predicts a target for the inputs based on the internal coefficents
     fn predict(&self, &Self::Input) -> Self::Target;
@@ -38,7 +38,7 @@ pub trait Model : Clone{
 /// Cost functions those value is supposed be minimized by the training algorithm
 pub trait Cost{
 
-    type Error : Num + Copy;
+    type Error : Float;
 
     /// Value of the cost function derived by the n-th coefficent at x expressed in E(x) and dY(x)/dx
     ///
@@ -240,8 +240,7 @@ mod tests {
     }
 
     #[test]
-    fn linear_sgd_2d()
-    {
+    fn linear_sgd_2d(){
         use cost::LeastSquares;
         use model::Linear;
         use inert_stochastic_gradient_descent;
@@ -253,7 +252,11 @@ mod tests {
         let learning_rate = 0.1;
 
         let cost = LeastSquares{};
-        let model = inert_stochastic_gradient_descent(&cost, start, history.iter().cycle().take(15000).cloned(), learning_rate, 0.9); 
+        let model = inert_stochastic_gradient_descent(
+            &cost, start,
+            history.iter().cycle().take(15000).cloned(),
+            learning_rate, 0.9
+        ); 
 
         println!("{:?}", model);
 
@@ -263,5 +266,46 @@ mod tests {
         assert!(model.m[1] > 1.9);
         assert!(model.c < 3.1);
         assert!(model.c > 2.9);
+    }
+
+    #[test]
+    fn logistic_sgd_2d(){
+        use cost::LeastSquares;
+        use model::{Logicstic, Linear};
+        use stochastic_gradient_descent;
+
+        use Model;
+
+        let history = [
+            ([2.7810836, 2.550537003], 0.0),
+            ([1.465489372, 2.362125076], 0.0),
+            ([3.396561688, 4.400293529], 0.0),
+            ([1.38807019, 1.850220317], 0.0),
+            ([3.06407232, 3.005305973], 0.0),
+            ([7.627531214, 2.759262235], 1.0),
+            ([5.332441248, 2.088626775], 1.0),
+            ([6.922596716, 1.77106367], 1.0),
+            ([8.675418651, -0.242068655], 1.0),
+            ([7.673756466, 3.508563011], 1.0)
+        ];
+
+        let start = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
+
+        let learning_rate = 0.3;
+
+        let cost = LeastSquares{};
+        let model = stochastic_gradient_descent(
+            &cost, start,
+            history.iter().cycle().take(40).cloned(),
+            learning_rate
+        ); 
+
+        println!("{:?}", model.linear);
+
+        let classification_errors = history.iter()
+            .map(|&(input, truth)| model.predict(&input).round() == truth)
+            .fold(0, |errors, correct| if correct { errors } else { errors + 1 });
+
+        assert_eq!(0, classification_errors);
     }
 }

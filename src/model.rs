@@ -1,5 +1,6 @@
 use Model;
 use linear_algebra::Vector;
+use num::{Float, One};
 
 /// Constant Model
 ///
@@ -49,7 +50,7 @@ pub struct Linear<V : Vector>{
     pub c : V::Scalar
 }
 
-impl<V : Vector> Model for Linear<V>{
+impl<V : Vector> Model for Linear<V> where V::Scalar : Float{
 
     type Input = V;
     type Target = V::Scalar;
@@ -79,5 +80,34 @@ impl<V : Vector> Model for Linear<V>{
         } else {
             self.m.mut_at(coefficent)
         }
+    }
+}
+
+/// Models target as `y = 1/1+e^(m * x + c)`
+#[derive(Clone)]
+pub struct Logicstic<V: Vector>{
+    pub linear : Linear<V>
+}
+
+impl<V : Vector> Model for Logicstic<V> where V::Scalar : Float{
+    type Input = V;
+    type Target = V::Scalar;
+
+    fn predict(&self, input : &V) -> V::Scalar{
+        V::Scalar::one() / (V::Scalar::one() + self.linear.predict(input).exp())
+    }
+
+    fn num_coefficents(&self) -> usize{
+        self.linear.num_coefficents()
+    }
+
+    fn gradient(&self, coefficent : usize, input : &V) -> V::Scalar{
+        let nom = self.linear.predict(input).exp();
+        let denom = (V::Scalar::one() + nom).powi(2);
+        - nom / denom * self.linear.gradient(coefficent, input)
+    }
+
+    fn coefficent(& mut self, coefficent : usize) -> & mut V::Scalar{
+        self.linear.coefficent(coefficent)
     }
 }
