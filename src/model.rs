@@ -102,9 +102,8 @@ impl<V : Vector> Model for Logicstic<V> where V::Scalar : Float{
     }
 
     fn gradient(&self, coefficent : usize, input : &V) -> V::Scalar{
-        let nom = self.linear.predict(input).exp();
-        let denom = (V::Scalar::one() + nom).powi(2);
-        - nom / denom * self.linear.gradient(coefficent, input)
+        let p = self.predict(input);
+        - p * (V::Scalar::one() - p) * self.linear.gradient(coefficent, input)
     }
 
     fn coefficent(& mut self, coefficent : usize) -> & mut V::Scalar{
