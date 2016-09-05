@@ -54,7 +54,8 @@ pub trait Cost{
 
 /// Changes all coefficents of model based on their derivation of the cost function at features
 ///
-/// Can be used to implement stochastic or batch gradient descent
+/// Will not get stuck on saddle points as easily as a plain SGD and will converge quicker in general.
+/// A good default for `inertia` is 0.9
 pub fn inert_gradient_descent_step<C, M>(
     cost : &C,
     model : &mut M,
@@ -79,8 +80,7 @@ pub fn inert_gradient_descent_step<C, M>(
 
 /// An SGD training step with a velocity term
 ///
-/// Will not get stuck on saddle points as easily as a plain SGD and will converge quicker in general.
-/// A good default for `inertia` is 0.9
+/// Can be used to implement stochastic or batch gradient descent
 pub fn gradient_descent_step<C, M>(cost : &C, model : &mut M, features : &M::Input, truth : M::Target, learning_rate : M::Target)
     where C : Cost, M : Model<Target=C::Error>
 {
