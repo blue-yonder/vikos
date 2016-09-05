@@ -1,22 +1,36 @@
 use Model;
 use linear_algebra::Vector;
 use num::{Float, One};
+use std::marker::PhantomData;
 
-/// Constant Model
+/// Models the target as `c`
 ///
 /// This model predicts a number. The cost function used during training decides
 /// wether this number is a mean, median or something else.
-#[derive(Debug, Clone)]
-pub struct Constant{
+#[derive(Debug)]
+pub struct Constant<Input>{
     /// Any prediction made by this model will have the value of `c`
-    pub c : f64
+    pub c: f64,
+    _phantom: PhantomData<Input>
 }
 
-impl Model for Constant{
-    type Input = ();
+impl<I> Constant<I> {
+    fn new(c: f64) -> Constant<I>{
+        Constant{c: c, _phantom: PhantomData::<I>{}}
+    }
+}
+
+impl<I> Clone for Constant<I>{
+    fn clone(&self) -> Self{
+        Constant::new(self.c)
+    }
+}
+
+impl<I> Model for Constant<I>{
+    type Input = I;
     type Target = f64;
 
-    fn predict(&self, _: &()) -> f64{
+    fn predict(&self, _: &I) -> f64{
         self.c
     }
 
@@ -24,7 +38,7 @@ impl Model for Constant{
         1
     }
 
-    fn gradient(&self, coefficent : usize, _ : &()) -> f64{
+    fn gradient(&self, coefficent : usize, _ : &I) -> f64{
         match coefficent{
             0 => 1.0,
             _ => panic!("coefficent index out of range")
@@ -39,8 +53,6 @@ impl Model for Constant{
     }
 }
 
-/// Linear model
-///
 /// Models the target as `y = m * x + c`
 #[derive(Debug, Clone)]
 pub struct Linear<V : Vector>{
