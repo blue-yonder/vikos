@@ -7,6 +7,8 @@
 //! The two submodules `model` and `cost` provide ready to use
 //! implementations of said traits.
 
+#![warn(missing_docs)]
+
 extern crate num;
 
 use std::iter::Iterator;
@@ -38,9 +40,12 @@ pub trait Model : Clone{
 /// Cost functions those value is supposed be minimized by the training algorithm
 pub trait Cost{
 
+    /// Error type used by the cost function
+    ///
+    /// Usually `f64` or `f32`
     type Error : Float;
 
-    /// Value of the cost function derived by the n-th coefficent at x expressed in E(x) and dY(x)/dx
+    /// Value of the cost function derived by the n-th coefficent at x expressed in Error(x) and dY(x)/dx
     ///
     /// This method is called by SGD based training algorithm in order to
     /// determine the delta of the coefficents
@@ -72,9 +77,10 @@ pub fn inert_gradient_descent_step<C, M>(
     }
 }
 
-/// Changes all coefficents of model based on their derivation of the cost function at features
+/// An SGD training step with a velocity term
 ///
-/// Can be used to implement stochastic or batch gradient descent
+/// Will not get stuck on saddle points as easily as a plain SGD and will converge quicker in general.
+/// A good default for `inertia` is 0.9
 pub fn gradient_descent_step<C, M>(cost : &C, model : &mut M, features : &M::Input, truth : M::Target, learning_rate : M::Target)
     where C : Cost, M : Model<Target=C::Error>
 {
@@ -86,7 +92,7 @@ pub fn gradient_descent_step<C, M>(cost : &C, model : &mut M, features : &M::Inp
     }
 }
 
-/// Trains a model
+/// Applies a plain SGD training step to model once for every event in history using a constant learning rate
 pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, learning_rate : M::Target) -> M
     where C : Cost,
     M : Model<Target=C::Error>,
@@ -102,7 +108,10 @@ pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, l
     next
 }
 
-/// Trains a model
+/// SGD tranining with constant learning rate and velocity
+///
+/// Velocity avoids being stuck on saddle points during optimization
+/// A good default for `inertia` is 0.9
 pub fn inert_stochastic_gradient_descent<C, M, H>(
     cost : &C,
     start : M,
@@ -115,7 +124,7 @@ pub fn inert_stochastic_gradient_descent<C, M, H>(
     H : Iterator<Item=(M::Input, M::Target)>
 {
 
-    let mut velocity = Vec::new();
+    let mut velocity = Vec::new(); 
     velocity.resize(start.num_coefficents(), M::Target::zero());
     let mut next = start.clone();        
     for (features, truth) in history{
@@ -126,8 +135,11 @@ pub fn inert_stochastic_gradient_descent<C, M, H>(
     next
 }
 
+/// Implementations of `Model` trait
 pub mod model;
+/// Implementations of `Cost` trait
 pub mod cost;
+/// Defines linear algebra traits used for some model parameters
 pub mod linear_algebra;
 
 #[cfg(test)]

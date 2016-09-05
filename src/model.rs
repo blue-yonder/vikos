@@ -86,6 +86,7 @@ impl<V : Vector> Model for Linear<V> where V::Scalar : Float{
 /// Models target as `y = 1/1+e^(m * x + c)`
 #[derive(Clone)]
 pub struct Logicstic<V: Vector>{
+    /// Linear term of `Logistic` model
     pub linear : Linear<V>
 }
 

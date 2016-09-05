@@ -2,13 +2,24 @@ use num::Num;
 use num::Zero;
 use num::One;
 
+/// Vector those dimension is known at runtime
+///
+/// Assumes the `Vector` is represented as a
+/// tuple of numbers representing its projection
+/// along orthogonal base vectors
 pub trait Vector : Clone{
 
+    /// Underlying Scalar type of `Vector` type
     type Scalar : Num + Zero + One + Copy;
+    /// Maximum allowed index for `at` and `mut_at`
     fn dimension(&self) -> usize;
+    /// Length of projection along `i`-th base
     fn at(&self, i : usize) -> Self::Scalar;
+    /// Mutable access to length of projection along `i`-th base
     fn mut_at<'a>(&'a mut self, i : usize) -> &'a mut Self::Scalar;
-    // fn dot(&self, other : &Self) -> Self::Scalar;
+    /// Scalar product
+    ///
+    /// Default implementation using `at` and `dimension` is provided
     fn dot(&self, other : &Self) -> Self::Scalar{
         let mut result = Self::Scalar::zero();
         for i in 0..self.dimension(){
