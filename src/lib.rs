@@ -156,7 +156,7 @@ mod tests {
         let history = [1.0, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //median is seven
 
         let cost = LeastAbsoluteDeviation{};
-        let mut model = Constant{c : 0.0};
+        let mut model = Constant::new(0.0);
 
         let learning_rate_start = 0.4;
         let learning_rate_stop = 0.001;
@@ -185,7 +185,7 @@ mod tests {
         let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
 
         let cost = LeastSquares{};
-        let mut model = Constant{c : 0.0};
+        let mut model = Constant::new(0.0);
 
         let learning_rate_start = 0.4;
         let learning_rate_stop = 0.001;

@@ -7,6 +7,32 @@ use std::marker::PhantomData;
 ///
 /// This model predicts a number. The cost function used during training decides
 /// wether this number is a mean, median or something else.
+///
+/// # Examples
+///
+/// Estimate mean
+///
+/// ```
+/// use vikos::model::Constant;
+/// use vikos::cost::LeastSquares;
+/// use vikos::gradient_descent_step;
+///
+/// let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
+/// let cost = LeastSquares{};
+/// let mut model = Constant::new(0.0);
+///
+/// let learning_rate_start = 0.4;
+/// let learning_rate_stop = 0.001;
+/// let num_steps = 60;
+///
+/// let learning_rate_gradient = (learning_rate_start - learning_rate_stop) / (num_steps as f64);
+///
+/// for (count_step, &truth) in history.iter().cycle().take(num_steps).enumerate(){
+///
+///     let adapted_learning_rate = learning_rate_stop + learning_rate_gradient * (num_steps - count_step) as f64;
+///     gradient_descent_step(&cost, & mut model, &(), truth, adapted_learning_rate);
+/// }
+/// ```
 #[derive(Debug)]
 pub struct Constant<Input>{
     /// Any prediction made by this model will have the value of `c`
@@ -15,7 +41,8 @@ pub struct Constant<Input>{
 }
 
 impl<I> Constant<I> {
-    fn new(c: f64) -> Constant<I>{
+    /// Creates a new Constant from a `f64`
+    pub fn new(c: f64) -> Constant<I>{
         Constant{c: c, _phantom: PhantomData::<I>{}}
     }
 }
