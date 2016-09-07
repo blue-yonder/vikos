@@ -279,8 +279,49 @@ mod tests {
     }
 
     #[test]
-    fn logistic_sgd_2d(){
-        use cost::{MaxLikelihood};
+    fn logistic_sgd_2d_least_squaers(){
+        use cost::LeastSquares;
+        use model::{Logicstic, Linear};
+        use stochastic_gradient_descent;
+
+        use Model;
+
+        let history = [
+            ([2.7810836, 2.550537003], 0.0),
+            ([1.465489372, 2.362125076], 0.0),
+            ([3.396561688, 4.400293529], 0.0),
+            ([1.38807019, 1.850220317], 0.0),
+            ([3.06407232, 3.005305973], 0.0),
+            ([7.627531214, 2.759262235], 1.0),
+            ([5.332441248, 2.088626775], 1.0),
+            ([6.922596716, 1.77106367], 1.0),
+            ([8.675418651, -0.242068655], 1.0),
+            ([7.673756466, 3.508563011], 1.0)
+        ];
+
+        let start = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
+
+        let learning_rate = 0.3;
+
+        let cost = LeastSquares{};
+        let model = stochastic_gradient_descent(
+            &cost, start,
+            history.iter().cycle().take(40).cloned(),
+            learning_rate
+        );
+
+        println!("{:?}", model.linear);
+
+        let classification_errors = history.iter()
+            .map(|&(input, truth)| model.predict(&input).round() == truth)
+            .fold(0, |errors, correct| if correct { errors } else { errors + 1 });
+
+        assert_eq!(0, classification_errors);
+    }
+
+        #[test]
+    fn logistic_sgd_2d_max_likelihood(){
+        use cost::MaxLikelihood;
         use model::{Logicstic, Linear};
         use stochastic_gradient_descent;
 
