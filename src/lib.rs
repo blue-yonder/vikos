@@ -40,6 +40,11 @@ pub trait Model : Clone{
 /// Cost functions those value is supposed be minimized by the training algorithm
 pub trait Cost{
 
+    /// Type used for truth by the cost function
+    ///
+    /// Usually `f64` or `bool`
+    type Truth : Copy;
+
     /// Error type used by the cost function
     ///
     /// Usually `f64` or `f32`
@@ -49,7 +54,7 @@ pub trait Cost{
     ///
     /// This method is called by SGD based training algorithm in order to
     /// determine the delta of the coefficents
-    fn gradient(&self, prediction : Self::Error, truth : Self::Error, gradient_error_by_coefficent : Self::Error) -> Self::Error;
+    fn gradient(&self, prediction : Self::Error, truth : Self::Truth, gradient_error_by_coefficent : Self::Error) -> Self::Error;
 }
 
 /// Changes all coefficents of model based on their derivation of the cost function at features
@@ -60,7 +65,7 @@ pub fn inert_gradient_descent_step<C, M>(
     cost : &C,
     model : &mut M,
     features : &M::Input,
-    truth : M::Target,
+    truth : C::Truth,
     learning_rate : M::Target,
     inertia : M::Target,
     velocity : & mut Vec<M::Target>
@@ -80,7 +85,7 @@ pub fn inert_gradient_descent_step<C, M>(
 /// An SGD training step with a velocity term
 ///
 /// Can be used to implement stochastic or batch gradient descent
-pub fn gradient_descent_step<C, M>(cost : &C, model : &mut M, features : &M::Input, truth : M::Target, learning_rate : M::Target)
+pub fn gradient_descent_step<C, M>(cost : &C, model : &mut M, features : &M::Input, truth : C::Truth, learning_rate : M::Target)
     where C : Cost, M : Model<Target=C::Error>
 {
     let prediction = model.predict(&features);
@@ -94,7 +99,7 @@ pub fn gradient_descent_step<C, M>(cost : &C, model : &mut M, features : &M::Inp
 pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, learning_rate : M::Target) -> M
     where C : Cost,
     M : Model<Target=C::Error>,
-    H : Iterator<Item=(M::Input, M::Target)>
+    H : Iterator<Item=(M::Input, C::Truth)>
 {
 
     let mut next = start.clone();
@@ -119,7 +124,7 @@ pub fn inert_stochastic_gradient_descent<C, M, H>(
 ) -> M
     where C : Cost,
     M : Model<Target=C::Error>,
-    H : Iterator<Item=(M::Input, M::Target)>
+    H : Iterator<Item=(M::Input, C::Truth)>
 {
 
     let mut velocity = Vec::new();
@@ -319,7 +324,7 @@ mod tests {
         assert_eq!(0, classification_errors);
     }
 
-        #[test]
+    #[test]
     fn logistic_sgd_2d_max_likelihood(){
         use cost::MaxLikelihood;
         use model::{Logicstic, Linear};
@@ -328,23 +333,23 @@ mod tests {
         use Model;
 
         let history = [
-            ([2.7810836, 2.550537003], 0.0),
-            ([1.465489372, 2.362125076], 0.0),
-            ([3.396561688, 4.400293529], 0.0),
-            ([1.38807019, 1.850220317], 0.0),
-            ([3.06407232, 3.005305973], 0.0),
-            ([7.627531214, 2.759262235], 1.0),
-            ([5.332441248, 2.088626775], 1.0),
-            ([6.922596716, 1.77106367], 1.0),
-            ([8.675418651, -0.242068655], 1.0),
-            ([7.673756466, 3.508563011], 1.0)
+            ([2.7810836, 2.550537003], false),
+            ([1.465489372, 2.362125076], false),
+            ([3.396561688, 4.400293529], false),
+            ([1.38807019, 1.850220317], false),
+            ([3.06407232, 3.005305973], false),
+            ([7.627531214, 2.759262235], true),
+            ([5.332441248, 2.088626775], true),
+            ([6.922596716, 1.77106367], true),
+            ([8.675418651, -0.242068655], true),
+            ([7.673756466, 3.508563011], true)
         ];
 
         let start = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
 
         let learning_rate = 0.3;
 
-        let cost = MaxLikelihood{};
+        let cost = MaxLikelihood::<bool>::new();
         let model = stochastic_gradient_descent(
             &cost, start,
             history.iter().cycle().take(20).cloned(),
@@ -354,7 +359,9 @@ mod tests {
         println!("{:?}", model.linear);
 
         let classification_errors = history.iter()
-            .map(|&(input, truth)| model.predict(&input).round() == truth)
+            .map(|&(input, truth)| {
+                model.predict(&input).round() == if truth { 1.0 } else { 0.0 }
+            })
             .fold(0, |errors, correct| if correct { errors } else { errors + 1 });
 
         assert_eq!(0, classification_errors);
