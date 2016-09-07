@@ -9,8 +9,9 @@ impl Cost for LeastSquares{
 
     type Error = f64;
 
-    fn gradient(&self, error : f64, gradient_error_by_coefficent : f64) -> f64
+    fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent : f64) -> f64
     {
+        let error = prediction - truth;
         2.0 * error * gradient_error_by_coefficent
     }
 }
@@ -25,8 +26,9 @@ impl Cost for LeastAbsoluteDeviation{
 
     type Error = f64;
 
-    fn gradient(&self, error : f64, gradient_error_by_coefficent : f64) -> f64
+    fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64
     {
+        let error = prediction - truth;
         if error > 0.0 {
             gradient_error_by_coefficent
         } else if error < 0.0{
@@ -34,5 +36,19 @@ impl Cost for LeastAbsoluteDeviation{
         } else {
             0.0
         }
+    }
+}
+
+/// Maximies the likelihood function `L` by defining `C=-ln(L)`
+///
+/// This cost function is best used to optimize propabilities
+pub struct MaxLikelihood;
+
+impl Cost for MaxLikelihood{
+
+    type Error = f64;
+
+    fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64{
+        gradient_error_by_coefficent * ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
     }
 }
