@@ -17,14 +17,14 @@ Getting started
 vikos = { path = "path/to/vikos" }
 ```
 
-Documention
------------
+Documentation
+-------------
 
 As this crate is not published yet, you still need to build the documentation yourself.
 
 1. Use [rustup] to setup rust.
 2. Clone this crate
-3. run `cargo doc`
+3. run `cargo doc --open`
 
 Contributing
 ------------

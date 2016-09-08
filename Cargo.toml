@@ -2,8 +2,8 @@
 name = "vikos"
 version = "0.1.0"
 authors = ["Markus Klein <markus-klein@live.de>"]
-description = "A machine learning library for supervised regression trainings"
-license = "MIT/Apache-2.0"
+description = "A machine learning library for supervised training of parametrized models"
+license = "MIT"
 
 [dependencies]
 num = "0.1"
