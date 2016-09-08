@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/blue-yonder/vikos.svg?branch=master)](https://travis-ci.org/blue-yonder/vikos)
 [![Docs](https://docs.rs/vikos/badge.svg)](https://docs.rs/vikos/)
+[![MIT licensed](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/blue-yonder/vikos/blob/master/LICENSE)
 
 A library for supervised trainining of parameterized, regression and classification models
 
