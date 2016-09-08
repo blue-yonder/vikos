@@ -14,9 +14,8 @@ Current State
 -------------
 
 Just starting to get the traits right, by continously trying new use cases
-and implementing the learning algorithms.
-
-If you are looking for more mature rust libraries in the domain of ML you might want to check out:
+and implementing the learning algorithms. If you are looking for more mature
+rust libraries in the domain of ML you might want to check out:
 * [rustlearn]
 * [leaf]
 
@@ -27,7 +26,7 @@ Getting started
 3. Add the dependency in your cargo toml:
 ```
 [dependencies]
-vikos = "0.1"
+vikos = "0.1.1"
 ```
 
 Documentation
