@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/blue-yonder/vikos.svg?branch=master)](https://travis-ci.org/blue-yonder/vikos)
+[![Docs](https://docs.rs/vikos/badge.svg)](https://docs.rs/vikos/)
 
 A library for supervised trainining of parameterized, regression and classification models
 
@@ -32,17 +33,15 @@ vikos = "0.1"
 Documentation
 -------------
 
-You still need to build the documentation yourself.
-
-1. Use [rustup] to setup rust.
-2. Clone this crate
-3. run `cargo doc --open`
+Thanks to the folks of [docs.rs] for building and hosting the [documentation]! 
 
 Contributing
 ------------
 
 Want to help out? Just create an issue, pull request or contact markus.klein@blue-yonder.com
 
+[docs.rs]: https://docs.rs
+[documentation]: https://docs.rs/vikos/
 [rustup]:  http://www.rustup.rs
 [rustlearn]: https://github.com/maciejkula/rustlearn
 [leaf]: https://github.com/autumnai/leaf
