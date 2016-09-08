@@ -17,7 +17,7 @@ use num::{Zero, One, Float};
 /// A Model is defines how to predict a target from an input
 ///
 /// A model usually depends on several coefficents whose values
-/// are derived using a training algorithm 
+/// are derived using a training algorithm
 pub trait Model : Clone{
     /// Input features
     type Input;
@@ -49,7 +49,7 @@ pub trait Cost{
     ///
     /// This method is called by SGD based training algorithm in order to
     /// determine the delta of the coefficents
-    fn gradient(&self, error : Self::Error, gradient_error_by_coefficent : Self::Error) -> Self::Error;
+    fn gradient(&self, prediction : Self::Error, truth : Self::Error, gradient_error_by_coefficent : Self::Error) -> Self::Error;
 }
 
 /// Changes all coefficents of model based on their derivation of the cost function at features
@@ -69,11 +69,10 @@ pub fn inert_gradient_descent_step<C, M>(
 {
     let inv_inertia = M::Target::one() - inertia;
     let prediction = model.predict(&features);
-    let error = prediction - truth;
 
     for ci in 0..model.num_coefficents(){
 
-        velocity[ci] = inertia * velocity[ci] - inv_inertia * learning_rate * cost.gradient(error, model.gradient(ci, features));
+        velocity[ci] = inertia * velocity[ci] - inv_inertia * learning_rate * cost.gradient(prediction, truth, model.gradient(ci, features));
         *model.coefficent(ci) = *model.coefficent(ci) + velocity[ci];
     }
 }
@@ -85,10 +84,9 @@ pub fn gradient_descent_step<C, M>(cost : &C, model : &mut M, features : &M::Inp
     where C : Cost, M : Model<Target=C::Error>
 {
     let prediction = model.predict(&features);
-    let error = prediction - truth;
 
     for ci in 0..model.num_coefficents(){
-        *model.coefficent(ci) = *model.coefficent(ci) - learning_rate * cost.gradient(error, model.gradient(ci, features));
+        *model.coefficent(ci) = *model.coefficent(ci) - learning_rate * cost.gradient(prediction, truth, model.gradient(ci, features));
     }
 }
 
@@ -99,7 +97,7 @@ pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, l
     H : Iterator<Item=(M::Input, M::Target)>
 {
 
-    let mut next = start.clone();        
+    let mut next = start.clone();
     for (features, truth) in history{
 
         gradient_descent_step(cost, & mut next, &features, truth, learning_rate);
@@ -124,9 +122,9 @@ pub fn inert_stochastic_gradient_descent<C, M, H>(
     H : Iterator<Item=(M::Input, M::Target)>
 {
 
-    let mut velocity = Vec::new(); 
+    let mut velocity = Vec::new();
     velocity.resize(start.num_coefficents(), M::Target::zero());
-    let mut next = start.clone();        
+    let mut next = start.clone();
     for (features, truth) in history{
 
         inert_gradient_descent_step(cost, & mut next, &features, truth, learning_rate, inertia, & mut velocity);
@@ -217,7 +215,7 @@ mod tests {
         let learning_rate = 0.2;
 
         let cost = LeastSquares{};
-        let model = stochastic_gradient_descent(&cost, start, history.iter().cycle().take(20).cloned(), learning_rate); 
+        let model = stochastic_gradient_descent(&cost, start, history.iter().cycle().take(20).cloned(), learning_rate);
 
         assert!(model.m < 1.1);
         assert!(model.m > 0.9);
@@ -268,7 +266,7 @@ mod tests {
             &cost, start,
             history.iter().cycle().take(15000).cloned(),
             learning_rate, 0.9
-        ); 
+        );
 
         println!("{:?}", model);
 
@@ -281,7 +279,7 @@ mod tests {
     }
 
     #[test]
-    fn logistic_sgd_2d(){
+    fn logistic_sgd_2d_least_squaers(){
         use cost::LeastSquares;
         use model::{Logicstic, Linear};
         use stochastic_gradient_descent;
@@ -310,7 +308,48 @@ mod tests {
             &cost, start,
             history.iter().cycle().take(40).cloned(),
             learning_rate
-        ); 
+        );
+
+        println!("{:?}", model.linear);
+
+        let classification_errors = history.iter()
+            .map(|&(input, truth)| model.predict(&input).round() == truth)
+            .fold(0, |errors, correct| if correct { errors } else { errors + 1 });
+
+        assert_eq!(0, classification_errors);
+    }
+
+        #[test]
+    fn logistic_sgd_2d_max_likelihood(){
+        use cost::MaxLikelihood;
+        use model::{Logicstic, Linear};
+        use stochastic_gradient_descent;
+
+        use Model;
+
+        let history = [
+            ([2.7810836, 2.550537003], 0.0),
+            ([1.465489372, 2.362125076], 0.0),
+            ([3.396561688, 4.400293529], 0.0),
+            ([1.38807019, 1.850220317], 0.0),
+            ([3.06407232, 3.005305973], 0.0),
+            ([7.627531214, 2.759262235], 1.0),
+            ([5.332441248, 2.088626775], 1.0),
+            ([6.922596716, 1.77106367], 1.0),
+            ([8.675418651, -0.242068655], 1.0),
+            ([7.673756466, 3.508563011], 1.0)
+        ];
+
+        let start = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
+
+        let learning_rate = 0.3;
+
+        let cost = MaxLikelihood{};
+        let model = stochastic_gradient_descent(
+            &cost, start,
+            history.iter().cycle().take(20).cloned(),
+            learning_rate
+        );
 
         println!("{:?}", model.linear);
 
