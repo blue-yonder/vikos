@@ -26,7 +26,7 @@ Getting started
 3. Add the dependency in your cargo toml:
 ```
 [dependencies]
-vikos = "0.1.1"
+vikos = "0.1.2"
 ```
 
 Documentation
