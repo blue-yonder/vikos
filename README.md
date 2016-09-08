@@ -4,7 +4,7 @@ Design Goals
 ------------
 
 * Changing model representation, cost function and optimization algorithm independently from each other
-* Generic: Not commiting to a particular datastructure for i.e. Input Vectors
+* Generic: Not commiting to a particular datastructure for inputs, targets etc.
 * If the design goals above can only be achieved by sacrificing performance, so be it 
 
 Current State
