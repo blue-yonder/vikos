@@ -124,12 +124,12 @@ impl<V : Vector> Model for Linear<V> where V::Scalar : Float{
 
 /// Models target as `y = 1/1+e^(m * x + c)`
 #[derive(Clone)]
-pub struct Logicstic<V: Vector>{
+pub struct Logistic<V: Vector>{
     /// Linear term of `Logistic` model
     pub linear : Linear<V>
 }
 
-impl<V : Vector> Model for Logicstic<V> where V::Scalar : Float{
+impl<V : Vector> Model for Logistic<V> where V::Scalar : Float{
     type Input = V;
     type Target = V::Scalar;
 
