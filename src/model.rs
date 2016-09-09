@@ -15,22 +15,22 @@ use std::marker::PhantomData;
 /// ```
 /// use vikos::model::Constant;
 /// use vikos::cost::LeastSquares;
-/// use vikos::gradient_descent_step;
+/// use vikos::train::GradientDescent;
+/// use vikos::Teacher;
 ///
+/// let features = ();
 /// let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
+///
 /// let cost = LeastSquares{};
 /// let mut model = Constant::new(0.0);
 ///
-/// let learning_rate_start = 0.4;
-/// let learning_rate_stop = 0.001;
-/// let num_steps = 60;
+/// let learning_rate_start = 0.3;
+/// let decay = 4;
 ///
-/// let learning_rate_gradient = (learning_rate_start - learning_rate_stop) / (num_steps as f64);
+/// for (count_step, &truth) in history.iter().cycle().take(100).enumerate(){
 ///
-/// for (count_step, &truth) in history.iter().cycle().take(num_steps).enumerate(){
-///
-///     let adapted_learning_rate = learning_rate_stop + learning_rate_gradient * (num_steps - count_step) as f64;
-///     gradient_descent_step(&cost, & mut model, &(), truth, adapted_learning_rate);
+/// let training = GradientDescent{ learning_rate: learning_rate_start / ( 1.0 + count_step as f64 /decay as f64) as f64 };
+///     training.teach_event(&cost, &mut model, &features, truth);
 /// }
 /// ```
 #[derive(Debug)]

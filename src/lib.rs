@@ -1,17 +1,16 @@
 //! A machine learning library for supervised regression trainings
 //!
-//! This library wants to enable its user to write training algorithms
+//! This library wants to enable its user to write teachers
 //! independent of the model trained or the cost function tried to
 //! minimize.
-//! Consequently its two main traits are currently `Model` and `Cost`.
-//! The two submodules `model` and `cost` provide ready to use
-//! implementations of said traits.
+//! Consequently its two main traits are currently `Model`, `Cost`
+//! and `Teacher`.
 
 #![warn(missing_docs)]
 
 extern crate num;
 
-use std::iter::Iterator;
+use std::iter::IntoIterator;
 use num::{Zero, One, Float};
 
 /// A Model is defines how to predict a target from an input
@@ -52,6 +51,27 @@ pub trait Cost{
     fn gradient(&self, prediction : Self::Error, truth : Self::Error, gradient_error_by_coefficent : Self::Error) -> Self::Error;
 }
 
+/// `Teachers` are used to train `Models`, based on events and a `Cost` function
+pub trait Teacher<M : Model>{
+
+    /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
+    fn teach_event<C>(&self, cost : &C, model : &mut M, features : &M::Input, truth : M::Target)
+        where C : Cost<Error=M::Target>;
+}
+
+/// Teaches `model` all events in `history`
+pub fn teach_history<M, C, T, H>(teacher : &T, cost : &C, model : &mut M, history : H)
+    where M : Model,
+    C : Cost<Error=M::Target>,
+    T : Teacher<M>,
+    H : IntoIterator<Item=(M::Input, M::Target)>
+{
+    for (features, truth) in history{
+
+        teacher.teach_event(cost, model, &features, truth);
+    }
+}
+
 /// Changes all coefficents of model based on their derivation of the cost function at features
 ///
 /// Will not get stuck on saddle points as easily as a plain SGD and will converge quicker in general.
@@ -77,19 +97,6 @@ pub fn inert_gradient_descent_step<C, M>(
     }
 }
 
-/// An SGD training step with a velocity term
-///
-/// Can be used to implement stochastic or batch gradient descent
-pub fn gradient_descent_step<C, M>(cost : &C, model : &mut M, features : &M::Input, truth : M::Target, learning_rate : M::Target)
-    where C : Cost, M : Model<Target=C::Error>
-{
-    let prediction = model.predict(&features);
-
-    for ci in 0..model.num_coefficents(){
-        *model.coefficent(ci) = *model.coefficent(ci) - learning_rate * cost.gradient(prediction, truth, model.gradient(ci, features));
-    }
-}
-
 /// Applies a plain SGD training step to model once for every event in history using a constant learning rate
 pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, learning_rate : M::Target) -> M
     where C : Cost,
@@ -97,10 +104,11 @@ pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, l
     H : Iterator<Item=(M::Input, M::Target)>
 {
 
+    let training = train::GradientDescent{ learning_rate : learning_rate };
     let mut next = start.clone();
     for (features, truth) in history{
 
-        gradient_descent_step(cost, & mut next, &features, truth, learning_rate);
+        training.teach_event(cost, & mut next, &features, truth);
     }
 
     next
@@ -137,6 +145,8 @@ pub fn inert_stochastic_gradient_descent<C, M, H>(
 pub mod model;
 /// Implementations of `Cost` trait
 pub mod cost;
+/// Teachers describe how the coefficents of a `Model` change based on `Cost` functions and history
+pub mod train;
 /// Defines linear algebra traits used for some model parameters
 pub mod linear_algebra;
 
@@ -148,7 +158,8 @@ mod tests {
 
         use model::Constant;
         use cost::LeastAbsoluteDeviation;
-        use gradient_descent_step;
+        use train::GradientDescent;
+        use Teacher;
 
         let features = ();
         let history = [1.0, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //median is seven
@@ -156,16 +167,14 @@ mod tests {
         let cost = LeastAbsoluteDeviation{};
         let mut model = Constant::new(0.0);
 
-        let learning_rate_start = 0.4;
-        let learning_rate_stop = 0.001;
-        let num_steps = 200;
-        let learning_rate_gradient = (learning_rate_start - learning_rate_stop) / (num_steps as f64);
+        let learning_rate_start = 0.9;
+        let decay = 9;
 
-        for (count_step, &truth) in history.iter().cycle().take(num_steps).enumerate(){
+        for (count_step, &truth) in history.iter().cycle().take(150).enumerate(){
 
-            let adapted_learning_rate = learning_rate_stop + learning_rate_gradient * (num_steps - count_step) as f64;
-            gradient_descent_step(&cost, & mut model, &features, truth, adapted_learning_rate);
-            println!("model: {:?}, learning_rate: {:?}", model, adapted_learning_rate);
+            let training = GradientDescent{ learning_rate: learning_rate_start / ( 1.0 + count_step as f64 /decay as f64) as f64 };
+            training.teach_event(&cost, &mut model, &features, truth);
+            println!("model: {:?}, learning_rate: {:?}", model, training.learning_rate);
         }
 
         assert!(model.c < 7.1);
@@ -177,7 +186,8 @@ mod tests {
 
         use model::Constant;
         use cost::LeastSquares;
-        use gradient_descent_step;
+        use train::GradientDescent;
+        use Teacher;
 
         let features = ();
         let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
@@ -185,16 +195,14 @@ mod tests {
         let cost = LeastSquares{};
         let mut model = Constant::new(0.0);
 
-        let learning_rate_start = 0.4;
-        let learning_rate_stop = 0.001;
-        let num_steps = 60;
-        let learning_rate_gradient = (learning_rate_start - learning_rate_stop) / (num_steps as f64);
+        let learning_rate_start = 0.3;
+        let decay = 4;
 
-        for (count_step, &truth) in history.iter().cycle().take(num_steps).enumerate(){
+        for (count_step, &truth) in history.iter().cycle().take(100).enumerate(){
 
-            let adapted_learning_rate = learning_rate_stop + learning_rate_gradient * (num_steps - count_step) as f64;
-            gradient_descent_step(&cost, & mut model, &features, truth, adapted_learning_rate);
-            println!("model: {:?}, learning_rate: {:?}", model, adapted_learning_rate);
+        let training = GradientDescent{ learning_rate: learning_rate_start / ( 1.0 + count_step as f64 /decay as f64) as f64 };
+            training.teach_event(&cost, &mut model, &features, truth);
+            println!("model: {:?}, learning_rate: {:?}", model, training.learning_rate);
         }
 
         assert!(model.c < 9.1);
@@ -206,16 +214,17 @@ mod tests {
 
         use cost::LeastSquares;
         use model::Linear;
-        use stochastic_gradient_descent;
+        use train::GradientDescent;
+        use teach_history;
 
         let history = [(0f64, 3f64), (1.0, 4.0), (2.0, 5.0)];
 
-        let start = Linear{m : 0.0, c : 0.0};
+        let mut model = Linear{m : 0.0, c : 0.0};
 
-        let learning_rate = 0.2;
+        let teacher = GradientDescent{ learning_rate : 0.2 };
 
         let cost = LeastSquares{};
-        let model = stochastic_gradient_descent(&cost, start, history.iter().cycle().take(20).cloned(), learning_rate);
+        teach_history(&teacher, &cost, &mut model, history.iter().cycle().take(20).cloned());
 
         assert!(model.m < 1.1);
         assert!(model.m > 0.9);
@@ -227,19 +236,20 @@ mod tests {
     fn linear_stochastic_gradient_descent_iter() {
 
         use model::Linear;
-        use gradient_descent_step;
         use cost::LeastSquares;
+        use train::GradientDescent;
+        use Teacher;
 
         let history = [(0f64, 3f64), (1.0, 4.0), (2.0, 5.0)];
 
         let cost = LeastSquares{};
         let mut model = Linear{m : 0.0, c : 0.0};
 
-        let learning_rate = 0.2;
+        let training = GradientDescent{ learning_rate : 0.2 };
 
         for &(features, truth) in history.iter().cycle().take(20){
 
-            gradient_descent_step(&cost, & mut model, &features, truth, learning_rate);
+            training.teach_event(&cost, &mut model, &features, truth);
             println!("model: {:?}", model);
         }
 
@@ -279,10 +289,11 @@ mod tests {
     }
 
     #[test]
-    fn logistic_sgd_2d_least_squaers(){
+    fn logistic_sgd_2d_least_squares(){
         use cost::LeastSquares;
         use model::{Logicstic, Linear};
-        use stochastic_gradient_descent;
+        use train::GradientDescent;
+        use teach_history;
 
         use Model;
 
@@ -299,15 +310,13 @@ mod tests {
             ([7.6, 3.5], 1.0)
         ];
 
-        let start = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
-
-        let learning_rate = 0.3;
-
+        let mut model = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
+        let teacher = GradientDescent{ learning_rate : 0.3 };
         let cost = LeastSquares{};
-        let model = stochastic_gradient_descent(
-            &cost, start,
+
+        teach_history(
+            &teacher, &cost, &mut model,
             history.iter().cycle().take(40).cloned(),
-            learning_rate
         );
 
         println!("{:?}", model.linear);
@@ -323,8 +332,8 @@ mod tests {
     fn logistic_sgd_2d_max_likelihood(){
         use cost::MaxLikelihood;
         use model::{Logicstic, Linear};
-        use stochastic_gradient_descent;
-
+        use train::GradientDescent;
+        use teach_history;
         use Model;
 
         let history = [
@@ -340,15 +349,13 @@ mod tests {
             ([7.6, 3.5], 1.0)
         ];
 
-        let start = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
-
-        let learning_rate = 0.3;
-
+        let mut model = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
+        let teacher = GradientDescent{ learning_rate : 0.3 };
         let cost = MaxLikelihood{};
-        let model = stochastic_gradient_descent(
-            &cost, start,
+
+        teach_history(
+            &teacher, &cost, &mut model,
             history.iter().cycle().take(20).cloned(),
-            learning_rate
         );
 
         println!("{:?}", model.linear);
