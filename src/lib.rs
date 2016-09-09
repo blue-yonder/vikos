@@ -51,12 +51,36 @@ pub trait Cost{
     fn gradient(&self, prediction : Self::Error, truth : Self::Error, gradient_error_by_coefficent : Self::Error) -> Self::Error;
 }
 
+/// Teaches event to a `Model` 
+pub trait Training{
+
+    /// `Model` changed by this `Training`
+    ///
+    /// A `Training` is strictly associated with a `Model` type. One could
+    /// even argue that an instance of `Training` strictly belongs to an
+    /// instance of `Model`
+    type Model : Model;
+
+    /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
+    fn teach_event<C>(
+        &mut self, cost : &C, model : &mut Self::Model,
+        features : &<Self::Model as Model>::Input,
+        truth : <Self::Model as Model>::Target
+    ) where
+        C : Cost<Error=<Self::Model as Model>::Target>;
+}
+
 /// `Teachers` are used to train `Models`, based on events and a `Cost` function
 pub trait Teacher<M : Model>{
 
-    /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
-    fn teach_event<C>(&self, cost : &C, model : &mut M, features : &M::Input, truth : M::Target)
-        where C : Cost<Error=M::Target>;
+    /// Contains state which changes during the training, but is not required by the expert
+    ///
+    /// Examples are the velocity of the coefficents (in SGD) or the number of events already learned.
+    /// This may also be empty
+    type Training : Training<Model=M>;
+
+    /// Creates a new `Training` object to hold training state
+    fn new_training(&self) -> Self::Training;
 }
 
 /// Teaches `model` all events in `history`
@@ -66,9 +90,10 @@ pub fn teach_history<M, C, T, H>(teacher : &T, cost : &C, model : &mut M, histor
     T : Teacher<M>,
     H : IntoIterator<Item=(M::Input, M::Target)>
 {
+    let mut training = teacher.new_training();
     for (features, truth) in history{
 
-        teacher.teach_event(cost, model, &features, truth);
+        training.teach_event(cost, model, &features, truth);
     }
 }
 
@@ -95,23 +120,6 @@ pub fn inert_gradient_descent_step<C, M>(
         velocity[ci] = inertia * velocity[ci] - inv_inertia * learning_rate * cost.gradient(prediction, truth, model.gradient(ci, features));
         *model.coefficent(ci) = *model.coefficent(ci) + velocity[ci];
     }
-}
-
-/// Applies a plain SGD training step to model once for every event in history using a constant learning rate
-pub fn stochastic_gradient_descent<C, M, H>(cost : &C, start : M, history : H, learning_rate : M::Target) -> M
-    where C : Cost,
-    M : Model<Target=C::Error>,
-    H : Iterator<Item=(M::Input, M::Target)>
-{
-
-    let training = train::GradientDescent{ learning_rate : learning_rate };
-    let mut next = start.clone();
-    for (features, truth) in history{
-
-        training.teach_event(cost, & mut next, &features, truth);
-    }
-
-    next
 }
 
 /// SGD tranining with constant learning rate and velocity
@@ -158,8 +166,8 @@ mod tests {
 
         use model::Constant;
         use cost::LeastAbsoluteDeviation;
-        use train::GradientDescent;
-        use Teacher;
+        use train::GradientDescentTraining;
+        use Training;
 
         let features = ();
         let history = [1.0, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //median is seven
@@ -172,7 +180,7 @@ mod tests {
 
         for (count_step, &truth) in history.iter().cycle().take(150).enumerate(){
 
-            let training = GradientDescent{ learning_rate: learning_rate_start / ( 1.0 + count_step as f64 /decay as f64) as f64 };
+            let mut training = GradientDescentTraining{ learning_rate: learning_rate_start / ( 1.0 + count_step as f64 /decay as f64) as f64 };
             training.teach_event(&cost, &mut model, &features, truth);
             println!("model: {:?}, learning_rate: {:?}", model, training.learning_rate);
         }
@@ -186,8 +194,8 @@ mod tests {
 
         use model::Constant;
         use cost::LeastSquares;
-        use train::GradientDescent;
-        use Teacher;
+        use train::GradientDescentTraining;
+        use Training;
 
         let features = ();
         let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
@@ -200,7 +208,7 @@ mod tests {
 
         for (count_step, &truth) in history.iter().cycle().take(100).enumerate(){
 
-        let training = GradientDescent{ learning_rate: learning_rate_start / ( 1.0 + count_step as f64 /decay as f64) as f64 };
+        let mut training = GradientDescentTraining{ learning_rate: learning_rate_start / ( 1.0 + count_step as f64 /decay as f64) as f64 };
             training.teach_event(&cost, &mut model, &features, truth);
             println!("model: {:?}, learning_rate: {:?}", model, training.learning_rate);
         }
@@ -239,13 +247,15 @@ mod tests {
         use cost::LeastSquares;
         use train::GradientDescent;
         use Teacher;
+        use Training;
 
         let history = [(0f64, 3f64), (1.0, 4.0), (2.0, 5.0)];
 
         let cost = LeastSquares{};
         let mut model = Linear{m : 0.0, c : 0.0};
 
-        let training = GradientDescent{ learning_rate : 0.2 };
+        let teacher = GradientDescent{ learning_rate : 0.2 };
+        let mut training = teacher.new_training();
 
         for &(features, truth) in history.iter().cycle().take(20){
 

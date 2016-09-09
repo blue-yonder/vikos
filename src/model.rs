@@ -15,8 +15,8 @@ use std::marker::PhantomData;
 /// ```
 /// use vikos::model::Constant;
 /// use vikos::cost::LeastSquares;
-/// use vikos::train::GradientDescent;
-/// use vikos::Teacher;
+/// use vikos::train::GradientDescentTraining;
+/// use vikos::Training;
 ///
 /// let features = ();
 /// let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
@@ -29,7 +29,7 @@ use std::marker::PhantomData;
 ///
 /// for (count_step, &truth) in history.iter().cycle().take(100).enumerate(){
 ///
-/// let training = GradientDescent{ learning_rate: learning_rate_start / ( 1.0 + count_step as f64 /decay as f64) as f64 };
+/// let mut training = GradientDescentTraining{ learning_rate: learning_rate_start / ( 1.0 + count_step as f64 /decay as f64) as f64 };
 ///     training.teach_event(&cost, &mut model, &features, truth);
 /// }
 /// ```
