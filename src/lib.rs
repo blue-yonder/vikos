@@ -80,7 +80,7 @@ pub trait Teacher<M : Model>{
     type Training : Training<Model=M>;
 
     /// Creates a new `Training` object to hold training state
-    fn new_training(&self) -> Self::Training;
+    fn new_training(&self, model : &M) -> Self::Training;
 }
 
 /// Teaches `model` all events in `history`
@@ -90,7 +90,7 @@ pub fn teach_history<M, C, T, H>(teacher : &T, cost : &C, model : &mut M, histor
     T : Teacher<M>,
     H : IntoIterator<Item=(M::Input, M::Target)>
 {
-    let mut training = teacher.new_training();
+    let mut training = teacher.new_training(&model);
     for (features, truth) in history{
 
         training.teach_event(cost, model, &features, truth);
@@ -255,7 +255,7 @@ mod tests {
         let mut model = Linear{m : 0.0, c : 0.0};
 
         let teacher = GradientDescent{ learning_rate : 0.2 };
-        let mut training = teacher.new_training();
+        let mut training = teacher.new_training(&model);
 
         for &(features, truth) in history.iter().cycle().take(20){
 
@@ -273,20 +273,26 @@ mod tests {
     fn linear_sgd_2d(){
         use cost::LeastSquares;
         use model::Linear;
+        use teacher::Momentum;
+        use teach_history;
+
         use inert_stochastic_gradient_descent;
 
         let history = [([0.0, 7.0], 17.0), ([1.0, 2.0], 8.0), ([2.0, -2.0], 1.0)];
-
-        let start = Linear{m : [0.0, 0.0], c : 0.0};
-
-        let learning_rate = 0.1;
-
+        let mut model = Linear{m : [0.0, 0.0], c : 0.0};
         let cost = LeastSquares{};
-        let model = inert_stochastic_gradient_descent(
-            &cost, start,
-            history.iter().cycle().take(15000).cloned(),
-            learning_rate, 0.9
-        );
+        let teacher = Momentum{ l0 : 0.1, t : 100000.0, inertia : 0.9 };
+
+        teach_history(&teacher, &cost, &mut model, history.iter().cycle().take(15000).cloned());
+
+
+        // let learning_rate = 0.1;
+
+        // let model = inert_stochastic_gradient_descent(
+        //     &cost, start,
+        //     history.iter().cycle().take(15000).cloned(),
+        //     learning_rate, 0.9
+        // );
 
         println!("{:?}", model);
 
