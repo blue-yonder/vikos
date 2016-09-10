@@ -9,8 +9,8 @@ Design Goals
 ------------
 
 * Changing model representation, cost function and optimization algorithm independently from each other
-* Generic: Not commiting to a particular datastructure for inputs, targets etc.
-* If the design goals above can only be achieved by sacrificing performance, so be it 
+* Generics: Not commiting to a particular datastructure for inputs, targets etc.
+* If the design goals above can only be achieved by sacrificing performance, so be it
 
 Current State
 -------------
@@ -25,7 +25,7 @@ Getting started
 ---------------
 
 1. Use [rustup] to setup rust.
-3. Add the dependency in your cargo toml:
+2. Add the dependency in your cargo toml:
 ```
 [dependencies]
 vikos = "0.1.3"
@@ -34,7 +34,7 @@ vikos = "0.1.3"
 Documentation
 -------------
 
-Thanks to the folks of [docs.rs] for building and hosting the [documentation]! 
+Thanks to the folks of [docs.rs] for building and hosting the [documentation]!
 
 Contributing
 ------------

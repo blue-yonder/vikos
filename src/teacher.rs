@@ -16,7 +16,7 @@ impl<F,M> Teacher<M> for GradientDescent<F>
     M : Model<Target=F>
 {
     type Training = training::GradientDescent<M>;
-    
+
     fn new_training(&self, _ : &M) -> training::GradientDescent<M>{
         training::GradientDescent::<M>{ learning_rate: self.learning_rate }
     }
@@ -43,8 +43,8 @@ impl<F,M> Teacher<M> for GradientDescentAl<F>
     type Training = training::GradientDescentAl<M>;
 
     fn new_training(&self, _ : &M) -> training::GradientDescentAl<M>{
-        training::GradientDescentAl::<M>{ l0: self.l0, t: self.l0, learned_events: M::Target::zero() }
-    }   
+        training::GradientDescentAl::<M>{ l0: self.l0, t: self.t, learned_events: M::Target::zero() }
+    }
 }
 
 /// Gradient Descent with annealing learning rate and momentum
@@ -75,10 +75,10 @@ impl<F,M> Teacher<M> for Momentum<F>
         velocity.resize(model.num_coefficents(), M::Target::zero());
 
         training::Momentum::<M>{
-            l0: self.l0, t: self.l0,
+            l0: self.l0, t: self.t,
             inertia: self.inertia,
             learned_events: M::Target::zero(),
             velocity : velocity
         }
-    }   
+    }
 }

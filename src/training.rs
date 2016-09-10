@@ -4,7 +4,7 @@ use Training;
 
 use num::One;
 
-/// SGD with constant learning rate and no momentum 
+/// SGD with constant learning rate and no momentum
 pub struct GradientDescent<M : Model>{
 
     /// Defines how fast the coefficents of the trained `Model` will change
@@ -50,7 +50,7 @@ impl<M : Model> GradientDescentAl<M>{
     /// look at the current learning rate
     pub fn learning_rate(&self) -> M::Target{
         self.l0 / (M::Target::one() + self.learned_events / self.t)
-    } 
+    }
 }
 
 impl<M> Training for GradientDescentAl<M>
@@ -72,6 +72,7 @@ impl<M> Training for GradientDescentAl<M>
 }
 
 /// SGD training with adaptive learning rate and momentum term
+#[derive(Debug)]
 pub struct Momentum<M : Model>{
 
     /// Start learning rate
@@ -103,7 +104,7 @@ impl<M : Model> Momentum<M>{
     /// look at the current learning rate
     pub fn learning_rate(&self) -> M::Target{
         self.l0 / (M::Target::one() + self.learned_events / self.t)
-    } 
+    }
 }
 
 impl<M> Training for Momentum<M> where M : Model{

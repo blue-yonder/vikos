@@ -3,15 +3,35 @@
 //! This library wants to enable its user to write teachers
 //! independent of the model trained or the cost function tried to
 //! minimize.
-//! Consequently its two main traits are currently `Model`, `Cost`
-//! and `Teacher`.
-
+//! Consequently its three most important traits are `Model`, `Cost`
+//! and `Training`.
+//!
+//! # Examples
+//!
+//! Estimate mean
+//!
+//! ```
+//! use vikos::{model, cost, teacher, teach_history, Model};
+//! //We are only training a constant so our feature vector is empty
+//! //Any other vector would be fine, too.
+//! let features = ();
+//! let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
+//! // Give each 'truth' its feature vector and stretch our history to 100 elements
+//! let history = history.iter().cycle().map(|&y|((),y)).take(100);
+//!
+//! let cost = cost::LeastSquares{};
+//! let mut model = model::Constant::new(0.0);
+//!
+//! let teacher = teacher::GradientDescentAl{ l0 : 0.3, t : 4.0 };
+//! teach_history(&teacher, &cost, &mut model, history);
+//! println!("{}", model.predict(&features));
+//! ```
 #![warn(missing_docs)]
 
 extern crate num;
 
 use std::iter::IntoIterator;
-use num::{Zero, One, Float};
+use num::Float;
 
 /// A Model is defines how to predict a target from an input
 ///
@@ -51,7 +71,7 @@ pub trait Cost{
     fn gradient(&self, prediction : Self::Error, truth : Self::Error, gradient_error_by_coefficent : Self::Error) -> Self::Error;
 }
 
-/// Teaches event to a `Model` 
+/// Teaches event to a `Model`
 pub trait Training{
 
     /// `Model` changed by this `Training`
@@ -97,65 +117,13 @@ pub fn teach_history<M, C, T, H>(teacher : &T, cost : &C, model : &mut M, histor
     }
 }
 
-/// Changes all coefficents of model based on their derivation of the cost function at features
-///
-/// Will not get stuck on saddle points as easily as a plain SGD and will converge quicker in general.
-/// A good default for `inertia` is 0.9
-pub fn inert_gradient_descent_step<C, M>(
-    cost : &C,
-    model : &mut M,
-    features : &M::Input,
-    truth : M::Target,
-    learning_rate : M::Target,
-    inertia : M::Target,
-    velocity : & mut Vec<M::Target>
-)
-    where C : Cost, M : Model<Target=C::Error>
-{
-    let inv_inertia = M::Target::one() - inertia;
-    let prediction = model.predict(&features);
-
-    for ci in 0..model.num_coefficents(){
-
-        velocity[ci] = inertia * velocity[ci] - inv_inertia * learning_rate * cost.gradient(prediction, truth, model.gradient(ci, features));
-        *model.coefficent(ci) = *model.coefficent(ci) + velocity[ci];
-    }
-}
-
-/// SGD tranining with constant learning rate and velocity
-///
-/// Velocity avoids being stuck on saddle points during optimization
-/// A good default for `inertia` is 0.9
-pub fn inert_stochastic_gradient_descent<C, M, H>(
-    cost : &C,
-    start : M,
-    history : H,
-    learning_rate : M::Target,
-    inertia : M::Target
-) -> M
-    where C : Cost,
-    M : Model<Target=C::Error>,
-    H : Iterator<Item=(M::Input, M::Target)>
-{
-
-    let mut velocity = Vec::new();
-    velocity.resize(start.num_coefficents(), M::Target::zero());
-    let mut next = start.clone();
-    for (features, truth) in history{
-
-        inert_gradient_descent_step(cost, & mut next, &features, truth, learning_rate, inertia, & mut velocity);
-    }
-
-    next
-}
-
 /// Implementations of `Model` trait
 pub mod model;
 /// Implementations of `Cost` trait
 pub mod cost;
 /// Implementations of `Training` trait
 ///
-/// You can use `Teacher`s to create `Training` instances 
+/// You can use `Teacher`s to create `Training` instances
 pub mod training;
 /// Implementatios of `Teacher` trait
 pub mod teacher;
@@ -276,23 +244,12 @@ mod tests {
         use teacher::Momentum;
         use teach_history;
 
-        use inert_stochastic_gradient_descent;
-
         let history = [([0.0, 7.0], 17.0), ([1.0, 2.0], 8.0), ([2.0, -2.0], 1.0)];
         let mut model = Linear{m : [0.0, 0.0], c : 0.0};
         let cost = LeastSquares{};
-        let teacher = Momentum{ l0 : 0.1, t : 100000.0, inertia : 0.9 };
+        let teacher = Momentum{ l0 : 0.01, t : 10000000.0, inertia : 0.9 };
 
         teach_history(&teacher, &cost, &mut model, history.iter().cycle().take(15000).cloned());
-
-
-        // let learning_rate = 0.1;
-
-        // let model = inert_stochastic_gradient_descent(
-        //     &cost, start,
-        //     history.iter().cycle().take(15000).cloned(),
-        //     learning_rate, 0.9
-        // );
 
         println!("{:?}", model);
 
@@ -344,7 +301,7 @@ mod tests {
         assert_eq!(0, classification_errors);
     }
 
-        #[test]
+    #[test]
     fn logistic_sgd_2d_max_likelihood(){
         use cost::MaxLikelihood;
         use model::{Logicstic, Linear};
