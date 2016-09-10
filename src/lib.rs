@@ -6,26 +6,67 @@
 //! Consequently its three most important traits are `Model`, `Cost`
 //! and `Training`.
 //!
-//! # Examples
+//! # Tutorial
 //!
-//! Estimate mean
+//! ## Estimating mean
 //!
 //! ```
 //! use vikos::{model, cost, teacher, teach_history, Model};
-//! //We are only training a constant so our feature vector is empty
-//! //Any other vector would be fine, too.
-//! let features = ();
-//! let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
-//! // Give each 'truth' its feature vector and stretch our history to 100 elements
-//! let history = history.iter().cycle().map(|&y|((),y)).take(100);
+//! // First element of the tuple is our feature vector
+//! // the second element represents the truth.
+//! let history = [
+//!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
+//!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
+//!    (16.0, 29.0)
+//! ]; //mean is 9, but we don't know that yet of course
 //!
-//! let cost = cost::LeastSquares{};
+//! // The mean is just a simple number ...
 //! let mut model = model::Constant::new(0.0);
-//!
+//! // ... which minimizes the square error
+//! let cost = cost::LeastSquares{};
+//! // Use Stochasic Gradient Descent with an annealed learning rate
 //! let teacher = teacher::GradientDescentAl{ l0 : 0.3, t : 4.0 };
-//! teach_history(&teacher, &cost, &mut model, history);
-//! println!("{}", model.predict(&features));
+//! // Train 100 (admitettly repetitive) events
+//! teach_history(&teacher, &cost, &mut model, history.iter().cycle().take(100).cloned());
+//! // We need an input vector for predictions, the 42 won't influence the mean
+//! println!("{}", model.predict(&42.0));
+//! // Since we know models type is `Constant` we could just access the members
+//! println!("{}", model.c);
 //! ```
+//! As far as the mean is concerned the first element is just
+//! ignored. The code would also compile if the first
+//! element would be an empty tuple or any other type for
+//! that matter.
+//!
+//! ## Estimating median
+//!
+//! If we want to estimate the median instead we only need to change
+//! our cost function
+//!
+//! ```
+//! use vikos::{model, cost, teacher, teach_history, Model};
+//! // First element of the tuple is our feature vector
+//! // the second element represents the truth.
+//! let history = [
+//!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
+//!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
+//!    (16.0, 29.0)
+//! ]; //median is 7, but we don't know that yet of course
+//!
+//! // The median is just a simple number ...
+//! let mut model = model::Constant::new(0.0);
+//! // ... which minimizes the absolute error
+//! let cost = cost::LeastAbsoluteDeviation{};
+//! // Use Stochasic Gradient Descent with an annealed learning rate
+//! let teacher = teacher::GradientDescentAl{ l0 : 1.0, t : 9.0 };
+//! // Train 100 (admitettly repetitive) events
+//! teach_history(&teacher, &cost, &mut model, history.iter().cycle().take(100).cloned());
+//! // We need an input vector for predictions, the 42 won't influence the median
+//! println!("{}", model.predict(&42.0));
+//! ```
+//! Most notably we changed the cost function to train for the median. We also increased
+//! our learning rate , but the old one would have worked fine too, if we had increased
+//! the number of events instead.
 #![warn(missing_docs)]
 
 extern crate num;
