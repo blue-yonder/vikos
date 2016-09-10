@@ -122,7 +122,6 @@
 //!     println!("Input: {}, Truth: {}, Prediction: {}", input, truth, model.predict(&input));
 //! }
 //! println!("slope: {}, intercept: {}", model.m, model.c);
-//! assert!(false);
 //! ```
 #![warn(missing_docs)]
 
