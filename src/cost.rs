@@ -41,7 +41,11 @@ impl Cost for LeastAbsoluteDeviation{
 
 /// Maximies the likelihood function `L` by defining `C=-ln(L)`
 ///
-/// This cost function is best used to optimize propabilities
+/// You can use this function if your truth is a propability
+/// (i.e. a value betwenn 0 and 1). Maximizing the Likelihood
+/// function is equivalent to minimizing the least square error
+/// yet this cost function has shown itself to converge quicker
+/// for some problems.
 pub struct MaxLikelihood;
 
 impl Cost for MaxLikelihood{
