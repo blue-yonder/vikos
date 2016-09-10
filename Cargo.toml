@@ -4,8 +4,10 @@ version = "0.1.4"
 authors = ["Markus Klein <markus-klein@live.de>"]
 description = "A machine learning library for supervised training of parametrized models"
 license = "MIT"
+license-file = "LICENSE"
 repository = "https://github.com/blue-yonder/vikos"
 documentation = "https://docs.rs/vikos/"
+readme = "README.md"
 
 [dependencies]
 num = "0.1.35"
