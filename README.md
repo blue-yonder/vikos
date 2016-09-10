@@ -21,16 +21,6 @@ rust libraries in the domain of ML you might want to check out:
 * [rustlearn]
 * [leaf]
 
-Getting started
----------------
-
-1. Use [rustup] to setup rust.
-2. Add the dependency in your cargo toml:
-```
-[dependencies]
-vikos = "0.1.3"
-```
-
 Documentation
 -------------
 
