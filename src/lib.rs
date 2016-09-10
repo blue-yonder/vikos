@@ -264,7 +264,7 @@ mod tests {
     #[test]
     fn logistic_sgd_2d_least_squares(){
         use cost::LeastSquares;
-        use model::{Logicstic, Linear};
+        use model::{Logistic, Linear};
         use teacher::GradientDescent;
         use teach_history;
 
@@ -283,7 +283,7 @@ mod tests {
             ([7.6, 3.5], 1.0)
         ];
 
-        let mut model = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
+        let mut model = Logistic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
         let teacher = GradientDescent{ learning_rate : 0.3 };
         let cost = LeastSquares{};
 
@@ -304,7 +304,7 @@ mod tests {
     #[test]
     fn logistic_sgd_2d_max_likelihood(){
         use cost::MaxLikelihood;
-        use model::{Logicstic, Linear};
+        use model::{Logistic, Linear};
         use teacher::GradientDescent;
         use teach_history;
         use Model;
@@ -322,7 +322,7 @@ mod tests {
             ([7.6, 3.5], 1.0)
         ];
 
-        let mut model = Logicstic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
+        let mut model = Logistic{ linear: Linear{m : [0.0, 0.0], c : 0.0}};
         let teacher = GradientDescent{ learning_rate : 0.3 };
         let cost = MaxLikelihood{};
 
