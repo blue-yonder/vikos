@@ -16,7 +16,7 @@ use std::marker::PhantomData;
 /// use vikos::model::Constant;
 /// use vikos::cost::LeastSquares;
 /// use vikos::teacher::GradientDescentAl;
-/// use vikos::teach_history;
+/// use vikos::learn_history;
 ///
 /// let features = ();
 /// let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
@@ -25,7 +25,7 @@ use std::marker::PhantomData;
 /// let mut model = Constant::new(0.0);
 ///
 /// let teacher = GradientDescentAl{ l0 : 0.3, t : 4.0 };
-/// teach_history(&teacher, &cost, &mut model, history.iter().cycle().map(|&y|((),y)).take(100));
+/// learn_history(&teacher, &cost, &mut model, history.iter().cycle().map(|&y|((),y)).take(100));
 /// println!("{}", model.c);
 /// ```
 #[derive(Debug)]
