@@ -102,9 +102,31 @@ fn linear_sgd_2d(){
     let history = [([0.0, 7.0], 17.0), ([1.0, 2.0], 8.0), ([2.0, -2.0], 1.0)];
     let mut model = model::Linear{m : [0.0, 0.0], c : 0.0};
     let cost = cost::LeastSquares{};
-    let teacher = teacher::Momentum{ l0 : 0.01, t : 10000000.0, inertia : 0.9 };
+    let teacher = teacher::Momentum{ l0 : 0.009, t : 1000.0, inertia : 0.995 };
 
-    learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(15000).cloned());
+    learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(1500).cloned());
+
+    println!("{:?}", model);
+
+    assert!(model.m[0] < 1.1);
+    assert!(model.m[0] > 0.9);
+    assert!(model.m[1] < 2.1);
+    assert!(model.m[1] > 1.9);
+    assert!(model.c < 3.1);
+    assert!(model.c > 2.9);
+}
+
+#[test]
+fn linear_nesterov_2d(){
+
+    use vikos::learn_history;
+
+    let history = [([0.0, 7.0], 17.0), ([1.0, 2.0], 8.0), ([2.0, -2.0], 1.0)];
+    let mut model = model::Linear{m : [0.0, 0.0], c : 0.0};
+    let cost = cost::LeastSquares{};
+    let teacher = teacher::Nesterov{ l0 : 0.009, t : 1000.0, inertia : 0.995 };
+
+    learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(1500).cloned());
 
     println!("{:?}", model);
 

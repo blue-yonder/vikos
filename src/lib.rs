@@ -2,133 +2,19 @@
 //!
 //! This library wants to enable its user to write teachers
 //! independent of the model trained or the cost function tried to
-//! minimize.
+//! minimize. If you have no idea how to start you may want to
+//! have a look at the [tutorial](./tutorial/index.html).
 //!
-//! # Tutorial
-//!
-//! Look, a bunch of data! Let's do something with it.
-//!
-//! ```
-//! let history = [
-//!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
-//!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
-//!    (16.0, 29.0)
-//! ];
-//! ```
-//! The first element of the tuple is our feature vector,
-//! the second elements represents the truth. We want to
-//! use a [Training] to find the coefficents of a [Model]
-//! which minimize a `Cost` function. Let's start with
-//! finding the mean value of the truth.
-//!
-//! ## Estimating mean
-//!
-//! ```
-//! use vikos::{model, cost, teacher, learn_history, Model};
-//! //mean is 9, but we don't know that yet of course
-//! let history = [
-//!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
-//!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
-//!    (16.0, 29.0)
-//! ];
-//!
-//! // The mean is just a simple number ...
-//! let mut model = model::Constant::new(0.0);
-//! // ... which minimizes the square error
-//! let cost = cost::LeastSquares{};
-//! // Use Stochasic Gradient Descent with an annealed learning rate
-//! let teacher = teacher::GradientDescentAl{ l0 : 0.3, t : 4.0 };
-//! // Train 100 (admitettly repetitive) events
-//! learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(100).cloned());
-//! // We need an input vector for predictions, the 42 won't influence the mean
-//! println!("{}", model.predict(&42.0));
-//! // Since we know models type is `Constant` we could just access the members
-//! println!("{}", model.c);
-//! ```
-//! As far as the mean is concerned the first element is just
-//! ignored. The code would also compile if the first
-//! element would be an empty tuple or any other type for
-//! that matter.
-//!
-//! ## Estimating median
-//!
-//! If we want to estimate the median instead we only need to change
-//! our cost function
-//!
-//! ```
-//! use vikos::{model, cost, teacher, learn_history, Model};
-//! //median is 7, but we don't know that yet of course
-//! let history = [
-//!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
-//!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
-//!    (16.0, 29.0)
-//! ];
-//!
-//! // The median is just a simple number ...
-//! let mut model = model::Constant::new(0.0);
-//! // ... which minimizes the absolute error
-//! let cost = cost::LeastAbsoluteDeviation{};
-//! let teacher = teacher::GradientDescentAl{ l0 : 1.0, t : 9.0 };
-//! learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(100).cloned());
-//! ```
-//! Most notably we changed the cost function to train for the median. We also had to
-//! increase our learning rate to be able to converge to `7` more quickly. Maybe we
-//! should try a slightly more sophisticated `Training` algorithm.
-//!
-//! ## Estimating median again
-//!
-//! ```
-//! use vikos::{model, cost, teacher, learn_history, Model};
-//! //median is 7, but we don't know that yet of course
-//! let history = [
-//!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
-//!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
-//!    (16.0, 29.0)
-//! ];
-//!
-//! // The median is just a simple number ...
-//! let mut model = model::Constant::new(0.0);
-//! // ... which minimizes the absolute error
-//! let cost = cost::LeastAbsoluteDeviation{};
-//! // Use Stochasic Gradient Descent with an annealed learning rate and momentum
-//! let teacher = teacher::Momentum{ l0 : 1.0, t : 3.0, inertia : 0.9};
-//! learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(100).cloned());
-//! println!("{}", model.predict(&42.0));
-//! ```
-//! The momentum term allowed us to drop our learning rate way quicker and to retrieve a
-//! more precise result in the same number of iterations. The algorithms and their
-//! parameters are not the point however, the important thing is we could switch them
-//! quite easily and independent of our cost function and our model. Speaking of which,
-//! it is time to fit a straight line through our data points.
-//!
-//! ## Line of best fit
-//!
-//! ```
-//! use vikos::{model, cost, teacher, learn_history, Model};
-//! //Best described by 2 * m - 3
-//! let history = [
-//!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
-//!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
-//!    (16.0, 29.0)
-//! ];
-//!
-//! let mut model = model::Linear{ m : 0.0, c : 0.0 };
-//! let cost = cost::LeastSquares{};
-//! let teacher = teacher::Momentum{ l0 : 0.001, t : 1000.0, inertia : 0.9};
-//! learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(500).cloned());
-//! for &(input, truth) in history.iter(){
-//!     println!("Input: {}, Truth: {}, Prediction: {}", input, truth, model.predict(&input));
-//! }
-//! println!("slope: {}, intercept: {}", model.m, model.c);
-//! ```
 //! # Desgin
-//! Consequently its three most important traits are [Model], [Cost]
-//! and [Training]. [Teacher]s act as factories for [Trainings] and
-//! as of now are largely convinience.
+//! Three most important traits are [Model], [Cost]
+//! and [Training]. [Teacher]s act as factories for [Training] and
+//! hold parameters which do not change during learning.
+//!
 //! [Model]: ./trait.Model.html
 //! [Cost]: ./trait.Cost.html
 //! [Training]: ./trait.Cost.html
 //! [Teacher]: ./trait.Teacher.html
+
 #![warn(missing_docs)]
 
 extern crate num;
@@ -136,10 +22,10 @@ extern crate num;
 use std::iter::IntoIterator;
 use num::Float;
 
-/// A Model is defines how to predict a target from an input
+/// A Model is a parameterized expert algorithm
 ///
-/// A model usually depends on several coefficents whose values
-/// are derived using a training algorithm
+/// Implementations of this trait can be found in
+/// [models](./model/index.html)
 pub trait Model : Clone{
     /// Input features
     type Input;
@@ -160,6 +46,9 @@ pub trait Model : Clone{
 }
 
 /// Cost functions those value is supposed be minimized by the training algorithm
+///
+/// Implementations of this trait can be found in
+/// [cost](./cost/index.html)
 pub trait Cost{
 
     /// Error type used by the cost function
@@ -174,7 +63,10 @@ pub trait Cost{
     fn gradient(&self, prediction : Self::Error, truth : Self::Error, gradient_error_by_coefficent : Self::Error) -> Self::Error;
 }
 
-/// Teaches event to a `Model`
+/// Algorithms used to adapt [Model](./trait.Model.html) coefficents
+///
+/// Implementations of this trait may hold mutable state during
+/// learning. You find training algorithms in [training](./training/index.html)
 pub trait Training{
 
     /// `Model` changed by this `Training`
@@ -193,7 +85,7 @@ pub trait Training{
         C : Cost<Error=<Self::Model as Model>::Target>;
 }
 
-/// `Teachers` are used to train `Models`, based on events and a `Cost` function
+/// Factories for [Training](./trait.Training.html)
 pub trait Teacher<M : Model>{
 
     /// Contains state which changes during the training, but is not required by the expert
@@ -225,10 +117,9 @@ pub mod model;
 /// Implementations of `Cost` trait
 pub mod cost;
 /// Implementations of `Training` trait
-///
-/// You can use `Teacher`s to create `Training` instances
 pub mod training;
-/// Implementatios of `Teacher` trait
+/// Implementations of `Teacher` trait
 pub mod teacher;
 /// Defines linear algebra traits used for some model parameters
 pub mod linear_algebra;
+pub mod tutorial;

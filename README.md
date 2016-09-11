@@ -33,6 +33,7 @@ Want to help out? Just create an issue, pull request or contact markus.klein@blu
 
 [docs.rs]: https://docs.rs
 [documentation]: https://docs.rs/vikos/
+[tutorial]: https://docs.rs/vikos/0.1.4/vikos/tutorial/index.html
 [rustup]:  http://www.rustup.rs
 [rustlearn]: https://github.com/maciejkula/rustlearn
 [leaf]: https://github.com/autumnai/leaf
