@@ -1,13 +1,13 @@
 //! A machine learning library for supervised regression trainings
 //!
-//! This library wants to enable its user to write teachers
-//! independent of the model trained or the cost function tried to
-//! minimize. If you have no idea how to start you may want to
+//! This library wants to enable its users to write teachers
+//! independently of the model trained or the cost function that is meant to
+//! be minimized. If you have no idea how to start, you may want to
 //! have a look at the [tutorial](./tutorial/index.html).
 //!
-//! # Desgin
-//! Three most important traits are [Model], [Cost]
-//! and [Training]. [Teacher]s act as factories for [Training] and
+//! # Design
+//! The three most important traits are [Model], [Cost],
+//! and [Training]. [Teacher]s act as factories for [Training]s and
 //! hold parameters which do not change during learning.
 //!
 //! [Model]: ./trait.Model.html
@@ -45,7 +45,7 @@ pub trait Model : Clone{
     fn coefficent(& mut self, coefficent : usize) -> & mut Self::Target;
 }
 
-/// Cost functions those value is supposed be minimized by the training algorithm
+/// Cost function whose value is supposed be minimized by the training algorithm
 ///
 /// Implementations of this trait can be found in
 /// [cost](./cost/index.html)
@@ -58,7 +58,7 @@ pub trait Cost{
 
     /// Value of the cost function derived by the n-th coefficent at x expressed in Error(x) and dY(x)/dx
     ///
-    /// This method is called by SGD based training algorithm in order to
+    /// This method is called by SGD-based training algorithm in order to
     /// determine the delta of the coefficents
     fn gradient(&self, prediction : Self::Error, truth : Self::Error, gradient_error_by_coefficent : Self::Error) -> Self::Error;
 }

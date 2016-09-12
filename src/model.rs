@@ -3,10 +3,10 @@ use linear_algebra::Vector;
 use num::{Float, One};
 use std::marker::PhantomData;
 
-/// Models the target as `c`
+/// Models the target as a constant `c`
 ///
 /// This model predicts a number. The cost function used during training decides
-/// wether this number is a mean, median or something else.
+/// whether this number is a mean, median, or something else.
 ///
 /// # Examples
 ///
