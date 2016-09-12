@@ -3,7 +3,7 @@ use Teacher;
 use Model;
 use num::Float;
 
-/// Gradient Descent
+/// Gradient descent
 ///
 /// Simplest possible implementation of gradient descent with fixed learning rate
 pub struct GradientDescent<F : Float>{
@@ -22,7 +22,7 @@ impl<F,M> Teacher<M> for GradientDescent<F>
     }
 }
 
-/// Gradient Descent with annealing learning rate
+/// Gradient descent with annealing learning rate
 ///
 /// For the i-th event the learning rate is `l = l0 * (1 + i/t)`
 pub struct GradientDescentAl<F : Float>{
@@ -47,7 +47,7 @@ impl<F,M> Teacher<M> for GradientDescentAl<F>
     }
 }
 
-/// Gradient Descent with annealing learning rate and momentum
+/// Gradient descent with annealing learning rate and momentum
 ///
 /// For the i-th event the learning rate is `l = l0 * (1 + i/t)`
 pub struct Momentum<F : Float>{
@@ -56,10 +56,10 @@ pub struct Momentum<F : Float>{
     /// Smaller t will decrease the learning rate faster
     ///
     /// After t events the start learning rate will be a half `l0`,
-    /// after two t events the learning rate will be one third `l0`
+    /// after two t events the learning rate will be one third `l0`,
     /// and so on.
     pub t : F,
-    /// Too simulate friction select a value smaller than 1 (recommended)
+    /// To simulate friction, please select a value smaller than 1 (recommended)
     pub inertia : F,
 }
 
@@ -83,17 +83,17 @@ impl<F,M> Teacher<M> for Momentum<F>
     }
 }
 
-/// Nesterov accelerated Gradient Descent
+/// Nesterov accelerated gradient descent
 pub struct Nesterov<F : Float>{
     /// Start learning rate
     pub l0 : F,
     /// Smaller t will decrease the learning rate faster
     ///
     /// After t events the start learning rate will be a half `l0`,
-    /// after two t events the learning rate will be one third `l0`
+    /// after two t events the learning rate will be one third `l0`,
     /// and so on.
     pub t : F,
-    /// Too simulate friction select a value smaller than 1 (recommended)
+    /// To simulate friction, please select a value smaller than 1 (recommended)
     pub inertia : F,
 }
 

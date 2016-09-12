@@ -2,14 +2,14 @@ use num::Num;
 use num::Zero;
 use num::One;
 
-/// Vector those dimension is known at runtime
+/// Vector whose dimension is known at runtime
 ///
 /// Assumes the `Vector` is represented as a
 /// tuple of numbers representing its projection
 /// along orthogonal base vectors
 pub trait Vector : Clone{
 
-    /// Underlying Scalar type of `Vector` type
+    /// Underlying scalar type of `Vector` type
     type Scalar : Num + Zero + One + Copy;
     /// Maximum allowed index for `at` and `mut_at`
     fn dimension(&self) -> usize;

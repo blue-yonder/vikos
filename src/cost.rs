@@ -1,6 +1,6 @@
 use Cost;
 
-/// Pass an instance of this Type to a training algorithm to optimize for C=Error^2
+/// Pass an instance of this type to a training algorithm to optimize for C=Error^2
 ///
 /// Optimizing a `model::Constant` for LeastSquares should yield the mean value
 pub struct LeastSquares;
@@ -16,9 +16,9 @@ impl Cost for LeastSquares{
     }
 }
 
-/// Pass an instance of this Type to a training algorithm to optimize for C=|Error|
+/// Pass an instance of this type to a training algorithm to optimize for C=|Error|
 ///
-/// Optimizing a `model::Constant` for LeastSquares should yield the median
+/// Optimizing a `model::Constant` for LeastAbsoluteDeviation should yield the median.
 /// Gradient for error == 0 is set to 0
 pub struct LeastAbsoluteDeviation;
 
@@ -39,11 +39,11 @@ impl Cost for LeastAbsoluteDeviation{
     }
 }
 
-/// Maximies the likelihood function `L` by defining `C=-ln(L)`
+/// Maximizes the likelihood function `L` by defining `C=-ln(L)`
 ///
-/// You can use this function if your truth is a propability
-/// (i.e. a value betwenn 0 and 1). Maximizing the Likelihood
-/// function is equivalent to minimizing the least square error
+/// You can use this function if your truth is a probability
+/// (i.e., a value betwenn 0 and 1). Maximizing the likelihood
+/// function is equivalent to minimizing the least square error,
 /// yet this cost function has shown itself to converge quicker
 /// for some problems.
 pub struct MaxLikelihood;

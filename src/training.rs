@@ -7,7 +7,7 @@ use num::One;
 /// SGD with constant learning rate and no momentum
 pub struct GradientDescent<M : Model>{
 
-    /// Defines how fast the coefficents of the trained `Model` will change
+    /// Defines how fast the coefficients of the trained `Model` will change
     pub learning_rate: M::Target
 }
 
@@ -26,14 +26,14 @@ impl<M> Training for GradientDescent<M> where M : Model{
     }
 }
 
-/// Trains a Model with an annealing learning rate
+/// Trains a model with an annealing learning rate
 pub struct GradientDescentAl<M : Model>{
     /// Start learning rate
     pub l0 : M::Target,
     /// Smaller t will decrease the learning rate faster
     ///
     /// After t events the start learning rate will be a half `l0`,
-    /// after two t events the learning rate will be one third `l0`
+    /// after two t events the learning rate will be one third `l0`,
     /// and so on.
     pub t : M::Target,
 
@@ -45,9 +45,9 @@ impl<M : Model> GradientDescentAl<M>{
 
     /// Returns current learning rate
     ///
-    /// While this could be calculated directly by `teach_event`
-    /// its useful for debugging or monitoring purposes to have a
-    /// look at the current learning rate
+    /// While this could be calculated directly by `teach_event`,
+    /// it is useful for debugging or monitoring purposes to have a
+    /// look at the current learning rate.
     pub fn learning_rate(&self) -> M::Target{
         self.l0 / (M::Target::one() + self.learned_events / self.t)
     }
@@ -81,17 +81,17 @@ pub struct Momentum<M : Model>{
     /// Smaller t will decrease the learning rate faster
     ///
     /// After t events the start learning rate will be a half `l0`,
-    /// after two t events the learning rate will be one third `l0`
+    /// after two t events the learning rate will be one third `l0`,
     /// and so on.
     pub t : M::Target,
 
-    /// Too simulate friction select a value smaller than 1 (recommended)
+    /// To simulate friction, please select a value smaller than 1 (recommended)
     pub inertia : M::Target,
 
     /// Number of learned events
     pub learned_events : M::Target,
 
-    /// Current velocity of coefficents (in delta per iteration);
+    /// Current velocity of coefficients (in delta per iteration);
     pub velocity : Vec<M::Target>
 }
 
@@ -99,8 +99,8 @@ impl<M : Model> Momentum<M>{
 
     /// Returns current learning rate
     ///
-    /// While this could be calculated directly by `teach_event`
-    /// its useful for debugging or monitoring purposes to have a
+    /// While this could be calculated directly by `teach_event`,
+    /// it is useful for debugging or monitoring purposes to have a
     /// look at the current learning rate
     pub fn learning_rate(&self) -> M::Target{
         self.l0 / (M::Target::one() + self.learned_events / self.t)
@@ -129,8 +129,8 @@ impl<M> Training for Momentum<M> where M : Model{
 
 /// Nesterov accelerated gradient descent
 ///
-/// Like accelerated gradient descent it implements a Momentum term.
-/// In contrast to regular gradient descent the acceleartion is not
+/// Like accelerated gradient descent, Nesterov accelerated gradient descent includes a momentum term.
+/// In contrast to regular gradient descent, the acceleration is not
 /// calculated with respect to the current position, but to the
 /// estimated new one.
 /// Source: [G. Hinton's lecture 6c](http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf)
@@ -143,11 +143,11 @@ pub struct Nesterov<M : Model>{
     /// Smaller t will decrease the learning rate faster
     ///
     /// After t events the start learning rate will be a half `l0`,
-    /// after two t events the learning rate will be one third `l0`
+    /// after two t events the learning rate will be one third `l0`,
     /// and so on.
     pub t : M::Target,
 
-    /// Too simulate friction select a value smaller than 1 (recommended)
+    /// To simulate friction, please select a value smaller than 1 (recommended)
     pub inertia : M::Target,
 
     /// Number of learned events
@@ -161,8 +161,8 @@ impl<M : Model> Nesterov<M>{
 
     /// Returns current learning rate
     ///
-    /// While this could be calculated directly by `teach_event`
-    /// its useful for debugging or monitoring purposes to have a
+    /// While this could be calculated directly by `teach_event`,
+    /// it is useful for debugging or monitoring purposes to have a
     /// look at the current learning rate
     pub fn learning_rate(&self) -> M::Target{
         self.l0 / (M::Target::one() + self.learned_events / self.t)
