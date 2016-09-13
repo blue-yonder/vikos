@@ -30,11 +30,14 @@
 //! // The mean is just a simple number ...
 //! let mut model = model::Constant::new(0.0);
 //! // ... which minimizes the square error
-//! let cost = cost::LeastSquares{};
+//! let cost = cost::LeastSquares {};
 //! // Use stochastic gradient descent with an annealed learning rate
-//! let teacher = teacher::GradientDescentAl{ l0 : 0.3, t : 4.0 };
+//! let teacher = teacher::GradientDescentAl { l0: 0.3, t: 4.0 };
 //! // Train 100 (admittedly repetitive) events
-//! learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(100).cloned());
+//! learn_history(&teacher,
+//!               &cost,
+//!               &mut model,
+//!               history.iter().cycle().take(100).cloned());
 //! // We need an input vector for predictions, the 42 will not influence the mean
 //! println!("{}", model.predict(&42.0));
 //! // Since we know the model's type is `Constant`, we could just access the members
@@ -52,19 +55,22 @@
 //!
 //! ```
 //! use vikos::{model, cost, teacher, learn_history, Model};
-//! //median is 7, but we don't know that yet of course
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
 //!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
 //!    (16.0, 29.0)
 //! ];
+//! // median is 7, but we don't know that yet of course
 //!
 //! // The median is just a simple number ...
 //! let mut model = model::Constant::new(0.0);
 //! // ... which minimizes the absolute error
-//! let cost = cost::LeastAbsoluteDeviation{};
-//! let teacher = teacher::GradientDescentAl{ l0 : 1.0, t : 9.0 };
-//! learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(100).cloned());
+//! let cost = cost::LeastAbsoluteDeviation {};
+//! let teacher = teacher::GradientDescentAl { l0: 1.0, t: 9.0 };
+//! learn_history(&teacher,
+//!               &cost,
+//!               &mut model,
+//!               history.iter().cycle().take(100).cloned());
 //! ```
 //! Most notably we changed the cost function to train for the median. We also had to
 //! increase our learning rate to be able to converge to `7` more quickly. Maybe we
@@ -74,7 +80,7 @@
 //!
 //! ```
 //! use vikos::{model, cost, teacher, learn_history, Model};
-//! //median is 7, but of course we do not know that yet
+//! // median is 7, but of course we do not know that yet
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
 //!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
@@ -84,10 +90,17 @@
 //! // The median is just a simple number ...
 //! let mut model = model::Constant::new(0.0);
 //! // ... which minimizes the absolute error
-//! let cost = cost::LeastAbsoluteDeviation{};
+//! let cost = cost::LeastAbsoluteDeviation {};
 //! // Use stochasic gradient descent with an annealed learning rate and momentum
-//! let teacher = teacher::Momentum{ l0 : 1.0, t : 3.0, inertia : 0.9};
-//! learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(100).cloned());
+//! let teacher = teacher::Momentum {
+//!     l0: 1.0,
+//!     t: 3.0,
+//!     inertia: 0.9,
+//! };
+//! learn_history(&teacher,
+//!               &cost,
+//!               &mut model,
+//!               history.iter().cycle().take(100).cloned());
 //! println!("{}", model.predict(&42.0));
 //! ```
 //! The momentum term allowed us to drop our learning rate way quicker and to retrieve a
@@ -100,19 +113,29 @@
 //!
 //! ```
 //! use vikos::{model, cost, teacher, learn_history, Model};
-//! //Best described by 2 * m - 3
+//! // Best described by 2 * m - 3
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
 //!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
 //!    (16.0, 29.0)
 //! ];
 //!
-//! let mut model = model::Linear{ m : 0.0, c : 0.0 };
-//! let cost = cost::LeastSquares{};
-//! let teacher = teacher::Momentum{ l0 : 0.0001, t : 1000.0, inertia : 0.99};
-//! learn_history(&teacher, &cost, &mut model, history.iter().cycle().take(500).cloned());
-//! for &(input, truth) in history.iter(){
-//!     println!("Input: {}, Truth: {}, Prediction: {}", input, truth, model.predict(&input));
+//! let mut model = model::Linear { m: 0.0, c: 0.0 };
+//! let cost = cost::LeastSquares {};
+//! let teacher = teacher::Momentum {
+//!     l0: 0.0001,
+//!     t: 1000.0,
+//!     inertia: 0.99,
+//! };
+//! learn_history(&teacher,
+//!               &cost,
+//!               &mut model,
+//!               history.iter().cycle().take(500).cloned());
+//! for &(input, truth) in history.iter() {
+//!     println!("Input: {}, Truth: {}, Prediction: {}",
+//!              input,
+//!              truth,
+//!              model.predict(&input));
 //! }
 //! println!("slope: {}, intercept: {}", model.m, model.c);
 //! ```
