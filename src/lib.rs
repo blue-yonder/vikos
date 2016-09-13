@@ -59,7 +59,7 @@ pub trait Cost {
 
     /// Value of the cost function derived by the n-th coefficent at x expressed in Error(x) and dY(x)/dx
     ///
-    /// This method is called by SGD-based training algorithm in order to
+    /// This method is called by stochastic gradient descent (SGD)-based training algorithm in order to
     /// determine the delta of the coefficents
     fn gradient(&self,
                 prediction: Self::Error,
@@ -93,7 +93,8 @@ pub trait Training {
 pub trait Teacher<M: Model> {
     /// Contains state which changes during the training, but is not required by the expert
     ///
-    /// Examples are the velocity of the coefficents (in SGD) or the number of events already learned.
+    /// Examples are the velocity of the coefficents (in stochastic gradient
+    /// descent) or the number of events already learned.
     /// This may also be empty
     type Training: Training<Model = M>;
 
