@@ -2,7 +2,7 @@ use Cost;
 
 /// Pass an instance of this type to a training algorithm to optimize for C=Error^2
 ///
-/// Optimizing a `model::Constant` for LeastSquares should yield the mean value
+/// Optimizing a `model::Constant` for `LeastSquares` should yield the mean value
 pub struct LeastSquares;
 
 impl Cost for LeastSquares {
@@ -16,7 +16,7 @@ impl Cost for LeastSquares {
 
 /// Pass an instance of this type to a training algorithm to optimize for C=|Error|
 ///
-/// Optimizing a `model::Constant` for LeastAbsoluteDeviation should yield the median.
+/// Optimizing a `model::Constant` for `LeastAbsoluteDeviation` should yield the median.
 /// Gradient for error == 0 is set to 0
 pub struct LeastAbsoluteDeviation;
 

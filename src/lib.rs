@@ -16,6 +16,8 @@
 //! [Teacher]: ./trait.Teacher.html
 
 #![warn(missing_docs)]
+#![cfg_attr(feature="clippy", feature(plugin))]
+#![cfg_attr(feature="clippy", plugin(clippy))]
 
 extern crate num;
 
@@ -106,7 +108,7 @@ pub fn learn_history<M, C, T, H>(teacher: &T, cost: &C, model: &mut M, history: 
           T: Teacher<M>,
           H: IntoIterator<Item = (M::Input, M::Target)>
 {
-    let mut training = teacher.new_training(&model);
+    let mut training = teacher.new_training(model);
     for (features, truth) in history {
 
         training.teach_event(cost, model, &features, truth);
