@@ -2,7 +2,7 @@
 //!
 //! This library wants to enable its users to write teachers
 //! independently of the model trained or the cost function that is meant to
-//! be minimized. If you have no idea how to start, you may want to
+//! be minimized. To get started right away, you may want to
 //! have a look at the [tutorial](./tutorial/index.html).
 //!
 //! # Design
@@ -60,8 +60,8 @@ pub trait Cost {
     /// Value of the cost function derived by the n-th coefficent at x
     /// expressed in Error(x) and dY(x)/dx
     ///
-    /// This method is called by SGD-based training algorithm in order to
-    /// determine the delta of the coefficents
+    /// This method is called by stochastic gradient descent (SGD)-based
+    /// training algorithm in order to determine the delta of the coefficents
     fn gradient(&self,
                 prediction: Self::Error,
                 truth: Self::Error,
@@ -94,8 +94,9 @@ pub trait Training {
 pub trait Teacher<M: Model> {
     /// Contains state which changes during the training, but is not required by the expert
     ///
-    /// Examples are the velocity of the coefficents (in SGD) or the number of events
-    /// already learned. This may also be empty
+    /// Examples are the velocity of the coefficents (in stochastic gradient
+    /// descent) or the number of events already learned.
+    /// This may also be empty
     type Training: Training<Model = M>;
 
     /// Creates a new `Training` object to hold training state

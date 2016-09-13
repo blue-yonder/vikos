@@ -4,7 +4,7 @@ use Training;
 
 use num::One;
 
-/// SGD with constant learning rate and no momentum
+/// Stochastic gradient descent (SGD) with constant learning rate and no momentum
 pub struct GradientDescent<M: Model> {
     /// Defines how fast the coefficients of the trained `Model` will change
     pub learning_rate: M::Target,
@@ -74,7 +74,7 @@ impl<M> Training for GradientDescentAl<M>
     }
 }
 
-/// SGD training with adaptive learning rate and momentum term
+/// Stochastic gradient descent (SGD) training with adaptive learning rate and momentum term
 #[derive(Debug)]
 pub struct Momentum<M: Model> {
     /// Start learning rate
