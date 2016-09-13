@@ -57,7 +57,8 @@ pub trait Cost {
     /// Usually `f64` or `f32`
     type Error: Float;
 
-    /// Value of the cost function derived by the n-th coefficent at x expressed in Error(x) and dY(x)/dx
+    /// Value of the cost function derived by the n-th coefficent at x
+    /// expressed in Error(x) and dY(x)/dx
     ///
     /// This method is called by SGD-based training algorithm in order to
     /// determine the delta of the coefficents
@@ -93,8 +94,8 @@ pub trait Training {
 pub trait Teacher<M: Model> {
     /// Contains state which changes during the training, but is not required by the expert
     ///
-    /// Examples are the velocity of the coefficents (in SGD) or the number of events already learned.
-    /// This may also be empty
+    /// Examples are the velocity of the coefficents (in SGD) or the number of events
+    /// already learned. This may also be empty
     type Training: Training<Model = M>;
 
     /// Creates a new `Training` object to hold training state

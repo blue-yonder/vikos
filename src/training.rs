@@ -22,7 +22,8 @@ impl<M> Training for GradientDescent<M>
 
         for ci in 0..model.num_coefficents() {
             *model.coefficent(ci) = *model.coefficent(ci) -
-                                    self.learning_rate * cost.gradient(prediction, truth, model.gradient(ci, features));
+                                    self.learning_rate *
+                                    cost.gradient(prediction, truth, model.gradient(ci, features));
         }
     }
 }
@@ -119,7 +120,8 @@ impl<M> Training for Momentum<M>
 
         for ci in 0..model.num_coefficents() {
             self.velocity[ci] = self.inertia * self.velocity[ci] -
-                                self.learning_rate() * cost.gradient(prediction, truth, model.gradient(ci, features));
+                                self.learning_rate() *
+                                cost.gradient(prediction, truth, model.gradient(ci, features));
             *model.coefficent(ci) = *model.coefficent(ci) + self.velocity[ci];
         }
 
@@ -129,11 +131,13 @@ impl<M> Training for Momentum<M>
 
 /// Nesterov accelerated gradient descent
 ///
-/// Like accelerated gradient descent, Nesterov accelerated gradient descent includes a momentum term.
-/// In contrast to regular gradient descent, the acceleration is not
-/// calculated with respect to the current position, but to the
-/// estimated new one.
-/// Source: [G. Hinton's lecture 6c](http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf)
+/// Like accelerated gradient descent, Nesterov accelerated gradient descent
+/// includes a momentum term. In contrast to regular gradient descent, the
+/// acceleration is not calculated with respect to the current position, but to
+/// the estimated new one.
+/// Source:
+/// [G. Hinton's lecture 6c]
+/// (http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf)
 #[derive(Debug)]
 pub struct Nesterov<M: Model> {
     /// Start learning rate
@@ -182,7 +186,8 @@ impl<M> Training for Nesterov<M>
         }
 
         for ci in 0..model.num_coefficents() {
-            let delta = -self.learning_rate() * cost.gradient(prediction, truth, model.gradient(ci, features));
+            let delta = -self.learning_rate() *
+                        cost.gradient(prediction, truth, model.gradient(ci, features));
             *model.coefficent(ci) = *model.coefficent(ci) + delta;
             self.velocity[ci] = self.inertia * self.velocity[ci] + delta;
         }

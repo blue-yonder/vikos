@@ -121,7 +121,7 @@ impl<V: Vector> Model for Linear<V>
     }
 }
 
-/// Models target as `y = 1/1+e^(m * x + c)`
+/// Models target as `y = 1/(1+e^(m * x + c))`
 #[derive(Clone)]
 pub struct Logistic<V: Vector> {
     /// Linear term of `Logistic` model
