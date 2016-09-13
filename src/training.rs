@@ -18,7 +18,7 @@ impl<M> Training for GradientDescent<M>
     fn teach_event<C>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: M::Target)
         where C: Cost<Error = M::Target>
     {
-        let prediction = model.predict(&features);
+        let prediction = model.predict(features);
 
         for ci in 0..model.num_coefficents() {
             *model.coefficent(ci) = *model.coefficent(ci) -
@@ -61,7 +61,7 @@ impl<M> Training for GradientDescentAl<M>
     fn teach_event<C>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: M::Target)
         where C: Cost<Error = M::Target>
     {
-        let prediction = model.predict(&features);
+        let prediction = model.predict(features);
 
         for ci in 0..model.num_coefficents() {
             *model.coefficent(ci) = *model.coefficent(ci) -
@@ -115,7 +115,7 @@ impl<M> Training for Momentum<M>
     fn teach_event<C>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: M::Target)
         where C: Cost<Error = M::Target>
     {
-        let prediction = model.predict(&features);
+        let prediction = model.predict(features);
 
         for ci in 0..model.num_coefficents() {
             self.velocity[ci] = self.inertia * self.velocity[ci] -
@@ -175,7 +175,7 @@ impl<M> Training for Nesterov<M>
     fn teach_event<C>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: M::Target)
         where C: Cost<Error = M::Target>
     {
-        let prediction = model.predict(&features);
+        let prediction = model.predict(features);
 
         for ci in 0..model.num_coefficents() {
             *model.coefficent(ci) = *model.coefficent(ci) + self.velocity[ci];

@@ -39,7 +39,7 @@ impl Vector for f64 {
         *self
     }
 
-    fn mut_at<'a>(&'a mut self, _: usize) -> &'a mut f64 {
+    fn mut_at(&mut self, _: usize) -> &mut f64 {
         self
     }
 
@@ -59,7 +59,7 @@ impl Vector for [f64; 2] {
         self[index]
     }
 
-    fn mut_at<'a>(&'a mut self, index: usize) -> &'a mut f64 {
+    fn mut_at(&mut self, index: usize) -> &mut f64 {
         &mut self[index]
     }
 }
