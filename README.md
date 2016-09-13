@@ -3,14 +3,14 @@
 [![MIT licensed](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/blue-yonder/vikos/blob/master/LICENSE)
 [![Published](http://meritbadge.herokuapp.com/vikos)](https://crates.io/crates/vikos)
 
-A library for supervised training of parameterized, regression, and classification models
+Vikos is a library for supervised training of parameterized, regression, and classification models.
 
 Design Goals
 ------------
 
-* Changing model representations, cost functions, and optimization algorithms independently of each other
-* Generics: Not committing to a particular data structure for inputs, targets, etc.
-* If the design goals above can only be achieved by sacrificing performance, so be it
+* Model representations, cost functions, and optimization algorithms can be changed independently of each other.
+* Generics: Not committed to a particular data structure for inputs, targets, etc.
+* If the design goals above can only be achieved by sacrificing performance, so be it.
 
 Current State
 -------------
@@ -19,7 +19,7 @@ Just starting to get the traits right, by continuously trying new use cases
 and implementing the learning algorithms. If you are looking for more mature
 rust libraries in the domain of ML, you might want to check out:
 * [rustlearn]
-* [leaf]
+* [leaf].
 
 Documentation
 -------------
@@ -29,7 +29,7 @@ Thanks to the folks of [docs.rs] for building and hosting the [documentation]!
 Contributing
 ------------
 
-Want to help out? Just create an issue, pull request or contact markus.klein@blue-yonder.com
+Want to help out? Just create an issue, pull request or contact markus.klein@blue-yonder.com.
 
 [docs.rs]: https://docs.rs
 [documentation]: https://docs.rs/vikos/
