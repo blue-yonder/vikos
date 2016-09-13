@@ -7,61 +7,60 @@ use num::One;
 /// Assumes the `Vector` is represented as a
 /// tuple of numbers representing its projection
 /// along orthogonal base vectors
-pub trait Vector : Clone{
-
+pub trait Vector: Clone {
     /// Underlying scalar type of `Vector` type
-    type Scalar : Num + Zero + One + Copy;
+    type Scalar: Num + Zero + One + Copy;
     /// Maximum allowed index for `at` and `mut_at`
     fn dimension(&self) -> usize;
     /// Length of projection along `i`-th base
-    fn at(&self, i : usize) -> Self::Scalar;
+    fn at(&self, i: usize) -> Self::Scalar;
     /// Mutable access to length of projection along `i`-th base
-    fn mut_at<'a>(&'a mut self, i : usize) -> &'a mut Self::Scalar;
+    fn mut_at<'a>(&'a mut self, i: usize) -> &'a mut Self::Scalar;
     /// Scalar product
     ///
     /// Default implementation using `at` and `dimension` is provided
-    fn dot(&self, other : &Self) -> Self::Scalar{
+    fn dot(&self, other: &Self) -> Self::Scalar {
         let mut result = Self::Scalar::zero();
-        for i in 0..self.dimension(){
+        for i in 0..self.dimension() {
             result = result + self.at(i) * other.at(i)
         }
         result
     }
 }
 
-impl Vector for f64{
+impl Vector for f64 {
     type Scalar = f64;
 
-    fn dimension(&self) -> usize{
+    fn dimension(&self) -> usize {
         1
     }
 
-    fn at(&self, _ : usize) -> f64{
+    fn at(&self, _: usize) -> f64 {
         *self
     }
 
-    fn mut_at<'a>(&'a mut self, _ : usize) -> &'a mut f64{
+    fn mut_at<'a>(&'a mut self, _: usize) -> &'a mut f64 {
         self
     }
 
-    fn dot(&self, other : &f64) -> f64{
+    fn dot(&self, other: &f64) -> f64 {
         self * other
     }
 }
 
-impl Vector for [f64;2]{
+impl Vector for [f64; 2] {
     type Scalar = f64;
 
-    fn dimension(&self) -> usize{
+    fn dimension(&self) -> usize {
         2
     }
 
-    fn at(&self, index : usize) -> f64{
+    fn at(&self, index: usize) -> f64 {
         self[index]
     }
 
-    fn mut_at<'a>(&'a mut self, index : usize) -> &'a mut f64{
-        & mut self[index]
+    fn mut_at<'a>(&'a mut self, index: usize) -> &'a mut f64 {
+        &mut self[index]
     }
 }
 
@@ -73,8 +72,8 @@ mod tests {
 
         use linear_algebra::Vector;
 
-        let a  = [1.0, 2.0];
-        let b  = [3.0, 4.0];
+        let a = [1.0, 2.0];
+        let b = [3.0, 4.0];
 
         assert_eq!(11.0, a.dot(&b))
     }

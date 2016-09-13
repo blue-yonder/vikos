@@ -29,88 +29,92 @@ use std::marker::PhantomData;
 /// println!("{}", model.c);
 /// ```
 #[derive(Debug)]
-pub struct Constant<Input>{
+pub struct Constant<Input> {
     /// Any prediction made by this model will have the value of `c`
     pub c: f64,
-    _phantom: PhantomData<Input>
+    _phantom: PhantomData<Input>,
 }
 
 impl<I> Constant<I> {
     /// Creates a new Constant from a `f64`
-    pub fn new(c: f64) -> Constant<I>{
-        Constant{c: c, _phantom: PhantomData::<I>{}}
+    pub fn new(c: f64) -> Constant<I> {
+        Constant {
+            c: c,
+            _phantom: PhantomData::<I> {},
+        }
     }
 }
 
-impl<I> Clone for Constant<I>{
-    fn clone(&self) -> Self{
+impl<I> Clone for Constant<I> {
+    fn clone(&self) -> Self {
         Constant::new(self.c)
     }
 }
 
-impl<I> Model for Constant<I>{
+impl<I> Model for Constant<I> {
     type Input = I;
     type Target = f64;
 
-    fn predict(&self, _: &I) -> f64{
+    fn predict(&self, _: &I) -> f64 {
         self.c
     }
 
-    fn num_coefficents(&self) -> usize{
+    fn num_coefficents(&self) -> usize {
         1
     }
 
-    fn gradient(&self, coefficent : usize, _ : &I) -> f64{
-        match coefficent{
+    fn gradient(&self, coefficent: usize, _: &I) -> f64 {
+        match coefficent {
             0 => 1.0,
-            _ => panic!("coefficent index out of range")
+            _ => panic!("coefficent index out of range"),
         }
     }
 
-    fn coefficent(& mut self, coefficent : usize) -> & mut f64{
-        match coefficent{
-            0 => & mut self.c,
-            _ => panic!("coefficent index out of range")
+    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
+        match coefficent {
+            0 => &mut self.c,
+            _ => panic!("coefficent index out of range"),
         }
     }
 }
 
 /// Models the target as `y = m * x + c`
 #[derive(Debug, Clone)]
-pub struct Linear<V : Vector>{
+pub struct Linear<V: Vector> {
     /// Slope
-    pub m : V,
+    pub m: V,
     /// Offset
-    pub c : V::Scalar
+    pub c: V::Scalar,
 }
 
-impl<V : Vector> Model for Linear<V> where V::Scalar : Float{
-
+impl<V: Vector> Model for Linear<V>
+    where V::Scalar: Float
+{
     type Input = V;
     type Target = V::Scalar;
 
-    fn predict(&self, input : &V) -> V::Scalar{
+    fn predict(&self, input: &V) -> V::Scalar {
         self.m.dot(input) + self.c
     }
 
-    fn num_coefficents(&self) -> usize{
+    fn num_coefficents(&self) -> usize {
         self.m.dimension() + 1
     }
 
-    fn gradient(&self, coefficent : usize, input : &V) -> V::Scalar{
+    fn gradient(&self, coefficent: usize, input: &V) -> V::Scalar {
 
         use num::One;
 
-        if coefficent == self.m.dimension(){
+        if coefficent == self.m.dimension() {
             V::Scalar::one() //c
         } else {
             input.at(coefficent)
         }
     }
 
-    fn coefficent(& mut self, coefficent : usize) -> & mut V::Scalar{
-        if coefficent == self.m.dimension(){
-            & mut self.c
+    fn coefficent(&mut self, coefficent: usize) -> &mut V::Scalar {
+        if coefficent == self.m.dimension() {
+            &mut self.c
         } else {
             self.m.mut_at(coefficent)
         }
@@ -119,29 +123,31 @@ impl<V : Vector> Model for Linear<V> where V::Scalar : Float{
 
 /// Models target as `y = 1/1+e^(m * x + c)`
 #[derive(Clone)]
-pub struct Logistic<V: Vector>{
+pub struct Logistic<V: Vector> {
     /// Linear term of `Logistic` model
-    pub linear : Linear<V>
+    pub linear: Linear<V>,
 }
 
-impl<V : Vector> Model for Logistic<V> where V::Scalar : Float{
+impl<V: Vector> Model for Logistic<V>
+    where V::Scalar: Float
+{
     type Input = V;
     type Target = V::Scalar;
 
-    fn predict(&self, input : &V) -> V::Scalar{
+    fn predict(&self, input: &V) -> V::Scalar {
         V::Scalar::one() / (V::Scalar::one() + self.linear.predict(input).exp())
     }
 
-    fn num_coefficents(&self) -> usize{
+    fn num_coefficents(&self) -> usize {
         self.linear.num_coefficents()
     }
 
-    fn gradient(&self, coefficent : usize, input : &V) -> V::Scalar{
+    fn gradient(&self, coefficent: usize, input: &V) -> V::Scalar {
         let p = self.predict(input);
-        - p * (V::Scalar::one() - p) * self.linear.gradient(coefficent, input)
+        -p * (V::Scalar::one() - p) * self.linear.gradient(coefficent, input)
     }
 
-    fn coefficent(& mut self, coefficent : usize) -> & mut V::Scalar{
+    fn coefficent(&mut self, coefficent: usize) -> &mut V::Scalar {
         self.linear.coefficent(coefficent)
     }
 }
