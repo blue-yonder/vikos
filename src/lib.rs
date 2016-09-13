@@ -2,7 +2,7 @@
 //!
 //! This library wants to enable its users to write teachers
 //! independently of the model trained or the cost function that is meant to
-//! be minimized. If you have no idea how to start, you may want to
+//! be minimized. To get started right away, you may want to
 //! have a look at the [tutorial](./tutorial/index.html).
 //!
 //! # Design
