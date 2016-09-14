@@ -51,7 +51,7 @@ pub trait Model: Clone {
 ///
 /// Implementations of this trait can be found in
 /// [cost](./cost/index.html)
-pub trait Cost {
+pub trait Cost<Truth> {
     /// Error type used by the cost function
     ///
     /// Usually `f64` or `f32`
@@ -64,7 +64,7 @@ pub trait Cost {
     /// training algorithm in order to determine the delta of the coefficents
     fn gradient(&self,
                 prediction: Self::Error,
-                truth: Self::Error,
+                truth: Truth,
                 gradient_error_by_coefficent: Self::Error)
                 -> Self::Error;
 }
@@ -82,12 +82,13 @@ pub trait Training {
     type Model: Model;
 
     /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
-    fn teach_event<C>(&mut self,
-                      cost: &C,
-                      model: &mut Self::Model,
-                      features: &<Self::Model as Model>::Input,
-                      truth: <Self::Model as Model>::Target)
-        where C: Cost<Error = <Self::Model as Model>::Target>;
+    fn teach_event<C, Truth>(&mut self,
+                             cost: &C,
+                             model: &mut Self::Model,
+                             features: &<Self::Model as Model>::Input,
+                             truth: Truth)
+        where C: Cost<Truth, Error = <Self::Model as Model>::Target>,
+              Truth: Copy;
 }
 
 /// Factories for [Training](./trait.Training.html)
@@ -104,11 +105,12 @@ pub trait Teacher<M: Model> {
 }
 
 /// Teaches `model` all events in `history`
-pub fn learn_history<M, C, T, H>(teacher: &T, cost: &C, model: &mut M, history: H)
+pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
     where M: Model,
-          C: Cost<Error = M::Target>,
+          C: Cost<Truth, Error = M::Target>,
           T: Teacher<M>,
-          H: IntoIterator<Item = (M::Input, M::Target)>
+          H: IntoIterator<Item = (M::Input, Truth)>,
+          Truth: Copy
 {
     let mut training = teacher.new_training(model);
     for (features, truth) in history {

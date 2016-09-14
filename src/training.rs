@@ -15,8 +15,9 @@ impl<M> Training for GradientDescent<M>
 {
     type Model = M;
 
-    fn teach_event<C>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: M::Target)
-        where C: Cost<Error = M::Target>
+    fn teach_event<C, Truth>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: Truth)
+        where C: Cost<Truth, Error = M::Target>,
+              Truth: Copy
     {
         let prediction = model.predict(features);
 
@@ -59,8 +60,9 @@ impl<M> Training for GradientDescentAl<M>
 {
     type Model = M;
 
-    fn teach_event<C>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: M::Target)
-        where C: Cost<Error = M::Target>
+    fn teach_event<C, Truth>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: Truth)
+        where C: Cost<Truth, Error = M::Target>,
+              Truth: Copy
     {
         let prediction = model.predict(features);
 
@@ -113,8 +115,9 @@ impl<M> Training for Momentum<M>
 {
     type Model = M;
 
-    fn teach_event<C>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: M::Target)
-        where C: Cost<Error = M::Target>
+    fn teach_event<C, Truth>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: Truth)
+        where C: Cost<Truth, Error = M::Target>,
+              Truth: Copy
     {
         let prediction = model.predict(features);
 
@@ -176,8 +179,9 @@ impl<M> Training for Nesterov<M>
 {
     type Model = M;
 
-    fn teach_event<C>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: M::Target)
-        where C: Cost<Error = M::Target>
+    fn teach_event<C, Truth>(&mut self, cost: &C, model: &mut M, features: &M::Input, truth: Truth)
+        where C: Cost<Truth, Error = M::Target>,
+              Truth: Copy
     {
         let prediction = model.predict(features);
 

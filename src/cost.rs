@@ -5,7 +5,7 @@ use Cost;
 /// Optimizing a `model::Constant` for `LeastSquares` should yield the mean value
 pub struct LeastSquares;
 
-impl Cost for LeastSquares {
+impl Cost<f64> for LeastSquares {
     type Error = f64;
 
     fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64 {
@@ -20,7 +20,7 @@ impl Cost for LeastSquares {
 /// Gradient for error == 0 is set to 0
 pub struct LeastAbsoluteDeviation;
 
-impl Cost for LeastAbsoluteDeviation {
+impl Cost<f64> for LeastAbsoluteDeviation {
     type Error = f64;
 
     fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64 {
@@ -44,10 +44,18 @@ impl Cost for LeastAbsoluteDeviation {
 /// for some problems.
 pub struct MaxLikelihood;
 
-impl Cost for MaxLikelihood {
+impl Cost<f64> for MaxLikelihood {
     type Error = f64;
 
     fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64 {
         gradient_error_by_coefficent * ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
+    }
+}
+
+impl Cost<bool> for MaxLikelihood {
+    type Error = f64;
+
+    fn gradient(&self, prediction: f64, truth: bool, gradient_error_by_coefficent: f64) -> f64 {
+        gradient_error_by_coefficent / if truth { -prediction } else { 1.0 - prediction }
     }
 }
