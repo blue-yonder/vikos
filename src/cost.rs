@@ -38,7 +38,7 @@ impl Cost<f64> for LeastAbsoluteDeviation {
 /// Maximizes the likelihood function `L` by defining `C=-ln(L)`
 ///
 /// You can use this function if your truth is a probability
-/// (i.e., a value betwenn 0 and 1). Maximizing the likelihood
+/// (i.e., a value between 0 and 1). Maximizing the likelihood
 /// function is equivalent to minimizing the least square error,
 /// yet this cost function has shown itself to converge quicker
 /// for some problems.
