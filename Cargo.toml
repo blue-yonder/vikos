@@ -1,6 +1,6 @@
 [package]
 name = "vikos"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Markus Klein <markus-klein@live.de>"]
 description = "A machine learning library for supervised training of parametrized models"
 license = "MIT"
