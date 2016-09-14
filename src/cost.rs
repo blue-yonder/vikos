@@ -42,6 +42,38 @@ impl Cost<f64> for LeastAbsoluteDeviation {
 /// function is equivalent to minimizing the least square error,
 /// yet this cost function has shown itself to converge quicker
 /// for some problems.
+///
+/// #Examples
+///
+/// ```
+/// use vikos::{learn_history, Model};
+/// use vikos::model::{Logistic, Linear};
+///
+/// let history = [([2.7, 2.5], false),
+///                ([1.4, 2.3], false),
+///                ([3.3, 4.4], false),
+///                ([1.3, 1.8], false),
+///                ([3.0, 3.0], false),
+///                ([7.6, 2.7], true),
+///                ([5.3, 2.0], true),
+///                ([6.9, 1.7], true),
+///                ([8.6, -0.2], true),
+///                ([7.6, 3.5], true)];
+///
+/// let mut model = Logistic {
+///     linear: Linear {
+///         m: [0.0, 0.0],
+///         c: 0.0,
+///     },
+/// };
+/// let teacher = teacher::GradientDescent { learning_rate: 0.3 };
+/// let cost = cost::MaxLikelihood {};
+///
+/// learn_history(&teacher,
+///               &cost,
+///               &mut model,
+///               history.iter().cycle().take(20).cloned());
+/// ```
 pub struct MaxLikelihood;
 
 impl Cost<f64> for MaxLikelihood {
