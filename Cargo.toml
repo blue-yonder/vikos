@@ -10,7 +10,7 @@ readme = "README.md"
 
 [dependencies]
 num = "0.1.35"
-clippy = {version= "*", optional = true }
+clippy = {version= "0.0.90", optional = true }
 
 [features]
 default = []
