@@ -46,7 +46,7 @@ impl Cost<f64> for LeastAbsoluteDeviation {
 /// #Examples
 ///
 /// ```
-/// use vikos::{learn_history, Model};
+/// use vikos::{learn_history, Model, teacher, cost};
 /// use vikos::model::{Logistic, Linear};
 ///
 /// let history = [([2.7, 2.5], false),
