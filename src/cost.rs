@@ -6,8 +6,7 @@ use Cost;
 pub struct LeastSquares;
 
 impl Cost<f64> for LeastSquares {
-    type Error = f64;
-
+    
     fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
         let error = prediction - truth;
         2.0 * error
@@ -25,7 +24,6 @@ impl Cost<f64> for LeastSquares {
 pub struct LeastAbsoluteDeviation;
 
 impl Cost<f64> for LeastAbsoluteDeviation {
-    type Error = f64;
 
     fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
         let error = prediction - truth;
@@ -84,7 +82,6 @@ impl Cost<f64> for LeastAbsoluteDeviation {
 pub struct MaxLikelihood;
 
 impl Cost<f64> for MaxLikelihood {
-    type Error = f64;
 
     fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
         ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
@@ -95,7 +92,6 @@ impl Cost<f64> for MaxLikelihood {
 }
 
 impl Cost<bool> for MaxLikelihood {
-    type Error = f64;
 
     fn outer_derivative(&self, prediction: f64, truth: bool) -> f64 {
         1. / if truth { -prediction } else { 1.0 - prediction }

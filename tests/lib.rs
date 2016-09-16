@@ -5,6 +5,7 @@ use vikos::{cost, model, training, teacher};
 #[test]
 fn estimate_median() {
 
+    use std::marker::PhantomData;
     use vikos::Training;
 
     let features = ();
@@ -17,6 +18,7 @@ fn estimate_median() {
         l0: 0.9,
         t: 9.0,
         learned_events: 0.0,
+        model_type: PhantomData{}
     };
 
     for &truth in history.iter().cycle().take(150) {
@@ -35,6 +37,7 @@ fn estimate_median() {
 fn estimate_mean() {
 
     use vikos::Training;
+    use std::marker::PhantomData;
 
     let features = ();
     let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
@@ -46,6 +49,7 @@ fn estimate_mean() {
         l0: 0.3,
         t: 4.0,
         learned_events: 0.0,
+        model_type: PhantomData
     };
 
     for &truth in history.iter().cycle().take(100) {

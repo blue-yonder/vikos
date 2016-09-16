@@ -1,6 +1,5 @@
 use Model;
 use linear_algebra::Vector;
-use num::{Float, One};
 use std::marker::PhantomData;
 
 /// Models the target as a constant `c`
@@ -53,7 +52,6 @@ impl<I> Clone for Constant<I> {
 
 impl<I> Model for Constant<I> {
     type Input = I;
-    type Target = f64;
 
     fn predict(&self, _: &I) -> f64 {
         self.c
@@ -87,11 +85,10 @@ pub struct Linear<V: Vector> {
     pub c: V::Scalar,
 }
 
-impl<V: Vector> Model for Linear<V>
-    where V::Scalar: Float
+impl<V> Model for Linear<V>
+    where V: Vector<Scalar=f64>
 {
     type Input = V;
-    type Target = V::Scalar;
 
     fn predict(&self, input: &V) -> V::Scalar {
         self.m.dot(input) + self.c
@@ -128,26 +125,25 @@ pub struct Logistic<V: Vector> {
     pub linear: Linear<V>,
 }
 
-impl<V: Vector> Model for Logistic<V>
-    where V::Scalar: Float
+impl<V> Model for Logistic<V>
+    where V: Vector<Scalar=f64>
 {
     type Input = V;
-    type Target = V::Scalar;
-
-    fn predict(&self, input: &V) -> V::Scalar {
-        V::Scalar::one() / (V::Scalar::one() + self.linear.predict(input).exp())
+    
+    fn predict(&self, input: &V) -> f64 {
+        1.0 / (1.0 + self.linear.predict(input).exp())
     }
 
     fn num_coefficents(&self) -> usize {
         self.linear.num_coefficents()
     }
 
-    fn gradient(&self, coefficent: usize, input: &V) -> V::Scalar {
+    fn gradient(&self, coefficent: usize, input: &V) -> f64 {
         let p = self.predict(input);
-        -p * (V::Scalar::one() - p) * self.linear.gradient(coefficent, input)
+        -p * (1.0 - p) * self.linear.gradient(coefficent, input)
     }
 
-    fn coefficent(&mut self, coefficent: usize) -> &mut V::Scalar {
+    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
         self.linear.coefficent(coefficent)
     }
 }
