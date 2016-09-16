@@ -8,9 +8,13 @@ pub struct LeastSquares;
 impl Cost<f64> for LeastSquares {
     type Error = f64;
 
-    fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64 {
+    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
         let error = prediction - truth;
-        2.0 * error * gradient_error_by_coefficent
+        2.0 * error
+    }
+
+    fn cost(&self, prediction: f64, truth: f64) -> f64 {
+        (prediction - truth).powi(2)
     }
 }
 
@@ -23,15 +27,18 @@ pub struct LeastAbsoluteDeviation;
 impl Cost<f64> for LeastAbsoluteDeviation {
     type Error = f64;
 
-    fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64 {
+    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
         let error = prediction - truth;
         if error > 0.0 {
-            gradient_error_by_coefficent
+            1.0
         } else if error < 0.0 {
-            -gradient_error_by_coefficent
+            -1.0
         } else {
             0.0
         }
+    }
+    fn cost(&self, prediction: f64, truth: f64) -> f64 {
+        (prediction - truth).abs()
     }
 }
 
@@ -79,15 +86,21 @@ pub struct MaxLikelihood;
 impl Cost<f64> for MaxLikelihood {
     type Error = f64;
 
-    fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64 {
-        gradient_error_by_coefficent * ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
+    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
+        ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
+    }
+    fn cost(&self, prediction: f64, truth: f64) -> f64 {
+        -truth * prediction.ln() - (1.0 - truth) * (1.0 - prediction).ln()
     }
 }
 
 impl Cost<bool> for MaxLikelihood {
     type Error = f64;
 
-    fn gradient(&self, prediction: f64, truth: bool, gradient_error_by_coefficent: f64) -> f64 {
-        gradient_error_by_coefficent / if truth { -prediction } else { 1.0 - prediction }
+    fn outer_derivative(&self, prediction: f64, truth: bool) -> f64 {
+        1. / if truth { -prediction } else { 1.0 - prediction }
+    }
+    fn cost(&self, prediction: f64, truth: bool) -> f64 {
+        -(if truth { prediction } else { 1.0 - prediction }).ln()
     }
 }
