@@ -15,7 +15,7 @@ pub trait Vector: Clone {
     /// Length of projection along `i`-th base
     fn at(&self, i: usize) -> Self::Scalar;
     /// Mutable access to length of projection along `i`-th base
-    fn mut_at(& mut self, i: usize) -> & mut Self::Scalar;
+    fn mut_at(&mut self, i: usize) -> &mut Self::Scalar;
     /// Scalar product
     ///
     /// Default implementation using `at` and `dimension` is provided
