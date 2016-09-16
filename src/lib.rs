@@ -64,8 +64,11 @@ pub trait Cost<Truth> {
     ///
     /// This method is called by stochastic gradient descent (SGD)-based
     /// training algorithm in order to determine the delta of the coefficents
-    fn gradient(&self, prediction: Self::Error, truth: Truth) -> Self::Error;
-
+    fn gradient(&self,
+                prediction: Self::Error,
+                truth: Truth,
+                gradient_error_by_coefficent: Self::Error)
+                -> Self::Error;
     /// Value of the cost function.
     fn cost(&self, prediction: Self::Error, truth: Truth) -> Self::Error;
 }
