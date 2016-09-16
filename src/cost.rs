@@ -96,3 +96,55 @@ impl Cost<bool> for MaxLikelihood {
         -(if truth { prediction } else { 1.0 - prediction }).ln()
     }
 }
+
+#[cfg(test)]
+mod test{
+
+    use super::super::Cost;
+    use super::{LeastSquares, LeastAbsoluteDeviation, MaxLikelihood};
+
+    // Approximates the derivation of the cost function
+    fn approx_derivate<T : Copy>(cost : &Cost<T>, prediction : f64, truth : T) -> f64{
+        let epsilon = 0.00001;
+        let f_plus_epsilon = cost.cost(prediction + epsilon, truth);
+        let f_minus_epsilon = cost.cost(prediction - epsilon, truth);
+        println!("f_x_plus_epsilon: {}, f_x_minus_epsilon:: {}", f_plus_epsilon, f_minus_epsilon);
+        (f_plus_epsilon - f_minus_epsilon) / (2.0 * epsilon)
+    }
+
+    // Returns absolute difference between derivate and approximation
+    fn check_derivate<T : Copy>(cost : &Cost<T>, prediction : f64, truth : T) -> f64{
+        let derivate = cost.outer_derivative(prediction, truth);
+        let approx = approx_derivate(cost, prediction, truth);
+        println!("derivation: {}, approximation: {}", derivate, approx);
+        (derivate - approx).abs()
+    }
+
+    #[test]
+    fn least_squares_derivation(){
+
+        let cost = LeastSquares{};
+        assert!(check_derivate(&cost, 10.0, 12.0) < 0.001);
+    }
+
+    #[test]
+    fn least_absolute_derivation(){
+
+        let cost = LeastAbsoluteDeviation{};
+        assert!(check_derivate(&cost, 0.0, 0.0) < 0.001);
+        assert!(check_derivate(&cost, 1.0, 0.0) < 0.001);
+        assert!(check_derivate(&cost, -1.0, 0.0) < 0.001);
+    }
+
+    #[test]
+    fn neg_log_likelihood_derivation(){
+
+        let cost = MaxLikelihood{};
+        assert!(check_derivate(&cost, 0.2, false) < 0.001);
+        assert!(check_derivate(&cost, 0.8, true) < 0.001);
+        assert!(check_derivate(&cost, 0.2, 0.0) < 0.001);
+        assert!(check_derivate(&cost, 0.8, 1.0) < 0.001);
+        assert_eq!(cost.outer_derivative(0.2, false), cost.outer_derivative(0.2, 0.0));
+        assert_eq!(cost.outer_derivative(0.8, true), cost.outer_derivative(0.8, 1.0));
+    }
+}
