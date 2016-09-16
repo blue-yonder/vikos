@@ -22,7 +22,6 @@
 extern crate num;
 
 use std::iter::IntoIterator;
-use num::Float;
 
 /// A Model is a parameterized expert algorithm
 ///
@@ -31,20 +30,18 @@ use num::Float;
 pub trait Model: Clone {
     /// Input features
     type Input;
-    /// Target type
-    type Target: Float;
 
     /// Predicts a target for the inputs based on the internal coefficents
-    fn predict(&self, &Self::Input) -> Self::Target;
+    fn predict(&self, &Self::Input) -> f64;
 
     /// The number of internal coefficents this model depends on
     fn num_coefficents(&self) -> usize;
 
     /// Value predict derived by the n-th `coefficent` at `input`
-    fn gradient(&self, coefficent: usize, input: &Self::Input) -> Self::Target;
+    fn gradient(&self, coefficent: usize, input: &Self::Input) -> f64;
 
     /// Mutable reference to the n-th `coefficent`
-    fn coefficent(&mut self, coefficent: usize) -> &mut Self::Target;
+    fn coefficent(&mut self, coefficent: usize) -> &mut f64;
 }
 
 /// Representing a cost function whose value is supposed be minimized by the
@@ -64,11 +61,6 @@ pub trait Model: Clone {
 /// Implementations of this trait can be found in
 /// [cost](./cost/index.html)
 pub trait Cost<Truth> {
-    /// Error type used by the cost function
-    ///
-    /// Usually `f64` or `f32`
-    type Error: Float;
-
     /// Value of the gradient of the cost function (i.e. the cost function
     /// derived by the n-th coefficent at x expressed in Error(x) and dY(x)/dx
     ///
@@ -77,19 +69,15 @@ pub trait Cost<Truth> {
     ///
     /// Implementors of this trait should implement `Cost::outer_derivative` and not overwrite this
     /// method.
-    fn gradient(&self,
-                prediction: Self::Error,
-                truth: Truth,
-                derivative_of_model: Self::Error)
-                -> Self::Error {
+    fn gradient(&self, prediction: f64, truth: Truth, derivative_of_model: f64) -> f64 {
         self.outer_derivative(prediction, truth) * derivative_of_model
     }
 
     /// The outer derivative of the cost function with respect to the prediction.
-    fn outer_derivative(&self, prediction: Self::Error, truth: Truth) -> Self::Error;
+    fn outer_derivative(&self, prediction: f64, truth: Truth) -> f64;
 
     /// Value of the cost function.
-    fn cost(&self, prediction: Self::Error, truth: Truth) -> Self::Error;
+    fn cost(&self, prediction: f64, truth: Truth) -> f64;
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficents
@@ -110,7 +98,7 @@ pub trait Training {
                              model: &mut Self::Model,
                              features: &<Self::Model as Model>::Input,
                              truth: Truth)
-        where C: Cost<Truth, Error = <Self::Model as Model>::Target>,
+        where C: Cost<Truth>,
               Truth: Copy;
 }
 
@@ -130,7 +118,7 @@ pub trait Teacher<M: Model> {
 /// Teaches `model` all events in `history`
 pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
     where M: Model,
-          C: Cost<Truth, Error = M::Target>,
+          C: Cost<Truth>,
           T: Teacher<M>,
           H: IntoIterator<Item = (M::Input, Truth)>,
           Truth: Copy
