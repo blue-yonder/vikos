@@ -17,7 +17,10 @@ impl<M> Teacher<M> for GradientDescent
     type Training = training::GradientDescent<M>;
 
     fn new_training(&self, _: &M) -> training::GradientDescent<M> {
-        training::GradientDescent{ learning_rate : self.learning_rate, model_type : PhantomData{}}
+        training::GradientDescent {
+            learning_rate: self.learning_rate,
+            model_type: PhantomData {},
+        }
     }
 }
 
@@ -45,7 +48,7 @@ impl<M> Teacher<M> for GradientDescentAl
             l0: self.l0,
             t: self.t,
             learned_events: 0.0,
-            model_type: PhantomData{}
+            model_type: PhantomData {},
         }
     }
 }
@@ -82,7 +85,7 @@ impl<M> Teacher<M> for Momentum
             inertia: self.inertia,
             learned_events: 0.0,
             velocity: velocity,
-            model_type: PhantomData{}
+            model_type: PhantomData {},
         }
     }
 }
@@ -117,7 +120,7 @@ impl<M> Teacher<M> for Nesterov
             inertia: self.inertia,
             learned_events: 0.0,
             velocity: velocity,
-            model_type: PhantomData{}
+            model_type: PhantomData {},
         }
     }
 }

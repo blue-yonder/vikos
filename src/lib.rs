@@ -69,11 +69,7 @@ pub trait Cost<Truth> {
     ///
     /// Implementors of this trait should implement `Cost::outer_derivative` and not overwrite this
     /// method.
-    fn gradient(&self,
-                prediction: f64,
-                truth: Truth,
-                derivative_of_model: f64)
-                -> f64 {
+    fn gradient(&self, prediction: f64, truth: Truth, derivative_of_model: f64) -> f64 {
         self.outer_derivative(prediction, truth) * derivative_of_model
     }
 

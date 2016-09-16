@@ -9,7 +9,7 @@ pub struct GradientDescent<M: Model> {
     pub learning_rate: f64,
 
     /// Associated `Model` type
-    pub model_type : PhantomData<M>
+    pub model_type: PhantomData<M>,
 }
 
 impl<M> Training for GradientDescent<M>
@@ -33,7 +33,6 @@ impl<M> Training for GradientDescent<M>
 
 /// Trains a model with an annealing learning rate
 pub struct GradientDescentAl<M: Model> {
-
     /// Start learning rate
     pub l0: f64,
     /// Smaller t will decrease the learning rate faster
@@ -47,7 +46,7 @@ pub struct GradientDescentAl<M: Model> {
     pub learned_events: f64,
 
     /// associated model type
-    pub model_type : PhantomData<M>
+    pub model_type: PhantomData<M>,
 }
 
 impl<M: Model> GradientDescentAl<M> {
@@ -105,7 +104,7 @@ pub struct Momentum<M: Model> {
     pub velocity: Vec<f64>,
 
     /// Associated `Model` type
-    pub model_type : PhantomData<M>
+    pub model_type: PhantomData<M>,
 }
 
 impl<M: Model> Momentum<M> {
@@ -172,7 +171,7 @@ pub struct Nesterov<M: Model> {
     pub velocity: Vec<f64>,
 
     /// Associated `Model` type
-    pub model_type: PhantomData<M>
+    pub model_type: PhantomData<M>,
 }
 
 impl<M: Model> Nesterov<M> {

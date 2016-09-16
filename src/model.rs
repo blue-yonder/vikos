@@ -86,7 +86,7 @@ pub struct Linear<V: Vector> {
 }
 
 impl<V> Model for Linear<V>
-    where V: Vector<Scalar=f64>
+    where V: Vector<Scalar = f64>
 {
     type Input = V;
 
@@ -126,10 +126,10 @@ pub struct Logistic<V: Vector> {
 }
 
 impl<V> Model for Logistic<V>
-    where V: Vector<Scalar=f64>
+    where V: Vector<Scalar = f64>
 {
     type Input = V;
-    
+
     fn predict(&self, input: &V) -> f64 {
         1.0 / (1.0 + self.linear.predict(input).exp())
     }
