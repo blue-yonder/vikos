@@ -89,8 +89,8 @@ impl Cost<f64> for MaxLikelihood {
     fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64 {
         gradient_error_by_coefficent * ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
     }
-    fn cost(&self, _prediction: f64, _truth: f64) -> f64 {
-        panic!("not implemented");
+    fn cost(&self, prediction: f64, truth: f64) -> f64 {
+        -truth * prediction.ln() - (1.0 - truth) * (1.0 - prediction).ln()
     }
 }
 
@@ -100,7 +100,7 @@ impl Cost<bool> for MaxLikelihood {
     fn gradient(&self, prediction: f64, truth: bool, gradient_error_by_coefficent: f64) -> f64 {
         gradient_error_by_coefficent / if truth { -prediction } else { 1.0 - prediction }
     }
-    fn cost(&self, _prediction: f64, _truth: bool) -> f64 {
-        panic!("not implemented");
+    fn cost(&self, prediction: f64, truth: bool) -> f64 {
+        -(if truth { prediction } else { 1.0 - prediction }).ln()
     }
 }
