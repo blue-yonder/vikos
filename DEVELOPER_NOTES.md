@@ -4,8 +4,9 @@ Building
 --------
 
 * `cargo build` makes a simple build.
-* `cargo build --features clippy ` will build vikos with added checks and hints
-  from the [clippy](https://github.com/Manishearth/rust-clippy) package.
+* When using the nightly build `cargo build --features clippy ` will build 
+  vikos with added checks and hints from the 
+  [clippy](https://github.com/Manishearth/rust-clippy) package.
 
 
 Execute Tests
