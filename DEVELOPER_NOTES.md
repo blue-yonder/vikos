@@ -23,8 +23,8 @@ run the file `examples/mean.rs`.
 Source Code Formatting
 ----------------------
 
-[Rustfmt]() is the appropriate tool to lay out code according to the community
-standards. You can invoke it with `cargo fmt` (you can install it via `cargo
-install rustfmt`).
+[Rustfmt](https://github.com/rust-lang-nursery/rustfmt) is the appropriate tool
+to lay out code according to the community standards. You can invoke it with
+`cargo fmt` (you can install it via `cargo install rustfmt`).
 
 
