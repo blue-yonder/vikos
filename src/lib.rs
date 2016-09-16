@@ -48,8 +48,18 @@ pub trait Model: Clone {
 }
 
 /// Representing a cost function whose value is supposed be minimized by the
-/// training algorithm A cost function quantifies the difference between a
-/// prediction and a true target value.
+/// training algorithm.
+///
+/// The cost function is a quantity that describes how deviations of the
+/// prediction from the true, observed target values should be penalized during
+/// the optimization of the prediction.
+///
+/// Algorithms like stochastic gradient descent use the gradient of the cost
+/// function. When calculating the gradient, it is important to apply the
+/// outer-derivative of the cost function to the prediction, with the
+/// inner-derivative of the model to the coefficient changes (chain-rule of
+/// calculus). This inner-derivative must be supplied as the argument
+/// `derivative_of_model` to `Cost::gradient`.
 ///
 /// Implementations of this trait can be found in
 /// [cost](./cost/index.html)
@@ -64,7 +74,19 @@ pub trait Cost<Truth> {
     ///
     /// This method is called by stochastic gradient descent (SGD)-based
     /// training algorithm in order to determine the delta of the coefficents
-    fn gradient(&self, prediction: Self::Error, truth: Truth) -> Self::Error;
+    ///
+    /// Implementors of this trait should implement `Cost::outer_derivative` and not overwrite this
+    /// method.
+    fn gradient(&self,
+                prediction: Self::Error,
+                truth: Truth,
+                derivative_of_model: Self::Error)
+                -> Self::Error {
+        self.outer_derivative(prediction, truth) * derivative_of_model
+    }
+
+    /// The outer derivative of the cost function with respect to the prediction.
+    fn outer_derivative(&self, prediction: Self::Error, truth: Truth) -> Self::Error;
 
     /// Value of the cost function.
     fn cost(&self, prediction: Self::Error, truth: Truth) -> Self::Error;

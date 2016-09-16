@@ -23,8 +23,8 @@ impl<M> Training for GradientDescent<M>
 
         for ci in 0..model.num_coefficents() {
             *model.coefficent(ci) = *model.coefficent(ci) -
-                                    self.learning_rate * cost.gradient(prediction, truth) *
-                                    model.gradient(ci, features);
+                                    self.learning_rate *
+                                    cost.gradient(prediction, truth, model.gradient(ci, features));
         }
     }
 }
@@ -68,8 +68,8 @@ impl<M> Training for GradientDescentAl<M>
 
         for ci in 0..model.num_coefficents() {
             *model.coefficent(ci) = *model.coefficent(ci) -
-                                    self.learning_rate() * cost.gradient(prediction, truth) *
-                                    model.gradient(ci, features);
+                                    self.learning_rate() *
+                                    cost.gradient(prediction, truth, model.gradient(ci, features));
         }
 
         self.learned_events = self.learned_events + M::Target::one();
@@ -123,8 +123,8 @@ impl<M> Training for Momentum<M>
 
         for ci in 0..model.num_coefficents() {
             self.velocity[ci] = self.inertia * self.velocity[ci] -
-                                self.learning_rate() * cost.gradient(prediction, truth) *
-                                model.gradient(ci, features);
+                                self.learning_rate() *
+                                cost.gradient(prediction, truth, model.gradient(ci, features));
             *model.coefficent(ci) = *model.coefficent(ci) + self.velocity[ci];
         }
 
@@ -190,8 +190,8 @@ impl<M> Training for Nesterov<M>
         }
 
         for ci in 0..model.num_coefficents() {
-            let delta = -self.learning_rate() * cost.gradient(prediction, truth) *
-                        model.gradient(ci, features);
+            let delta = -self.learning_rate() *
+                        cost.gradient(prediction, truth, model.gradient(ci, features));
             *model.coefficent(ci) = *model.coefficent(ci) + delta;
             self.velocity[ci] = self.inertia * self.velocity[ci] + delta;
         }

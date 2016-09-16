@@ -8,7 +8,7 @@ pub struct LeastSquares;
 impl Cost<f64> for LeastSquares {
     type Error = f64;
 
-    fn gradient(&self, prediction: f64, truth: f64) -> f64 {
+    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
         let error = prediction - truth;
         2.0 * error
     }
@@ -27,7 +27,7 @@ pub struct LeastAbsoluteDeviation;
 impl Cost<f64> for LeastAbsoluteDeviation {
     type Error = f64;
 
-    fn gradient(&self, prediction: f64, truth: f64) -> f64 {
+    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
         let error = prediction - truth;
         if error > 0.0 {
             1.0
@@ -86,7 +86,7 @@ pub struct MaxLikelihood;
 impl Cost<f64> for MaxLikelihood {
     type Error = f64;
 
-    fn gradient(&self, prediction: f64, truth: f64) -> f64 {
+    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
         ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
     }
     fn cost(&self, _prediction: f64, _truth: f64) -> f64 {
@@ -97,7 +97,7 @@ impl Cost<f64> for MaxLikelihood {
 impl Cost<bool> for MaxLikelihood {
     type Error = f64;
 
-    fn gradient(&self, prediction: f64, truth: bool) -> f64 {
+    fn outer_derivative(&self, prediction: f64, truth: bool) -> f64 {
         1. / if truth { -prediction } else { 1.0 - prediction }
     }
     fn cost(&self, _prediction: f64, _truth: bool) -> f64 {
