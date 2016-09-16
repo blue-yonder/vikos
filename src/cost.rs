@@ -12,6 +12,10 @@ impl Cost<f64> for LeastSquares {
         let error = prediction - truth;
         2.0 * error * gradient_error_by_coefficent
     }
+
+    fn cost(&self, prediction: f64, truth: f64) -> f64 {
+        (prediction - truth).powi(2)
+    }
 }
 
 /// Pass an instance of this type to a training algorithm to optimize for C=|Error|
@@ -32,6 +36,9 @@ impl Cost<f64> for LeastAbsoluteDeviation {
         } else {
             0.0
         }
+    }
+    fn cost(&self, prediction: f64, truth: f64) -> f64 {
+        (prediction - truth).abs()
     }
 }
 
@@ -82,6 +89,9 @@ impl Cost<f64> for MaxLikelihood {
     fn gradient(&self, prediction: f64, truth: f64, gradient_error_by_coefficent: f64) -> f64 {
         gradient_error_by_coefficent * ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
     }
+    fn cost(&self, _prediction: f64, _truth: f64) -> f64 {
+        panic!("not implemented");
+    }
 }
 
 impl Cost<bool> for MaxLikelihood {
@@ -89,5 +99,8 @@ impl Cost<bool> for MaxLikelihood {
 
     fn gradient(&self, prediction: f64, truth: bool, gradient_error_by_coefficent: f64) -> f64 {
         gradient_error_by_coefficent / if truth { -prediction } else { 1.0 - prediction }
+    }
+    fn cost(&self, _prediction: f64, _truth: bool) -> f64 {
+        panic!("not implemented");
     }
 }

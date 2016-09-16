@@ -47,7 +47,9 @@ pub trait Model: Clone {
     fn coefficent(&mut self, coefficent: usize) -> &mut Self::Target;
 }
 
-/// Cost function whose value is supposed be minimized by the training algorithm
+/// Representing a cost function whose value is supposed be minimized by the
+/// training algorithm A cost function quantifies the difference between a
+/// prediction and a true target value.
 ///
 /// Implementations of this trait can be found in
 /// [cost](./cost/index.html)
@@ -57,8 +59,8 @@ pub trait Cost<Truth> {
     /// Usually `f64` or `f32`
     type Error: Float;
 
-    /// Value of the cost function derived by the n-th coefficent at x
-    /// expressed in Error(x) and dY(x)/dx
+    /// Value of the gradient of the cost function (i.e. the cost function
+    /// derived by the n-th coefficent at x expressed in Error(x) and dY(x)/dx
     ///
     /// This method is called by stochastic gradient descent (SGD)-based
     /// training algorithm in order to determine the delta of the coefficents
@@ -67,6 +69,8 @@ pub trait Cost<Truth> {
                 truth: Truth,
                 gradient_error_by_coefficent: Self::Error)
                 -> Self::Error;
+    /// Value of the cost function.
+    fn cost(&self, prediction: Self::Error, truth: Truth) -> Self::Error;
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficents
