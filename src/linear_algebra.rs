@@ -1,6 +1,6 @@
-use num::Num;
-use num::Zero;
-use num::One;
+use num::{Num, Zero, One};
+use rustc_serialize::{Encodable, Decodable};
+use std::fmt::Debug;
 
 /// Vector whose dimension is known at runtime
 ///
@@ -9,7 +9,7 @@ use num::One;
 /// along orthogonal base vectors
 pub trait Vector: Clone {
     /// Underlying scalar type of `Vector` type
-    type Scalar: Num + Zero + One + Copy;
+    type Scalar: Num + Zero + One + Copy + Encodable + Decodable + Debug;
     /// Maximum allowed index for `at` and `mut_at`
     fn dimension(&self) -> usize;
     /// Length of projection along `i`-th base

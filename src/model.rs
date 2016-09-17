@@ -27,7 +27,7 @@ use std::marker::PhantomData;
 /// learn_history(&teacher, &cost, &mut model, history.iter().cycle().map(|&y|((),y)).take(100));
 /// println!("{}", model.c);
 /// ```
-#[derive(Debug)]
+#[derive(Debug, RustcDecodable, RustcEncodable)]
 pub struct Constant<Input> {
     /// Any prediction made by this model will have the value of `c`
     pub c: f64,
@@ -77,7 +77,7 @@ impl<I> Model for Constant<I> {
 }
 
 /// Models the target as `y = m * x + c`
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, RustcDecodable, RustcEncodable)]
 pub struct Linear<V: Vector> {
     /// Slope
     pub m: V,
@@ -119,7 +119,7 @@ impl<V> Model for Linear<V>
 }
 
 /// Models target as `y = 1/(1+e^(m * x + c))`
-#[derive(Clone)]
+#[derive(Debug, Clone, RustcDecodable, RustcEncodable)]
 pub struct Logistic<V: Vector> {
     /// Linear term of `Logistic` model
     pub linear: Linear<V>,
