@@ -2,13 +2,12 @@
 [![Docs](https://docs.rs/vikos/badge.svg)](https://docs.rs/vikos/)
 [![MIT licensed](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/blue-yonder/vikos/blob/master/LICENSE)
 [![Published](http://meritbadge.herokuapp.com/vikos)](https://crates.io/crates/vikos)
+[![Join the chat at https://gitter.im/vikos-optimization/Lobby](https://badges.gitter.im/vikos-optimization/Lobby.svg)](https://gitter.im/vikos-optimization/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Vikos is a library for supervised training of parameterized, regression, and classification models.
 
 Design Goals
 ------------
-
-[![Join the chat at https://gitter.im/vikos-optimization/Lobby](https://badges.gitter.im/vikos-optimization/Lobby.svg)](https://gitter.im/vikos-optimization/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 * Model representations, cost functions, and optimization algorithms can be changed independently of each other.
 * Generics: Not committed to a particular data structure for inputs, targets, etc.
