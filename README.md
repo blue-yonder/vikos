@@ -8,6 +8,8 @@ Vikos is a library for supervised training of parameterized, regression, and cla
 Design Goals
 ------------
 
+[![Join the chat at https://gitter.im/vikos-optimization/Lobby](https://badges.gitter.im/vikos-optimization/Lobby.svg)](https://gitter.im/vikos-optimization/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 * Model representations, cost functions, and optimization algorithms can be changed independently of each other.
 * Generics: Not committed to a particular data structure for inputs, targets, etc.
 * If the design goals above can only be achieved by sacrificing performance, so be it.
