@@ -37,7 +37,7 @@ Getting Started
    [package]
    name = "hello_vikos"
    version = "0.1.0"
-   authors = ["Klein, Markus <Markus.Klein@blue-yonder.com>"]
+   authors = ["..."]
 
    [dependencies]
    vikos = "0.1.6"
