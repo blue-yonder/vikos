@@ -48,21 +48,57 @@ impl Vector for f64 {
     }
 }
 
-impl Vector for [f64; 2] {
-    type Scalar = f64;
+macro_rules! vec_impl_for_array {
+    ($v:expr) => {
+        impl Vector for [f64; $v] {
 
-    fn dimension(&self) -> usize {
-        2
-    }
+            type Scalar = f64;
 
-    fn at(&self, index: usize) -> f64 {
-        self[index]
-    }
+            fn dimension(&self) -> usize{ $v }
 
-    fn mut_at(&mut self, index: usize) -> &mut f64 {
-        &mut self[index]
+            fn at(&self, index: usize) -> f64 {
+                self[index]
+            }
+
+            fn mut_at(&mut self, index: usize) -> &mut f64 {
+                &mut self[index]
+            }
+        }
     }
 }
+
+vec_impl_for_array! { 1 }
+vec_impl_for_array! { 2 }
+vec_impl_for_array! { 3 }
+vec_impl_for_array! { 4 }
+vec_impl_for_array! { 5 }
+vec_impl_for_array! { 6 }
+vec_impl_for_array! { 7 }
+vec_impl_for_array! { 8 }
+vec_impl_for_array! { 9 }
+vec_impl_for_array! { 10 }
+vec_impl_for_array! { 11 }
+vec_impl_for_array! { 12 }
+vec_impl_for_array! { 13 }
+vec_impl_for_array! { 14 }
+vec_impl_for_array! { 15 }
+vec_impl_for_array! { 16 }
+vec_impl_for_array! { 17 }
+vec_impl_for_array! { 18 }
+vec_impl_for_array! { 19 }
+vec_impl_for_array! { 20 }
+vec_impl_for_array! { 21 }
+vec_impl_for_array! { 22 }
+vec_impl_for_array! { 23 }
+vec_impl_for_array! { 24 }
+vec_impl_for_array! { 25 }
+vec_impl_for_array! { 26 }
+vec_impl_for_array! { 27 }
+vec_impl_for_array! { 28 }
+vec_impl_for_array! { 29 }
+vec_impl_for_array! { 30 }
+vec_impl_for_array! { 31 }
+vec_impl_for_array! { 32 }
 
 #[cfg(test)]
 mod tests {
