@@ -44,7 +44,8 @@ Getting Started
    ```
 6. Insert `extern crate vikos;` at the first line in `main.rs`
 7. You can now start replacing code in `main` with code from the [tutorial].
-   ```rust
+
+   ```
    fn main(){
        /* tutorial code goes here */
    }
