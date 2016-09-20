@@ -31,7 +31,7 @@ Getting Started
 2. Run `cargo new --bin hello_vikos`.
 3. switch to the `hello_vikos` directory.
 4. Run `cargo run` to execute the hello world program. 
-3. Edit the `Cargo.toml` file. Add `vikos = "0.1.6"` to your dependencies. The file should
+5. Edit the `Cargo.toml` file. Add `vikos = "0.1.6"` to your dependencies. The file should
    now look somewhat like this:
    ```
    [package]
@@ -42,8 +42,13 @@ Getting Started
    [dependencies]
    vikos = "0.1.6"
    ```
-4. You can now start replacing code in `main.rs` with code from the [tutorial].
-
+6. Insert `extern crate vikos;` at the first line in `main.rs`
+7. You can now start replacing code in `main` with code from the [tutorial].
+   ```
+   fn main(){
+       /* tutorial code goes here */
+   }
+   ```
 
 Documentation
 -------------
