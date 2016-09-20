@@ -19,7 +19,7 @@ struct Features{
     petal_width : f64
 }
 
-//trait required by `vikos::model::Logistic`
+// Trait required by `vikos::model::Logistic`
 impl vikos::linear_algebra::Vector for Features{
     type Scalar = f64;
 
@@ -65,7 +65,7 @@ fn main() {
     let mut train_versicolor = teacher.new_training(&versicolor);
     let mut train_virginica = teacher.new_training(&virginica);
 
-    // read iris Data
+    // Read iris Data
     for epoch in 0..300{
         let mut rdr = csv::Reader::from_file(PATH).expect("File is ok");
         let mut hit = 0;
@@ -73,13 +73,13 @@ fn main() {
 
         for row in rdr.decode() {
 
-            //learn event
+            // Learn event
             let (truth, features) : (String, Features) = row.unwrap();
             train_setosa.teach_event(&cost, &mut setosa, &features, truth == "setosa");
             train_versicolor.teach_event(&cost, &mut versicolor, &features, truth == "versicolor");
             train_virginica.teach_event(&cost, &mut virginica, &features, truth == "virginica");
 
-            //make prediction using current expertise
+            // Make prediction using current expertise
             let p_setosa = setosa.predict(&features);
             let p_versicolor = versicolor.predict(&features);
             let p_virginica = virginica.predict(&features);
