@@ -27,7 +27,7 @@ use std::marker::PhantomData;
 /// learn_history(&teacher, &cost, &mut model, history.iter().cycle().map(|&y|((),y)).take(100));
 /// println!("{}", model.c);
 /// ```
-#[derive(Debug, RustcDecodable, RustcEncodable)]
+#[derive(Debug, Default, RustcDecodable, RustcEncodable)]
 pub struct Constant<Input> {
     /// Any prediction made by this model will have the value of `c`
     pub c: f64,
@@ -77,7 +77,7 @@ impl<I> Model for Constant<I> {
 }
 
 /// Models the target as `y = m * x + c`
-#[derive(Debug, Clone, RustcDecodable, RustcEncodable)]
+#[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
 pub struct Linear<V: Vector> {
     /// Slope
     pub m: V,
@@ -119,11 +119,8 @@ impl<V> Model for Linear<V>
 }
 
 /// Models target as `y = 1/(1+e^(m * x + c))`
-#[derive(Debug, Clone, RustcDecodable, RustcEncodable)]
-pub struct Logistic<V: Vector> {
-    /// Linear term of `Logistic` model
-    pub linear: Linear<V>,
-}
+#[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
+pub struct Logistic<V: Vector>(Linear<V>);
 
 impl<V> Model for Logistic<V>
     where V: Vector<Scalar = f64>
@@ -131,19 +128,19 @@ impl<V> Model for Logistic<V>
     type Input = V;
 
     fn predict(&self, input: &V) -> f64 {
-        1.0 / (1.0 + self.linear.predict(input).exp())
+        1.0 / (1.0 + self.0.predict(input).exp())
     }
 
     fn num_coefficents(&self) -> usize {
-        self.linear.num_coefficents()
+        self.0.num_coefficents()
     }
 
     fn gradient(&self, coefficent: usize, input: &V) -> f64 {
         let p = self.predict(input);
-        -p * (1.0 - p) * self.linear.gradient(coefficent, input)
+        -p * (1.0 - p) * self.0.gradient(coefficent, input)
     }
 
     fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
-        self.linear.coefficent(coefficent)
+        self.0.coefficent(coefficent)
     }
 }

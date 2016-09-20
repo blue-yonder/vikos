@@ -1,6 +1,7 @@
 extern crate vikos;
 
 use vikos::{cost, model, training, teacher};
+use std::default::Default;
 
 #[test]
 fn estimate_median() {
@@ -193,12 +194,7 @@ fn logistic_sgd_2d_least_squares() {
                    ([8.6, -0.2], 1.0),
                    ([7.6, 3.5], 1.0)];
 
-    let mut model = model::Logistic {
-        linear: model::Linear {
-            m: [0.0, 0.0],
-            c: 0.0,
-        },
-    };
+    let mut model = model::Logistic::default();
     let teacher = teacher::GradientDescent { learning_rate: 0.3 };
     let cost = cost::LeastSquares {};
 
@@ -207,7 +203,7 @@ fn logistic_sgd_2d_least_squares() {
                   &mut model,
                   history.iter().cycle().take(40).cloned());
 
-    println!("{:?}", model.linear);
+    println!("{:?}", model);
 
     let classification_errors = history.iter()
         .map(|&(input, truth)| model.predict(&input).round() == truth)
@@ -220,7 +216,6 @@ fn logistic_sgd_2d_least_squares() {
 #[test]
 fn logistic_sgd_2d_max_likelihood() {
     use vikos::{learn_history, Model};
-    use vikos::model::{Logistic, Linear};
 
     let history = [([2.7, 2.5], 0.0),
                    ([1.4, 2.3], 0.0),
@@ -233,12 +228,7 @@ fn logistic_sgd_2d_max_likelihood() {
                    ([8.6, -0.2], 1.0),
                    ([7.6, 3.5], 1.0)];
 
-    let mut model = Logistic {
-        linear: Linear {
-            m: [0.0, 0.0],
-            c: 0.0,
-        },
-    };
+    let mut model = model::Logistic::default();
     let teacher = teacher::GradientDescent { learning_rate: 0.3 };
     let cost = cost::MaxLikelihood {};
 
@@ -247,7 +237,7 @@ fn logistic_sgd_2d_max_likelihood() {
                   &mut model,
                   history.iter().cycle().take(20).cloned());
 
-    println!("{:?}", model.linear);
+    println!("{:?}", model);
 
     let classification_errors = history.iter()
         .map(|&(input, truth)| model.predict(&input).round() == truth)
@@ -260,7 +250,6 @@ fn logistic_sgd_2d_max_likelihood() {
 #[test]
 fn logistic_sgd_2d_max_likelihood_bool() {
     use vikos::{learn_history, Model};
-    use vikos::model::{Logistic, Linear};
 
     let history = [([2.7, 2.5], false),
                    ([1.4, 2.3], false),
@@ -273,12 +262,7 @@ fn logistic_sgd_2d_max_likelihood_bool() {
                    ([8.6, -0.2], true),
                    ([7.6, 3.5], true)];
 
-    let mut model = Logistic {
-        linear: Linear {
-            m: [0.0, 0.0],
-            c: 0.0,
-        },
-    };
+    let mut model = model::Logistic::default();
     let teacher = teacher::GradientDescent { learning_rate: 0.3 };
     let cost = cost::MaxLikelihood {};
 
@@ -287,7 +271,7 @@ fn logistic_sgd_2d_max_likelihood_bool() {
                   &mut model,
                   history.iter().cycle().take(20).cloned());
 
-    println!("{:?}", model.linear);
+    println!("{:?}", model);
 
     let classification_errors = history.iter()
         .map(|&(input, truth)| model.predict(&input).round() == if truth {1.0} else {0.0})

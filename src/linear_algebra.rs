@@ -9,7 +9,7 @@ use std::fmt::Debug;
 /// along orthogonal base vectors
 pub trait Vector: Clone {
     /// Underlying scalar type of `Vector` type
-    type Scalar: Num + Zero + One + Copy + Encodable + Decodable + Debug;
+    type Scalar: Num + Zero + One + Copy + Encodable + Decodable + Default + Debug;
     /// Maximum allowed index for `at` and `mut_at`
     fn dimension(&self) -> usize;
     /// Length of projection along `i`-th base

@@ -50,7 +50,8 @@ impl Cost<f64> for LeastAbsoluteDeviation {
 ///
 /// ```
 /// use vikos::{learn_history, Model, teacher, cost};
-/// use vikos::model::{Logistic, Linear};
+/// use vikos::model::Logistic;
+/// use std::default::Default;
 ///
 /// let history = [([2.7, 2.5], false),
 ///                ([1.4, 2.3], false),
@@ -63,12 +64,7 @@ impl Cost<f64> for LeastAbsoluteDeviation {
 ///                ([8.6, -0.2], true),
 ///                ([7.6, 3.5], true)];
 ///
-/// let mut model = Logistic {
-///     linear: Linear {
-///         m: [0.0, 0.0],
-///         c: 0.0,
-///     },
-/// };
+/// let mut model = Logistic::default();
 /// let teacher = teacher::GradientDescent { learning_rate: 0.3 };
 /// let cost = cost::MaxLikelihood {};
 ///
