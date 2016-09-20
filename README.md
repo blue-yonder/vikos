@@ -20,7 +20,7 @@ Current State
 Just starting to get the traits right, by continuously trying new use cases
 and implementing the learning algorithms. If you are looking for more mature
 rust libraries in the domain of ML, you might want to check out:
-* [rustlearn]
+* [rusty-machine]
 * [leaf].
 
 Getting Started
@@ -65,5 +65,5 @@ Want to help out? Just create an issue, pull request or contact markus.klein@blu
 [documentation]: https://docs.rs/vikos/
 [tutorial]: https://docs.rs/vikos/0.1.6/vikos/tutorial/index.html
 [rustup]:  http://www.rustup.rs
-[rustlearn]: https://github.com/maciejkula/rustlearn
+[rusty-machine]: https://github.com/AtheMathmo/rusty-machine
 [leaf]: https://github.com/autumnai/leaf
