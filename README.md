@@ -30,7 +30,7 @@ Getting Started
    the page (in my experience this works fine for Windows, Ubuntu and OS X).
 2. Run `cargo new --bin hello_vikos`.
 3. switch to the `hello_vikos` directory.
-4. Run `cargo run` to execute the hello world program. 
+4. Run `cargo run` to execute the hello world program.
 5. Edit the `Cargo.toml` file. Add `vikos = "0.1.6"` to your dependencies. The file should
    now look somewhat like this:
    ```
@@ -44,7 +44,7 @@ Getting Started
    ```
 6. Insert `extern crate vikos;` at the first line in `main.rs`
 7. You can now start replacing code in `main` with code from the [tutorial].
-   ```
+   ```rust
    fn main(){
        /* tutorial code goes here */
    }
