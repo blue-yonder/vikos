@@ -6,13 +6,10 @@
 //! have a look at the [tutorial](./tutorial/index.html).
 //!
 //! # Design
-//! The three most important traits are [Model], [Cost],
-//! and [Training]. [Teacher]s act as factories for [Training]s and
-//! hold parameters which do not change during learning.
+//! The three most important traits are [Model], [Cost] and [Teacher].
 //!
 //! [Model]: ./trait.Model.html
 //! [Cost]: ./trait.Cost.html
-//! [Training]: ./trait.Cost.html
 //! [Teacher]: ./trait.Teacher.html
 
 #![warn(missing_docs)]
@@ -90,7 +87,7 @@ pub trait Teacher<M: Model> {
     /// This may also be empty
     type Training;
 
-    /// Creates a new `Training` object to hold training state
+    /// Creates an instance holding all mutable state of the algorithm
     fn new_training(&self, model: &M) -> Self::Training;
 
     /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
