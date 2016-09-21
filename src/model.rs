@@ -146,6 +146,25 @@ impl<V> Model for Logistic<V>
 }
 
 /// Models the target as `y = g(m*x + c)`
+///
+/// # Example
+///
+/// Logistic regression implemented using a generalized linear model. This is just for
+/// demonstration purposes. For this usecase you would usally use `Logistic`.
+///
+/// ```
+/// # use vikos::{model, teacher, cost, learn_history};
+/// # let history = [(0.0, true)];
+/// let mut model = model::GeneralizedLinearModel::new(|x| 1.0 / (1.0 + x.exp()),
+///                                                    |x| -x.exp() / (1.0 + x.exp()).powi(2) );
+/// let teacher = teacher::GradientDescent { learning_rate: 0.3 };
+/// let cost = cost::MaxLikelihood {};
+///
+/// learn_history(&teacher,
+///               &cost,
+///               &mut model,
+///               history.iter().cloned());
+/// ```
 #[derive(Clone)]
 pub struct GeneralizedLinearModel<V: Vector, G, Dg> {
     /// `Linear` term of the generalized linear `Model`
@@ -157,7 +176,9 @@ pub struct GeneralizedLinearModel<V: Vector, G, Dg> {
 }
 
 impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
-    where V: Vector
+    where V: Vector,
+          G: Fn(f64) -> f64,
+          Dg: Fn(f64) -> f64
 {
     /// Creates new model with the coefficents set to zero
     pub fn new(g: G, g_derivate: Dg) -> GeneralizedLinearModel<V, G, Dg>
@@ -172,8 +193,8 @@ impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
 }
 
 impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
-    where F: Fn(f64) -> f64 + Clone,
-          Df: Fn(f64) -> f64 + Clone,
+    where F: Fn(f64) -> f64,
+          Df: Fn(f64) -> f64,
           V: Vector<Scalar = f64>
 {
     type Input = V;

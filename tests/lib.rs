@@ -14,7 +14,7 @@ fn estimate_median() {
     let cost = cost::LeastAbsoluteDeviation {};
     let mut model = model::Constant::new(0.0);
 
-    let teacher = teacher::GradientDescentAl{ l0: 0.9, t: 9.0 };
+    let teacher = teacher::GradientDescentAl { l0: 0.9, t: 9.0 };
     let mut training = teacher.new_training(&model);
 
     for &truth in history.iter().cycle().take(150) {
@@ -40,7 +40,7 @@ fn estimate_mean() {
     let cost = cost::LeastSquares {};
     let mut model = model::Constant::new(0.0);
 
-    let teacher = teacher::GradientDescentAl{ l0: 0.3, t: 4.0 };
+    let teacher = teacher::GradientDescentAl { l0: 0.3, t: 4.0 };
     let mut training = teacher.new_training(&model);
 
     for &truth in history.iter().cycle().take(100) {
@@ -263,7 +263,40 @@ fn logistic_sgd_2d_max_likelihood_bool() {
     println!("{:?}", model);
 
     let classification_errors = history.iter()
-        .map(|&(input, truth)| model.predict(&input).round() == if truth {1.0} else {0.0})
+        .map(|&(input, truth)| model.predict(&input).round() == if truth { 1.0 } else { 0.0 })
+        .fold(0,
+              |errors, correct| if correct { errors } else { errors + 1 });
+
+    assert_eq!(0, classification_errors);
+}
+
+#[test]
+fn generalized_linear_model_as_logistic_regression() {
+    use vikos::{learn_history, Model};
+
+    let history = [([2.7, 2.5], false),
+                   ([1.4, 2.3], false),
+                   ([3.3, 4.4], false),
+                   ([1.3, 1.8], false),
+                   ([3.0, 3.0], false),
+                   ([7.6, 2.7], true),
+                   ([5.3, 2.0], true),
+                   ([6.9, 1.7], true),
+                   ([8.6, -0.2], true),
+                   ([7.6, 3.5], true)];
+
+    let mut model = model::GeneralizedLinearModel::new(|x| 1.0 / (1.0 + x.exp()),
+                                                       |x| -x.exp() / (1.0 + x.exp()).powi(2));
+    let teacher = teacher::GradientDescent { learning_rate: 0.3 };
+    let cost = cost::MaxLikelihood {};
+
+    learn_history(&teacher,
+                  &cost,
+                  &mut model,
+                  history.iter().cycle().take(20).cloned());
+
+    let classification_errors = history.iter()
+        .map(|&(input, truth)| model.predict(&input).round() == if truth { 1.0 } else { 0.0 })
         .fold(0,
               |errors, correct| if correct { errors } else { errors + 1 });
 
