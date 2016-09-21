@@ -50,53 +50,53 @@ impl vikos::linear_algebra::Vector for Features{
 
 fn main() {
 
-    let teacher = vikos::teacher::Nesterov{l0 : 0.0001, t: 1000.0, inertia: 0.99};
-    let cost = vikos::cost::MaxLikelihood{};
+    // let teacher = vikos::teacher::Nesterov{l0 : 0.0001, t: 1000.0, inertia: 0.99};
+    // let cost = vikos::cost::MaxLikelihood{};
 
-    // We train three binary classifiers. One for each specis of iris.
-    // Each of this classifiers will tell us the propability of an
-    // observation belonging to its particular class
-    let mut setosa = vikos::model::Logistic::default();
-    let mut versicolor = vikos::model::Logistic::default();
-    let mut virginica = vikos::model::Logistic::default();
+    // // We train three binary classifiers. One for each specis of iris.
+    // // Each of this classifiers will tell us the propability of an
+    // // observation belonging to its particular class
+    // let mut setosa = vikos::model::Logistic::default();
+    // let mut versicolor = vikos::model::Logistic::default();
+    // let mut virginica = vikos::model::Logistic::default();
 
-    // Each of the classifieres has its own training state
-    let mut train_setosa = teacher.new_training(&setosa);
-    let mut train_versicolor = teacher.new_training(&versicolor);
-    let mut train_virginica = teacher.new_training(&virginica);
+    // // Each of the classifieres has its own training state
+    // let mut train_setosa = teacher.new_training(&setosa, &cost);
+    // let mut train_versicolor = teacher.new_training(&versicolor, &cost);
+    // let mut train_virginica = teacher.new_training(&virginica, &cost);
 
-    // Read iris Data
-    for epoch in 0..300{
-        let mut rdr = csv::Reader::from_file(PATH).expect("File is ok");
-        let mut hit = 0;
-        let mut miss = 0;
+    // // Read iris Data
+    // for epoch in 0..300{
+    //     let mut rdr = csv::Reader::from_file(PATH).expect("File is ok");
+    //     let mut hit = 0;
+    //     let mut miss = 0;
 
-        for row in rdr.decode() {
+    //     for row in rdr.decode() {
 
-            // Learn event
-            let (truth, features) : (String, Features) = row.unwrap();
-            train_setosa.teach_event(&cost, &mut setosa, &features, truth == "setosa");
-            train_versicolor.teach_event(&cost, &mut versicolor, &features, truth == "versicolor");
-            train_virginica.teach_event(&cost, &mut virginica, &features, truth == "virginica");
+    //         // Learn event
+    //         let (truth, features) : (String, Features) = row.unwrap();
+    //         teacher.teach_event(&mut train_setosa, &mut setosa, &cost, &features, truth == "setosa");
+    //         teacher.teach_event(&mut train_versicolor, &mut versicolor, &cost, &features, truth == "setosa");
+    //         teacher.teach_event(&mut train_virginica, &mut virginica, &cost, &features, truth == "setosa");
 
-            // Make prediction using current expertise
-            let p_setosa = setosa.predict(&features);
-            let p_versicolor = versicolor.predict(&features);
-            let p_virginica = virginica.predict(&features);
-            let prediction = if p_setosa > p_versicolor {
-                if p_setosa > p_virginica { "setosa" } else { "virginica" }
-            } else {
-                if p_versicolor > p_virginica { "versicolor" } else { "virginica" }
-            };
+    //         // Make prediction using current expertise
+    //         let p_setosa = setosa.predict(&features);
+    //         let p_versicolor = versicolor.predict(&features);
+    //         let p_virginica = virginica.predict(&features);
+    //         let prediction = if p_setosa > p_versicolor {
+    //             if p_setosa > p_virginica { "setosa" } else { "virginica" }
+    //         } else {
+    //             if p_versicolor > p_virginica { "versicolor" } else { "virginica" }
+    //         };
 
-            if prediction == truth{
-                hit += 1;
-            } else {
-                miss += 1;
-            }
-        }
-        let accuracy = hit as f64 / (hit + miss) as f64;
+    //         if prediction == truth{
+    //             hit += 1;
+    //         } else {
+    //             miss += 1;
+    //         }
+    //     }
+    //     let accuracy = hit as f64 / (hit + miss) as f64;
 
-        println!("epoch: {}, accuracy: {}", epoch, accuracy);
-    }
+    //     println!("epoch: {}, accuracy: {}", epoch, accuracy);
+    // }
 }

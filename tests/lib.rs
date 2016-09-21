@@ -6,8 +6,7 @@ use std::default::Default;
 #[test]
 fn estimate_median() {
 
-    use std::marker::PhantomData;
-    use vikos::Training;
+    use vikos::Teacher;
 
     let features = ();
     let history = [1.0, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //median is seven
@@ -15,19 +14,15 @@ fn estimate_median() {
     let cost = cost::LeastAbsoluteDeviation {};
     let mut model = model::Constant::new(0.0);
 
-    let mut training = training::GradientDescentAl {
-        l0: 0.9,
-        t: 9.0,
-        learned_events: 0.0,
-        model_type: PhantomData{}
-    };
+    let teacher = teacher::GradientDescentAl{ l0: 0.9, t: 9.0 };
+    let mut training = teacher.new_training(&model, &cost);
 
     for &truth in history.iter().cycle().take(150) {
 
-        training.teach_event(&cost, &mut model, &features, truth);
+        teacher.teach_event(&mut training, &mut model, &cost, &features, truth);
         println!("model: {:?}, learning_rate: {:?}",
                  model,
-                 training.learning_rate());
+                 training::annealed_learning_rate(training, teacher.l0, teacher.t));
     }
 
     assert!(model.c < 7.1);
@@ -37,8 +32,7 @@ fn estimate_median() {
 #[test]
 fn estimate_mean() {
 
-    use vikos::Training;
-    use std::marker::PhantomData;
+    use vikos::Teacher;
 
     let features = ();
     let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
@@ -46,19 +40,15 @@ fn estimate_mean() {
     let cost = cost::LeastSquares {};
     let mut model = model::Constant::new(0.0);
 
-    let mut training = training::GradientDescentAl {
-        l0: 0.3,
-        t: 4.0,
-        learned_events: 0.0,
-        model_type: PhantomData
-    };
+    let teacher = teacher::GradientDescentAl{ l0: 0.3, t: 4.0 };
+    let mut training = teacher.new_training(&model, &cost);
 
     for &truth in history.iter().cycle().take(100) {
 
-        training.teach_event(&cost, &mut model, &features, truth);
+        teacher.teach_event(&mut training, &mut model, &cost, &features, truth);
         println!("model: {:?}, learning_rate: {:?}",
                  model,
-                 training.learning_rate());
+                 training::annealed_learning_rate(training, teacher.l0, teacher.t));
     }
 
     assert!(model.c < 9.1);
@@ -92,7 +82,6 @@ fn linear_stochastic_gradient_descent() {
 fn linear_stochastic_gradient_descent_iter() {
 
     use vikos::Teacher;
-    use vikos::Training;
 
     let history = [(0f64, 3f64), (1.0, 4.0), (2.0, 5.0)];
 
@@ -100,11 +89,11 @@ fn linear_stochastic_gradient_descent_iter() {
     let mut model = model::Linear { m: 0.0, c: 0.0 };
 
     let teacher = teacher::GradientDescent { learning_rate: 0.2 };
-    let mut training = teacher.new_training(&model);
+    let mut training = teacher.new_training(&model, &cost);
 
     for &(features, truth) in history.iter().cycle().take(20) {
 
-        training.teach_event(&cost, &mut model, &features, truth);
+        teacher.teach_event(&mut training, &mut model, &cost, &features, truth);
         println!("model: {:?}", model);
     }
 

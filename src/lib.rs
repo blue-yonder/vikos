@@ -104,30 +104,38 @@ pub trait Training {
 }
 
 /// Factories for [Training](./trait.Training.html)
-pub trait Teacher<M: Model> {
-    /// Contains state which changes during the training, but is not required by the expert
+pub trait Teacher<Y, M: Model, C: Cost<Y>> {
+    /// Contains state which changes during the training, but is not part of the expertise
     ///
     /// Examples are the velocity of the coefficents (in stochastic gradient
     /// descent) or the number of events already learned.
     /// This may also be empty
-    type Training: Training<Model = M>;
+    type Training;
 
     /// Creates a new `Training` object to hold training state
-    fn new_training(&self, model: &M) -> Self::Training;
+    fn new_training(&self, model: &M, cost: &C) -> Self::Training;
+
+    /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
+    fn teach_event(&self,
+                   training: &mut Self::Training,
+                   model: &mut M,
+                   cost: &C,
+                   features: &M::Input,
+                   truth: Y);
 }
 
 /// Teaches `model` all events in `history`
 pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
     where M: Model,
           C: Cost<Truth>,
-          T: Teacher<M>,
+          T: Teacher<Truth, M, C>,
           H: IntoIterator<Item = (M::Input, Truth)>,
           Truth: Copy
 {
-    let mut training = teacher.new_training(model);
+    let mut training = teacher.new_training(model, cost);
     for (features, truth) in history {
 
-        training.teach_event(cost, model, &features, truth);
+        teacher.teach_event(&mut training, model, cost, &features, truth);
     }
 }
 
