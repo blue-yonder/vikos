@@ -147,26 +147,34 @@ impl<V> Model for Logistic<V>
 
 /// Models the target as `y = g(m*x + c)`
 #[derive(Clone)]
-pub struct GeneralizedLinearModel<V : Vector,G,Dg>{
+pub struct GeneralizedLinearModel<V: Vector, G, Dg> {
     /// `Linear` term of the generalized linear `Model`
-    pub linear : Linear<V>,
+    pub linear: Linear<V>,
     /// Outer function applied to the result of `linear`
-    pub g : G,
+    pub g: G,
     /// Derivation of `g`
-    pub g_derivate : Dg,
+    pub g_derivate: Dg,
 }
 
-impl<V,G,Dg> GeneralizedLinearModel<V,G,Dg> where V: Vector{
-
+impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
+    where V: Vector
+{
     /// Creates new model with the coefficents set to zero
-    pub fn new(g : G, g_derivate : Dg) -> GeneralizedLinearModel<V,G,Dg>
-    where V : Default {
-        GeneralizedLinearModel{ linear: Linear::default(), g : g, g_derivate : g_derivate}
+    pub fn new(g: G, g_derivate: Dg) -> GeneralizedLinearModel<V, G, Dg>
+        where V: Default
+    {
+        GeneralizedLinearModel {
+            linear: Linear::default(),
+            g: g,
+            g_derivate: g_derivate,
+        }
     }
 }
 
-impl<V,F,Df> Model for GeneralizedLinearModel<V,F,Df> where F : Fn (f64) -> f64 + Clone,
- Df : Fn (f64) -> f64 + Clone, V : Vector<Scalar=f64>
+impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
+    where F: Fn(f64) -> f64 + Clone,
+          Df: Fn(f64) -> f64 + Clone,
+          V: Vector<Scalar = f64>
 {
     type Input = V;
 
