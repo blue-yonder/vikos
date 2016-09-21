@@ -82,29 +82,7 @@ pub trait Cost<Truth> {
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficents
-///
-/// Implementations of this trait may hold mutable state during
-/// learning. You find training algorithms in [training](./training/index.html)
-pub trait Training {
-    /// `Model` changed by this `Training`
-    ///
-    /// A `Training` is strictly associated with a `Model` type. One could
-    /// even argue that an instance of `Training` strictly belongs to an
-    /// instance of `Model`
-    type Model: Model;
-
-    /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
-    fn teach_event<C, Truth>(&mut self,
-                             cost: &C,
-                             model: &mut Self::Model,
-                             features: &<Self::Model as Model>::Input,
-                             truth: Truth)
-        where C: Cost<Truth>,
-              Truth: Copy;
-}
-
-/// Factories for [Training](./trait.Training.html)
-pub trait Teacher<Y, M: Model, C: Cost<Y>> {
+pub trait Teacher<M: Model, C> {
     /// Contains state which changes during the training, but is not part of the expertise
     ///
     /// Examples are the velocity of the coefficents (in stochastic gradient
@@ -116,19 +94,19 @@ pub trait Teacher<Y, M: Model, C: Cost<Y>> {
     fn new_training(&self, model: &M, cost: &C) -> Self::Training;
 
     /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
-    fn teach_event(&self,
+    fn teach_event<Y>(&self,
                    training: &mut Self::Training,
                    model: &mut M,
                    cost: &C,
                    features: &M::Input,
-                   truth: Y);
+                   truth: Y) where C : Cost<Y>, Y : Copy;
 }
 
 /// Teaches `model` all events in `history`
 pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
     where M: Model,
           C: Cost<Truth>,
-          T: Teacher<Truth, M, C>,
+          T: Teacher<M, C>,
           H: IntoIterator<Item = (M::Input, Truth)>,
           Truth: Copy
 {
@@ -143,9 +121,7 @@ pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, hi
 pub mod model;
 /// Implementations of `Cost` trait
 pub mod cost;
-/// Implementations of `Training` trait
 pub mod training;
-/// Implementations of `Teacher` trait
 pub mod teacher;
 /// Defines linear algebra traits used for some model parameters
 pub mod linear_algebra;

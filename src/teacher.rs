@@ -1,3 +1,5 @@
+//! Learning algorithms implementing `Teacher` trait
+
 use ::training;
 use Teacher;
 use Model;
@@ -11,14 +13,15 @@ pub struct GradientDescent {
     pub learning_rate: f64,
 }
 
-impl<Y,M,C> Teacher<Y,M,C> for GradientDescent
-    where M: Model, C: Cost<Y>, Y: Copy
+impl<M,C> Teacher<M,C> for GradientDescent
+    where M: Model
 {
     type Training = ();
 
     fn new_training(&self, _: &M, _cost : &C) -> () { () }
 
-    fn teach_event(&self, _training: &mut (), model: &mut M, cost: &C, features: &M::Input, truth: Y){
+    fn teach_event<Y>(&self, _training: &mut (), model: &mut M, cost: &C, features: &M::Input, truth: Y)
+    where C : Cost<Y>, Y : Copy{
         let prediction = model.predict(features);
 
         for ci in 0..model.num_coefficents() {
@@ -43,14 +46,15 @@ pub struct GradientDescentAl {
     pub t: f64,
 }
 
-impl<Y,M,C> Teacher<Y,M,C> for GradientDescentAl
-    where M: Model, C : Cost<Y>, Y: Copy
+impl<M,C> Teacher<M,C> for GradientDescentAl
+    where M: Model
 {
     type Training = usize;
 
     fn new_training(&self, _: &M, _cost : &C) -> usize { 0 }
 
-    fn teach_event(&self, num_events: &mut usize, model: &mut M, cost: &C, features: &M::Input, truth: Y){
+    fn teach_event<Y>(&self, num_events: &mut usize, model: &mut M, cost: &C, features: &M::Input, truth: Y)
+    where C : Cost<Y>, Y : Copy{
         let prediction = model.predict(features);
         let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
 
@@ -79,8 +83,8 @@ pub struct Momentum {
     pub inertia: f64,
 }
 
-impl<Y,M,C> Teacher<Y,M,C> for Momentum
-    where M: Model, C: Cost<Y>, Y: Copy
+impl<M,C> Teacher<M,C> for Momentum
+    where M: Model
 {
     type Training = (usize, Vec<f64>);
 
@@ -92,7 +96,8 @@ impl<Y,M,C> Teacher<Y,M,C> for Momentum
         (0, velocity)
     }
 
-    fn teach_event(&self, training: &mut (usize, Vec<f64>), model: &mut M, cost: &C, features: &M::Input, truth: Y){
+    fn teach_event<Y>(&self, training: &mut (usize, Vec<f64>), model: &mut M, cost: &C, features: &M::Input, truth: Y)
+    where C : Cost<Y>, Y : Copy{
         // let (ref mut num_events, ref mut velocity) = *training; ok?
         let mut num_events = &mut training.0;
         let mut velocity = &mut training.1;
@@ -131,8 +136,8 @@ pub struct Nesterov {
     pub inertia: f64,
 }
 
-impl<Y,M,C> Teacher<Y,M,C> for Nesterov
-    where M: Model, C: Cost<Y>, Y : Copy
+impl<M,C> Teacher<M,C> for Nesterov
+    where M: Model
 {
     type Training = (usize, Vec<f64>);
 
@@ -144,7 +149,8 @@ impl<Y,M,C> Teacher<Y,M,C> for Nesterov
         (0, velocity)
     }
 
-    fn teach_event(&self, training: &mut (usize, Vec<f64>), model: &mut M, cost: &C, features: &M::Input, truth: Y){
+    fn teach_event<Y>(&self, training: &mut (usize, Vec<f64>), model: &mut M, cost: &C, features: &M::Input, truth: Y)
+    where C : Cost<Y>, Y : Copy{
 
         let mut num_events = &mut training.0;
         let mut velocity = &mut training.1;
