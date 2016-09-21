@@ -30,7 +30,7 @@ Getting Started
 2. Run `cargo new --bin hello_vikos`.
 3. switch to the `hello_vikos` directory.
 4. Run `cargo run` to execute the hello world program.
-5. Edit the `Cargo.toml` file. Add `vikos = "0.1.6"` to your dependencies. The file should
+5. Edit the `Cargo.toml` file. Add `vikos = "0.1.7"` to your dependencies. The file should
    now look somewhat like this:
    ```
    [package]
@@ -62,7 +62,7 @@ Want to help out? Just create an issue, pull request or contact markus.klein@blu
 
 [docs.rs]: https://docs.rs
 [documentation]: https://docs.rs/vikos/
-[tutorial]: https://docs.rs/vikos/0.1.6/vikos/tutorial/index.html
+[tutorial]: https://docs.rs/vikos/0.1.7/vikos/tutorial/index.html
 [rustup]:  http://www.rustup.rs
 [rusty-machine]: https://github.com/AtheMathmo/rusty-machine
 [leaf]: https://github.com/autumnai/leaf
