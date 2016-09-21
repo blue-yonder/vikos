@@ -80,7 +80,7 @@
 //! ```
 //! Most notably we changed the cost function to train for the median. We also had to
 //! increase our learning rate to be able to converge to `7` more quickly. Maybe we
-//! should try a slightly more sophisticated `Training` algorithm.
+//! should try a slightly more sophisticated `Teacher` algorithm.
 //!
 //! ## Estimating median again
 //!
@@ -155,7 +155,7 @@
 //!    relate to each other (and what kind of estimated parameters/coefficients
 //!    mediate among the target and the feature space), the model is  fitted by
 //!  * the training algorithm, modelled with the
-//!    [Teacher](../trait.Teacher.html) and the [Training](../trait.Training.html)
-//!    traits, that contains the optimization algorithm minimizing the
+//!    [Teacher](../trait.Teacher.html) trait, that contains the optimization algorithm minimizing
+//!    the model coefficents.
 //!  * the [Cost](../trait.Cost.html) "function" describes the function that
 //!    should be minimized by the algorithm.
