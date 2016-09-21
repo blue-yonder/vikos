@@ -82,38 +82,26 @@ pub trait Cost<Truth> {
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficents
-///
-/// Implementations of this trait may hold mutable state during
-/// learning. You find training algorithms in [training](./training/index.html)
-pub trait Training {
-    /// `Model` changed by this `Training`
-    ///
-    /// A `Training` is strictly associated with a `Model` type. One could
-    /// even argue that an instance of `Training` strictly belongs to an
-    /// instance of `Model`
-    type Model: Model;
-
-    /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
-    fn teach_event<C, Truth>(&mut self,
-                             cost: &C,
-                             model: &mut Self::Model,
-                             features: &<Self::Model as Model>::Input,
-                             truth: Truth)
-        where C: Cost<Truth>,
-              Truth: Copy;
-}
-
-/// Factories for [Training](./trait.Training.html)
 pub trait Teacher<M: Model> {
-    /// Contains state which changes during the training, but is not required by the expert
+    /// Contains state which changes during the training, but is not part of the expertise
     ///
     /// Examples are the velocity of the coefficents (in stochastic gradient
     /// descent) or the number of events already learned.
     /// This may also be empty
-    type Training: Training<Model = M>;
+    type Training;
 
     /// Creates a new `Training` object to hold training state
     fn new_training(&self, model: &M) -> Self::Training;
+
+    /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
+    fn teach_event<Y, C>(&self,
+                         training: &mut Self::Training,
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Input,
+                         truth: Y)
+        where C: Cost<Y>,
+              Y: Copy;
 }
 
 /// Teaches `model` all events in `history`
@@ -127,7 +115,7 @@ pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, hi
     let mut training = teacher.new_training(model);
     for (features, truth) in history {
 
-        training.teach_event(cost, model, &features, truth);
+        teacher.teach_event(&mut training, model, cost, &features, truth);
     }
 }
 
@@ -135,9 +123,7 @@ pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, hi
 pub mod model;
 /// Implementations of `Cost` trait
 pub mod cost;
-/// Implementations of `Training` trait
 pub mod training;
-/// Implementations of `Teacher` trait
 pub mod teacher;
 /// Defines linear algebra traits used for some model parameters
 pub mod linear_algebra;

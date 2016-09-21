@@ -1,7 +1,9 @@
+//! Learning algorithms implementing `Teacher` trait
+
 use ::training;
 use Teacher;
 use Model;
-use std::marker::PhantomData;
+use Cost;
 
 /// Gradient descent
 ///
@@ -14,12 +16,27 @@ pub struct GradientDescent {
 impl<M> Teacher<M> for GradientDescent
     where M: Model
 {
-    type Training = training::GradientDescent<M>;
+    type Training = ();
 
-    fn new_training(&self, _: &M) -> training::GradientDescent<M> {
-        training::GradientDescent {
-            learning_rate: self.learning_rate,
-            model_type: PhantomData {},
+    fn new_training(&self, _: &M) -> () {
+        ()
+    }
+
+    fn teach_event<Y, C>(&self,
+                         _training: &mut (),
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Input,
+                         truth: Y)
+        where C: Cost<Y>,
+              Y: Copy
+    {
+        let prediction = model.predict(features);
+
+        for ci in 0..model.num_coefficents() {
+            *model.coefficent(ci) = *model.coefficent(ci) -
+                                    self.learning_rate *
+                                    cost.gradient(prediction, truth, model.gradient(ci, features));
         }
     }
 }
@@ -41,15 +58,30 @@ pub struct GradientDescentAl {
 impl<M> Teacher<M> for GradientDescentAl
     where M: Model
 {
-    type Training = training::GradientDescentAl<M>;
+    type Training = usize;
 
-    fn new_training(&self, _: &M) -> training::GradientDescentAl<M> {
-        training::GradientDescentAl::<M> {
-            l0: self.l0,
-            t: self.t,
-            learned_events: 0.0,
-            model_type: PhantomData {},
+    fn new_training(&self, _: &M) -> usize {
+        0
+    }
+
+    fn teach_event<Y, C>(&self,
+                         num_events: &mut usize,
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Input,
+                         truth: Y)
+        where C: Cost<Y>,
+              Y: Copy
+    {
+        let prediction = model.predict(features);
+        let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
+
+        for ci in 0..model.num_coefficents() {
+            *model.coefficent(ci) = *model.coefficent(ci) -
+                                    learning_rate *
+                                    cost.gradient(prediction, truth, model.gradient(ci, features));
         }
+        *num_events += 1;
     }
 }
 
@@ -72,25 +104,50 @@ pub struct Momentum {
 impl<M> Teacher<M> for Momentum
     where M: Model
 {
-    type Training = training::Momentum<M>;
+    type Training = (usize, Vec<f64>);
 
-    fn new_training(&self, model: &M) -> training::Momentum<M> {
+    fn new_training(&self, model: &M) -> (usize, Vec<f64>) {
 
         let mut velocity = Vec::with_capacity(model.num_coefficents());
         velocity.resize(model.num_coefficents(), 0.0);
 
-        training::Momentum {
-            l0: self.l0,
-            t: self.t,
-            inertia: self.inertia,
-            learned_events: 0.0,
-            velocity: velocity,
-            model_type: PhantomData {},
+        (0, velocity)
+    }
+
+    fn teach_event<Y, C>(&self,
+                         training: &mut (usize, Vec<f64>),
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Input,
+                         truth: Y)
+        where C: Cost<Y>,
+              Y: Copy
+    {
+        // let (ref mut num_events, ref mut velocity) = *training; ok?
+        let mut num_events = &mut training.0;
+        let mut velocity = &mut training.1;
+        let prediction = model.predict(features);
+        let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
+
+        for ci in 0..model.num_coefficents() {
+            velocity[ci] = self.inertia * velocity[ci] -
+                           learning_rate *
+                           cost.gradient(prediction, truth, model.gradient(ci, features));
+            *model.coefficent(ci) = *model.coefficent(ci) + velocity[ci];
         }
+        *num_events += 1;
     }
 }
 
 /// Nesterov accelerated gradient descent
+///
+/// Like accelerated gradient descent, Nesterov accelerated gradient descent
+/// includes a momentum term. In contrast to regular gradient descent, the
+/// acceleration is not calculated with respect to the current position, but to
+/// the estimated new one.
+/// Source:
+/// [G. Hinton's lecture 6c]
+/// (http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf)
 pub struct Nesterov {
     /// Start learning rate
     pub l0: f64,
@@ -107,20 +164,40 @@ pub struct Nesterov {
 impl<M> Teacher<M> for Nesterov
     where M: Model
 {
-    type Training = training::Nesterov<M>;
+    type Training = (usize, Vec<f64>);
 
-    fn new_training(&self, model: &M) -> training::Nesterov<M> {
+    fn new_training(&self, model: &M) -> (usize, Vec<f64>) {
 
         let mut velocity = Vec::with_capacity(model.num_coefficents());
         velocity.resize(model.num_coefficents(), 0.0);
 
-        training::Nesterov {
-            l0: self.l0,
-            t: self.t,
-            inertia: self.inertia,
-            learned_events: 0.0,
-            velocity: velocity,
-            model_type: PhantomData {},
+        (0, velocity)
+    }
+
+    fn teach_event<Y, C>(&self,
+                         training: &mut (usize, Vec<f64>),
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Input,
+                         truth: Y)
+        where C: Cost<Y>,
+              Y: Copy
+    {
+
+        let mut num_events = &mut training.0;
+        let mut velocity = &mut training.1;
+        let prediction = model.predict(features);
+        let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
+
+        for ci in 0..model.num_coefficents() {
+            *model.coefficent(ci) = *model.coefficent(ci) + velocity[ci];
         }
+        for ci in 0..model.num_coefficents() {
+            let delta = -learning_rate *
+                        cost.gradient(prediction, truth, model.gradient(ci, features));
+            *model.coefficent(ci) = *model.coefficent(ci) + delta;
+            velocity[ci] = self.inertia * velocity[ci] + delta;
+        }
+        *num_events += 1;
     }
 }

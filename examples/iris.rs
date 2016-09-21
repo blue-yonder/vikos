@@ -5,7 +5,7 @@ extern crate csv;
 extern crate vikos;
 extern crate rustc_serialize;
 
-use vikos::{Teacher, Training, Model};
+use vikos::{Teacher, Model};
 use std::default::Default;
 
 const PATH : &'static str = "examples/data/iris.csv";
@@ -75,9 +75,9 @@ fn main() {
 
             // Learn event
             let (truth, features) : (String, Features) = row.unwrap();
-            train_setosa.teach_event(&cost, &mut setosa, &features, truth == "setosa");
-            train_versicolor.teach_event(&cost, &mut versicolor, &features, truth == "versicolor");
-            train_virginica.teach_event(&cost, &mut virginica, &features, truth == "virginica");
+            teacher.teach_event(&mut train_setosa, &mut setosa, &cost, &features, truth == "setosa");
+            teacher.teach_event(&mut train_versicolor, &mut versicolor, &cost, &features, truth == "versicolor");
+            teacher.teach_event(&mut train_virginica, &mut virginica, &cost, &features, truth == "virginica");
 
             // Make prediction using current expertise
             let p_setosa = setosa.predict(&features);
