@@ -144,3 +144,34 @@ impl<V> Model for Logistic<V>
         self.0.coefficent(coefficent)
     }
 }
+
+#[derive(Clone)]
+pub struct GLM<F,Df>{
+    pub linear : Linear<f64>,
+    g_inv : F,
+    g_invderivate : Df,
+}
+
+impl<F,Df> Model for GLM<F,Df> where F : Fn (f64) -> f64,
+ Df : Fn (f64) -> f64, F : Clone, Df : Clone
+{
+    type Input = f64;
+
+    fn predict(&self, input: &f64) -> f64 {
+        let f = &self.g_inv;
+        f(self.linear.predict(input))
+    }
+
+    fn num_coefficents(&self) -> usize {
+        self.linear.num_coefficents()
+    }
+
+    fn gradient(&self, coefficent: usize, input: &f64) -> f64 {
+        let f = &self.g_invderivate;
+        f(self.linear.predict(input))
+    }
+
+    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
+        self.linear.coefficent(coefficent)
+    }
+}
