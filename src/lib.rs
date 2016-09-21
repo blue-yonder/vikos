@@ -82,7 +82,7 @@ pub trait Cost<Truth> {
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficents
-pub trait Teacher<M: Model, C> {
+pub trait Teacher<M: Model> {
     /// Contains state which changes during the training, but is not part of the expertise
     ///
     /// Examples are the velocity of the coefficents (in stochastic gradient
@@ -91,26 +91,28 @@ pub trait Teacher<M: Model, C> {
     type Training;
 
     /// Creates a new `Training` object to hold training state
-    fn new_training(&self, model: &M, cost: &C) -> Self::Training;
+    fn new_training(&self, model: &M) -> Self::Training;
 
     /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
-    fn teach_event<Y>(&self,
-                   training: &mut Self::Training,
-                   model: &mut M,
-                   cost: &C,
-                   features: &M::Input,
-                   truth: Y) where C : Cost<Y>, Y : Copy;
+    fn teach_event<Y, C>(&self,
+                         training: &mut Self::Training,
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Input,
+                         truth: Y)
+        where C: Cost<Y>,
+              Y: Copy;
 }
 
 /// Teaches `model` all events in `history`
 pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
     where M: Model,
           C: Cost<Truth>,
-          T: Teacher<M, C>,
+          T: Teacher<M>,
           H: IntoIterator<Item = (M::Input, Truth)>,
           Truth: Copy
 {
-    let mut training = teacher.new_training(model, cost);
+    let mut training = teacher.new_training(model);
     for (features, truth) in history {
 
         teacher.teach_event(&mut training, model, cost, &features, truth);

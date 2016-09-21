@@ -61,9 +61,9 @@ fn main() {
     let mut virginica = vikos::model::Logistic::default();
 
     // Each of the classifieres has its own training state
-    let mut train_setosa = teacher.new_training(&setosa, &cost);
-    let mut train_versicolor = teacher.new_training(&versicolor, &cost);
-    let mut train_virginica = teacher.new_training(&virginica, &cost);
+    let mut train_setosa = teacher.new_training(&setosa);
+    let mut train_versicolor = teacher.new_training(&versicolor);
+    let mut train_virginica = teacher.new_training(&virginica);
 
     // Read iris Data
     for epoch in 0..300{

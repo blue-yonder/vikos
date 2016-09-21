@@ -15,7 +15,7 @@ fn estimate_median() {
     let mut model = model::Constant::new(0.0);
 
     let teacher = teacher::GradientDescentAl{ l0: 0.9, t: 9.0 };
-    let mut training = teacher.new_training(&model, &cost);
+    let mut training = teacher.new_training(&model);
 
     for &truth in history.iter().cycle().take(150) {
 
@@ -41,7 +41,7 @@ fn estimate_mean() {
     let mut model = model::Constant::new(0.0);
 
     let teacher = teacher::GradientDescentAl{ l0: 0.3, t: 4.0 };
-    let mut training = teacher.new_training(&model, &cost);
+    let mut training = teacher.new_training(&model);
 
     for &truth in history.iter().cycle().take(100) {
 
@@ -89,7 +89,7 @@ fn linear_stochastic_gradient_descent_iter() {
     let mut model = model::Linear { m: 0.0, c: 0.0 };
 
     let teacher = teacher::GradientDescent { learning_rate: 0.2 };
-    let mut training = teacher.new_training(&model, &cost);
+    let mut training = teacher.new_training(&model);
 
     for &(features, truth) in history.iter().cycle().take(20) {
 
