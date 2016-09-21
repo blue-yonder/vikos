@@ -1,7 +1,8 @@
-//! In the following short tutorial vikos will perform the fitting a supervised machine learning
-// model. 
-// While doing so, the values of a target variable will be predicted based on other 
-// varaibles that are called features.
+//! A short tutorial on how to use vikos to solve the problem of supervised
+//! machine learning: We want to predict values for a quantity (the target), and
+//! we have some data that we can base our inference on (features). We have a
+//! data set (a history), that consists of features and corresponding, *true* target values, so
+//! that we have a base to learn about how the target relates to the feature data.
 //!
 //! # Tutorial
 //! Look, a bunch of data! Let us do something with it.
