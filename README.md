@@ -45,7 +45,7 @@ Getting Started
 7. You can now start replacing code in `main` with code from the [tutorial].
 
    ```
-   fn main(){
+   fn main() {
        /* tutorial code goes here */
    }
    ```
