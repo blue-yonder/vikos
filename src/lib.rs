@@ -1,12 +1,14 @@
-//! A machine learning library for supervised regression trainings
+//! vikos is machine learning library for models that are trained in a 
+//! streaming, supervised fashion  
 //!
-//! This library wants to enable its users to write teachers
-//! independently of the model trained or the cost function that is meant to
-//! be minimized. To get started right away, you may want to
+//! This library wants to enable its users to write train algorithms, called teachers,
+//! independently of the model or the cost function that is meant to
+//! be minimized. 
+//! To get started right away, you may want to
 //! have a look at the [tutorial](./tutorial/index.html).
 //!
 //! # Design
-//! The three most important traits are [Model], [Cost] and [Teacher].
+//! The three most important vikos concepts and traits are [Model], [Cost] and [Teacher].
 //!
 //! [Model]: ./trait.Model.html
 //! [Cost]: ./trait.Cost.html
@@ -35,22 +37,23 @@ pub trait Model: Clone {
     /// The number of internal coefficents this model depends on
     fn num_coefficents(&self) -> usize;
 
-    /// Value predict derived by the n-th `coefficent` at `input`
+    /// Differentation of model with respect to n-th `coefficent` then evaluated at `input`
     fn gradient(&self, coefficent: usize, input: &Self::Input) -> f64;
 
     /// Mutable reference to the n-th `coefficent`
     fn coefficent(&mut self, coefficent: usize) -> &mut f64;
 }
 
-/// Representing a cost function whose value is supposed be minimized by the
-/// training algorithm.
+/// The [cost](./cost/index.html) trait is representing a cost function whose value is supposed be 
+/// minimized by the training algorithm.
 ///
 /// The cost function is a quantity that describes how deviations of the
 /// prediction from the true, observed target values should be penalized during
 /// the optimization of the prediction.
 ///
-/// Algorithms like stochastic gradient descent use the gradient of the cost
-/// function. When calculating the gradient, it is important to apply the
+/// Algorithms like stochastic gradient descent utilize the gradient of the cost
+/// function to train a machine learning model. 
+/// When calculating the gradient, it is important to apply the
 /// outer-derivative of the cost function to the prediction, with the
 /// inner-derivative of the model to the coefficient changes (chain-rule of
 /// calculus). This inner-derivative must be supplied as the argument
