@@ -7,6 +7,7 @@ license = "MIT"
 repository = "https://github.com/blue-yonder/vikos"
 documentation = "https://docs.rs/vikos/"
 readme = "README.md"
+keywords = ["machine","learning","machine-learning"]
 
 [dependencies]
 num = "0.1.35"
