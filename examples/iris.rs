@@ -76,8 +76,8 @@ fn main() {
             // Learn event
             let (truth, features) : (String, Features) = row.unwrap();
             teacher.teach_event(&mut train_setosa, &mut setosa, &cost, &features, truth == "setosa");
-            teacher.teach_event(&mut train_versicolor, &mut versicolor, &cost, &features, truth == "setosa");
-            teacher.teach_event(&mut train_virginica, &mut virginica, &cost, &features, truth == "setosa");
+            teacher.teach_event(&mut train_versicolor, &mut versicolor, &cost, &features, truth == "versicolor");
+            teacher.teach_event(&mut train_virginica, &mut virginica, &cost, &features, truth == "virginica");
 
             // Make prediction using current expertise
             let p_setosa = setosa.predict(&features);
