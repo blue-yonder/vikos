@@ -144,3 +144,76 @@ impl<V> Model for Logistic<V>
         self.0.coefficent(coefficent)
     }
 }
+
+/// Models the target as `y = g(m*x + c)`
+///
+/// # Example
+///
+/// Logistic regression implemented using a generalized linear model. This is just for
+/// demonstration purposes. For this usecase you would usally use `Logistic`.
+///
+/// ```
+/// # use vikos::{model, teacher, cost, learn_history};
+/// # let history = [(0.0, true)];
+/// let mut model = model::GeneralizedLinearModel::new(|x| 1.0 / (1.0 + x.exp()),
+///                                                    |x| -x.exp() / (1.0 + x.exp()).powi(2) );
+/// let teacher = teacher::GradientDescent { learning_rate: 0.3 };
+/// let cost = cost::MaxLikelihood {};
+///
+/// learn_history(&teacher,
+///               &cost,
+///               &mut model,
+///               history.iter().cloned());
+/// ```
+#[derive(Clone)]
+pub struct GeneralizedLinearModel<V: Vector, G, Dg> {
+    /// `Linear` term of the generalized linear `Model`
+    pub linear: Linear<V>,
+    /// Outer function applied to the result of `linear`
+    pub g: G,
+    /// Derivation of `g`
+    pub g_derivate: Dg,
+}
+
+impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
+    where V: Vector,
+          G: Fn(f64) -> f64,
+          Dg: Fn(f64) -> f64
+{
+    /// Creates new model with the coefficents set to zero
+    pub fn new(g: G, g_derivate: Dg) -> GeneralizedLinearModel<V, G, Dg>
+        where V: Default
+    {
+        GeneralizedLinearModel {
+            linear: Linear::default(),
+            g: g,
+            g_derivate: g_derivate,
+        }
+    }
+}
+
+impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
+    where F: Fn(f64) -> f64,
+          Df: Fn(f64) -> f64,
+          V: Vector<Scalar = f64>
+{
+    type Input = V;
+
+    fn predict(&self, input: &V) -> f64 {
+        let f = &self.g;
+        f(self.linear.predict(&input))
+    }
+
+    fn num_coefficents(&self) -> usize {
+        self.linear.num_coefficents()
+    }
+
+    fn gradient(&self, coefficent: usize, input: &V) -> f64 {
+        let f = &self.g_derivate;
+        f(self.linear.predict(&input)) * self.linear.gradient(coefficent, input)
+    }
+
+    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
+        self.linear.coefficent(coefficent)
+    }
+}

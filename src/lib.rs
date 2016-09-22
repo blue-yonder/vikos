@@ -25,7 +25,7 @@ use std::iter::IntoIterator;
 ///
 /// Implementations of this trait can be found in
 /// [models](./model/index.html)
-pub trait Model: Clone {
+pub trait Model {
     /// Input features
     type Input;
 
