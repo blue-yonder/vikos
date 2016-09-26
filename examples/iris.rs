@@ -5,7 +5,7 @@ extern crate csv;
 extern crate vikos;
 extern crate rustc_serialize;
 
-use vikos::{Teacher, Model};
+use vikos::{Teacher, Expert};
 use std::default::Default;
 
 const PATH : &'static str = "examples/data/iris.csv";

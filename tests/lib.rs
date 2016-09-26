@@ -170,7 +170,7 @@ fn linear_nesterov_2d() {
 #[test]
 fn logistic_sgd_2d_least_squares() {
 
-    use vikos::{learn_history, Model};
+    use vikos::{learn_history, Expert};
 
     let history = [([2.7, 2.5], 0.0),
                    ([1.4, 2.3], 0.0),
@@ -204,7 +204,7 @@ fn logistic_sgd_2d_least_squares() {
 
 #[test]
 fn logistic_sgd_2d_max_likelihood() {
-    use vikos::{learn_history, Model};
+    use vikos::{learn_history, Expert};
 
     let history = [([2.7, 2.5], 0.0),
                    ([1.4, 2.3], 0.0),
@@ -238,7 +238,7 @@ fn logistic_sgd_2d_max_likelihood() {
 
 #[test]
 fn logistic_sgd_2d_max_likelihood_bool() {
-    use vikos::{learn_history, Model};
+    use vikos::{learn_history, Expert};
 
     let history = [([2.7, 2.5], false),
                    ([1.4, 2.3], false),
@@ -272,7 +272,7 @@ fn logistic_sgd_2d_max_likelihood_bool() {
 
 #[test]
 fn generalized_linear_model_as_logistic_regression() {
-    use vikos::{learn_history, Model};
+    use vikos::{learn_history, Expert};
 
     let history = [([2.7, 2.5], false),
                    ([1.4, 2.3], false),

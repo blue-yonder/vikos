@@ -21,23 +21,27 @@ extern crate num;
 
 use std::iter::IntoIterator;
 
-/// A Model is a parameterized expert algorithm
-///
-/// Implementations of this trait can be found in
-/// [models](./model/index.html)
-pub trait Model<X> {
-
-    /// Predicts a target for the inputs based on the internal coefficents
-    fn predict(&self, &X) -> f64;
+/// Allows accessing and changing coefficents
+pub trait Model {
 
     /// The number of internal coefficents this model depends on
     fn num_coefficents(&self) -> usize;
 
-    /// Value predict derived by the n-th `coefficent` at `input`
-    fn gradient(&self, coefficent: usize, input: &X) -> f64;
-
     /// Mutable reference to the n-th `coefficent`
     fn coefficent(&mut self, coefficent: usize) -> &mut f64;
+}
+
+/// A parameterized expert algorithm
+///
+/// Implementations of this trait can be found in
+/// [models](./model/index.html)
+pub trait Expert<X> : Model{
+
+    /// Predicts a target for the inputs based on the internal coefficents
+    fn predict(&self, &X) -> f64;
+
+    /// Value predict derived by the n-th `coefficent` at `input`
+    fn gradient(&self, coefficent: usize, input: &X) -> f64;
 }
 
 /// Representing a cost function whose value is supposed be minimized by the
@@ -77,7 +81,7 @@ pub trait Cost<Truth> {
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficents
-pub trait Teacher<X, M: Model<X>> {
+pub trait Teacher<M: Model> {
     /// Contains state which changes during the training, but is not part of the expertise
     ///
     /// Examples are the velocity of the coefficents (in stochastic gradient
@@ -89,21 +93,22 @@ pub trait Teacher<X, M: Model<X>> {
     fn new_training(&self, model: &M) -> Self::Training;
 
     /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
-    fn teach_event<Y, C>(&self,
+    fn teach_event<X, Y, C>(&self,
                          training: &mut Self::Training,
                          model: &mut M,
                          cost: &C,
                          features: &X,
                          truth: Y)
         where C: Cost<Y>,
-              Y: Copy;
+              Y: Copy,
+              M: Expert<X>;
 }
 
 /// Teaches `model` all events in `history`
 pub fn learn_history<X, M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
-    where M: Model<X>,
+    where M: Expert<X>,
           C: Cost<Truth>,
-          T: Teacher<X, M>,
+          T: Teacher<M>,
           H: IntoIterator<Item = (X, Truth)>,
           Truth: Copy
 {

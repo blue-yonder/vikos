@@ -24,7 +24,7 @@
 //! ## Estimating the mean target value
 //!
 //! ```
-//! use vikos::{model, cost, teacher, learn_history, Model};
+//! use vikos::{model, cost, teacher, learn_history, Expert};
 //! // mean is 9, but of course we do not know that yet
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
@@ -60,7 +60,7 @@
 //! our cost function, to that of an absolute error:
 //!
 //! ```
-//! use vikos::{model, cost, teacher, learn_history, Model};
+//! use vikos::{model, cost, teacher, learn_history, Expert};
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
 //!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
@@ -85,7 +85,7 @@
 //! ## Estimating median again
 //!
 //! ```
-//! use vikos::{model, cost, teacher, learn_history, Model};
+//! use vikos::{model, cost, teacher, learn_history, Expert};
 //! // median is 7, but of course we do not know that yet
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
@@ -119,7 +119,7 @@
 //! We now use a linear model
 //!
 //! ```
-//! use vikos::{model, cost, teacher, learn_history, Model};
+//! use vikos::{model, cost, teacher, learn_history, Expert};
 //! // Best described by 2 * m - 3
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
