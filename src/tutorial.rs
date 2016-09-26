@@ -43,14 +43,12 @@
 //!               &cost,
 //!               &mut model,
 //!               history.iter().cycle().take(100).cloned());
-//! // Since we know the model's type is `Constant`, we could just access the members
+//! // Since we know the model's type is `f64`, we can just print it
 //! println!("{}", model);
 //! ```
-//! As far as the mean is concerned, the first element of each tuple, i.e.,
-//! the feature, is just ignored (because we use the
-//! [Constant](../model/struct.Constant.html) model).  The code would also
-//! compile if the first element would be an empty tuple or any other type for
-//! that matter.
+//! As far as the mean is concerned, the first element of each tuple, i.e., the feature, is just
+//! ignored. The code would also compile if the first element would be an empty tuple or any other
+//! type for that matter.
 //!
 //! ## Estimating the median target value
 //!
@@ -144,16 +142,18 @@
 //! }
 //! println!("slope: {}, intercept: {}", model.m, model.c);
 //! ```
+//! Note the use of the [Expert](../trait.Expert.html) trait to predict the target based the input.
+//!
 //! # Summary
 //!
 //! Using Vikos, we can build a machine-learning model by composing
 //! implementations of three aspects:
 //!
-//!  * the [Model](../trait.Model.html) describes how features and target
-//!    relate to each other (and what kind of estimated parameters/coefficients
-//!    mediate among the target and the feature space), the model is  fitted by
-//!  * the training algorithm, modelled with the
-//!    [Teacher](../trait.Teacher.html) trait, that contains the optimization algorithm minimizing
-//!    the model coefficents.
-//!  * the [Cost](../trait.Cost.html) "function" describes the function that
-//!    should be minimized by the algorithm.
+//!  * the describes how features and target relate to each other using an
+//!    [Expert](../trait.Expert.html) algorithm and what kind of estimated parameters/coefficients
+//!    mediate among the target and the feature space ([Model](../trait.Model.html)), the model is
+//!    fitted by
+//!  * the training algorithm, modelled with the [Teacher](../trait.Teacher.html) trait, that
+//!    contains the optimization algorithm minimizing the model coefficents.
+//!  * the [Cost](../trait.Cost.html) "function" describes the function that should be minimized by
+//!    the algorithm.

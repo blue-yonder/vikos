@@ -24,11 +24,11 @@ impl<M> Teacher<M> for GradientDescent
     }
 
     fn teach_event<X, Y, C>(&self,
-                         _training: &mut (),
-                         model: &mut M,
-                         cost: &C,
-                         features: &X,
-                         truth: Y)
+                            _training: &mut (),
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
               Y: Copy,
               M: Expert<X>
@@ -67,11 +67,11 @@ impl<M> Teacher<M> for GradientDescentAl
     }
 
     fn teach_event<X, Y, C>(&self,
-                         num_events: &mut usize,
-                         model: &mut M,
-                         cost: &C,
-                         features: &X,
-                         truth: Y)
+                            num_events: &mut usize,
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
               Y: Copy,
               M: Expert<X>
@@ -118,11 +118,11 @@ impl<M> Teacher<M> for Momentum
     }
 
     fn teach_event<X, Y, C>(&self,
-                         training: &mut (usize, Vec<f64>),
-                         model: &mut M,
-                         cost: &C,
-                         features: &X,
-                         truth: Y)
+                            training: &mut (usize, Vec<f64>),
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
               Y: Copy,
               M: Expert<X>
@@ -179,11 +179,11 @@ impl<M> Teacher<M> for Nesterov
     }
 
     fn teach_event<X, Y, C>(&self,
-                         training: &mut (usize, Vec<f64>),
-                         model: &mut M,
-                         cost: &C,
-                         features: &X,
-                         truth: Y)
+                            training: &mut (usize, Vec<f64>),
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
               Y: Copy,
               M: Expert<X>

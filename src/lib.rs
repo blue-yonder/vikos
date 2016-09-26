@@ -4,13 +4,6 @@
 //! independently of the model trained or the cost function that is meant to
 //! be minimized. To get started right away, you may want to
 //! have a look at the [tutorial](./tutorial/index.html).
-//!
-//! # Design
-//! The three most important traits are [Model], [Cost] and [Teacher].
-//!
-//! [Model]: ./trait.Model.html
-//! [Cost]: ./trait.Cost.html
-//! [Teacher]: ./trait.Teacher.html
 
 #![warn(missing_docs)]
 #![cfg_attr(feature="clippy", feature(plugin))]
@@ -23,7 +16,6 @@ use std::iter::IntoIterator;
 
 /// Allows accessing and changing coefficents
 pub trait Model {
-
     /// The number of internal coefficents this model depends on
     fn num_coefficents(&self) -> usize;
 
@@ -35,8 +27,7 @@ pub trait Model {
 ///
 /// Implementations of this trait can be found in
 /// [models](./model/index.html)
-pub trait Expert<X> : Model{
-
+pub trait Expert<X>: Model {
     /// Predicts a target for the inputs based on the internal coefficents
     fn predict(&self, &X) -> f64;
 
@@ -94,11 +85,11 @@ pub trait Teacher<M: Model> {
 
     /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
     fn teach_event<X, Y, C>(&self,
-                         training: &mut Self::Training,
-                         model: &mut M,
-                         cost: &C,
-                         features: &X,
-                         truth: Y)
+                            training: &mut Self::Training,
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
               Y: Copy,
               M: Expert<X>;

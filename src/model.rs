@@ -2,8 +2,7 @@ use Model;
 use Expert;
 use linear_algebra::Vector;
 
-impl Model for f64{
-
+impl Model for f64 {
     fn num_coefficents(&self) -> usize {
         1
     }
@@ -14,11 +13,9 @@ impl Model for f64{
             _ => panic!("coefficent index out of range"),
         }
     }
-
 }
 
 impl<I> Expert<I> for f64 {
-
     fn predict(&self, _: &I) -> f64 {
         *self
     }
