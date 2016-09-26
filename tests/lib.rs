@@ -12,7 +12,7 @@ fn estimate_median() {
     let history = [1.0, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //median is seven
 
     let cost = cost::LeastAbsoluteDeviation {};
-    let mut model = model::Constant::new(0.0);
+    let mut model = 0.0;
 
     let teacher = teacher::GradientDescentAl { l0: 0.9, t: 9.0 };
     let mut training = teacher.new_training(&model);
@@ -25,8 +25,8 @@ fn estimate_median() {
                  training::annealed_learning_rate(training, teacher.l0, teacher.t));
     }
 
-    assert!(model.c < 7.1);
-    assert!(model.c > 6.9);
+    assert!(model < 7.1);
+    assert!(model > 6.9);
 }
 
 #[test]
@@ -38,7 +38,7 @@ fn estimate_mean() {
     let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
 
     let cost = cost::LeastSquares {};
-    let mut model = model::Constant::new(0.0);
+    let mut model = 0.0;
 
     let teacher = teacher::GradientDescentAl { l0: 0.3, t: 4.0 };
     let mut training = teacher.new_training(&model);
@@ -51,8 +51,8 @@ fn estimate_mean() {
                  training::annealed_learning_rate(training, teacher.l0, teacher.t));
     }
 
-    assert!(model.c < 9.1);
-    assert!(model.c > 8.9);
+    assert!(model < 9.1);
+    assert!(model > 8.9);
 }
 
 #[test]

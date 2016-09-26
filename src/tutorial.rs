@@ -24,7 +24,7 @@
 //! ## Estimating the mean target value
 //!
 //! ```
-//! use vikos::{model, cost, teacher, learn_history, Expert};
+//! use vikos::{cost, teacher, learn_history};
 //! // mean is 9, but of course we do not know that yet
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
@@ -33,7 +33,7 @@
 //! ];
 //!
 //! // The mean is just a simple number ...
-//! let mut model = model::Constant::new(0.0);
+//! let mut model = 0.0;
 //! // ... which minimizes the square error
 //! let cost = cost::LeastSquares {};
 //! // Use stochastic gradient descent with an annealed learning rate
@@ -43,10 +43,8 @@
 //!               &cost,
 //!               &mut model,
 //!               history.iter().cycle().take(100).cloned());
-//! // We need an input vector for predictions, the 42 will not influence the mean
-//! println!("{}", model.predict(&42.0));
 //! // Since we know the model's type is `Constant`, we could just access the members
-//! println!("{}", model.c);
+//! println!("{}", model);
 //! ```
 //! As far as the mean is concerned, the first element of each tuple, i.e.,
 //! the feature, is just ignored (because we use the
@@ -60,7 +58,7 @@
 //! our cost function, to that of an absolute error:
 //!
 //! ```
-//! use vikos::{model, cost, teacher, learn_history, Expert};
+//! use vikos::{cost, teacher, learn_history};
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
 //!    (5.0, 7.0), (5.5, 8.0), (7.0, 11.0),
@@ -69,7 +67,7 @@
 //! // median is 7, but we don't know that yet of course
 //!
 //! // The median is just a simple number ...
-//! let mut model = model::Constant::new(0.0);
+//! let mut model = 0.0;
 //! // ... which minimizes the absolute error
 //! let cost = cost::LeastAbsoluteDeviation {};
 //! let teacher = teacher::GradientDescentAl { l0: 1.0, t: 9.0 };
@@ -85,7 +83,7 @@
 //! ## Estimating median again
 //!
 //! ```
-//! use vikos::{model, cost, teacher, learn_history, Expert};
+//! use vikos::{cost, teacher, learn_history};
 //! // median is 7, but of course we do not know that yet
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
@@ -94,7 +92,7 @@
 //! ];
 //!
 //! // The median is just a simple number ...
-//! let mut model = model::Constant::new(0.0);
+//! let mut model = 0.0;
 //! // ... which minimizes the absolute error
 //! let cost = cost::LeastAbsoluteDeviation {};
 //! // Use stochasic gradient descent with an annealed learning rate and momentum
@@ -107,7 +105,7 @@
 //!               &cost,
 //!               &mut model,
 //!               history.iter().cycle().take(100).cloned());
-//! println!("{}", model.predict(&42.0));
+//! println!("{}", model);
 //! ```
 //! The momentum term allowed us to drop our learning rate way quicker and to retrieve a
 //! more precise result in the same number of iterations. The algorithms and their

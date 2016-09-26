@@ -2,53 +2,7 @@ use Model;
 use Expert;
 use linear_algebra::Vector;
 
-/// Models the target as a constant `c`
-///
-/// This model predicts a number. The cost function used during training decides
-/// whether this number is a mean, median, or something else.
-///
-/// # Examples
-///
-/// Estimate mean
-///
-/// ```
-/// use vikos::model::Constant;
-/// use vikos::cost::LeastSquares;
-/// use vikos::teacher::GradientDescentAl;
-/// use vikos::learn_history;
-///
-/// let features = ();
-/// let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
-///
-/// let cost = LeastSquares{};
-/// let mut model = Constant::new(0.0);
-///
-/// let teacher = GradientDescentAl{ l0 : 0.3, t : 4.0 };
-/// learn_history(&teacher, &cost, &mut model, history.iter().cycle().map(|&y|((),y)).take(100));
-/// println!("{}", model.c);
-/// ```
-#[derive(Debug, Default, RustcDecodable, RustcEncodable)]
-pub struct Constant {
-    /// Any prediction made by this model will have the value of `c`
-    pub c: f64
-}
-
-impl Constant {
-    /// Creates a new Constant from a `f64`
-    pub fn new(c: f64) -> Constant {
-        Constant {
-            c: c
-        }
-    }
-}
-
-impl Clone for Constant {
-    fn clone(&self) -> Self {
-        Constant::new(self.c)
-    }
-}
-
-impl Model for Constant{
+impl Model for f64{
 
     fn num_coefficents(&self) -> usize {
         1
@@ -56,17 +10,17 @@ impl Model for Constant{
 
     fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
         match coefficent {
-            0 => &mut self.c,
+            0 => self,
             _ => panic!("coefficent index out of range"),
         }
     }
 
 }
 
-impl<I> Expert<I> for Constant {
+impl<I> Expert<I> for f64 {
 
     fn predict(&self, _: &I) -> f64 {
-        self.c
+        *self
     }
 
     fn gradient(&self, coefficent: usize, _: &I) -> f64 {
