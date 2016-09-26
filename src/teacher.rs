@@ -13,8 +13,8 @@ pub struct GradientDescent {
     pub learning_rate: f64,
 }
 
-impl<M> Teacher<M> for GradientDescent
-    where M: Model
+impl<X, M> Teacher<X, M> for GradientDescent
+    where M: Model<X>
 {
     type Training = ();
 
@@ -26,7 +26,7 @@ impl<M> Teacher<M> for GradientDescent
                          _training: &mut (),
                          model: &mut M,
                          cost: &C,
-                         features: &M::Input,
+                         features: &X,
                          truth: Y)
         where C: Cost<Y>,
               Y: Copy
@@ -55,8 +55,8 @@ pub struct GradientDescentAl {
     pub t: f64,
 }
 
-impl<M> Teacher<M> for GradientDescentAl
-    where M: Model
+impl<X, M> Teacher<X, M> for GradientDescentAl
+    where M: Model<X>
 {
     type Training = usize;
 
@@ -68,7 +68,7 @@ impl<M> Teacher<M> for GradientDescentAl
                          num_events: &mut usize,
                          model: &mut M,
                          cost: &C,
-                         features: &M::Input,
+                         features: &X,
                          truth: Y)
         where C: Cost<Y>,
               Y: Copy
@@ -101,8 +101,8 @@ pub struct Momentum {
     pub inertia: f64,
 }
 
-impl<M> Teacher<M> for Momentum
-    where M: Model
+impl<X, M> Teacher<X, M> for Momentum
+    where M: Model<X>
 {
     type Training = (usize, Vec<f64>);
 
@@ -118,7 +118,7 @@ impl<M> Teacher<M> for Momentum
                          training: &mut (usize, Vec<f64>),
                          model: &mut M,
                          cost: &C,
-                         features: &M::Input,
+                         features: &X,
                          truth: Y)
         where C: Cost<Y>,
               Y: Copy
@@ -161,8 +161,8 @@ pub struct Nesterov {
     pub inertia: f64,
 }
 
-impl<M> Teacher<M> for Nesterov
-    where M: Model
+impl<X, M> Teacher<X, M> for Nesterov
+    where M: Model<X>
 {
     type Training = (usize, Vec<f64>);
 
@@ -178,7 +178,7 @@ impl<M> Teacher<M> for Nesterov
                          training: &mut (usize, Vec<f64>),
                          model: &mut M,
                          cost: &C,
-                         features: &M::Input,
+                         features: &X,
                          truth: Y)
         where C: Cost<Y>,
               Y: Copy

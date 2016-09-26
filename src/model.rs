@@ -50,8 +50,7 @@ impl<I> Clone for Constant<I> {
     }
 }
 
-impl<I> Model for Constant<I> {
-    type Input = I;
+impl<I> Model<I> for Constant<I> {
 
     fn predict(&self, _: &I) -> f64 {
         self.c
@@ -85,10 +84,9 @@ pub struct Linear<V: Vector> {
     pub c: V::Scalar,
 }
 
-impl<V> Model for Linear<V>
+impl<V> Model<V> for Linear<V>
     where V: Vector<Scalar = f64>
 {
-    type Input = V;
 
     fn predict(&self, input: &V) -> V::Scalar {
         self.m.dot(input) + self.c
@@ -122,11 +120,9 @@ impl<V> Model for Linear<V>
 #[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
 pub struct Logistic<V: Vector>(Linear<V>);
 
-impl<V> Model for Logistic<V>
+impl<V> Model<V> for Logistic<V>
     where V: Vector<Scalar = f64>
 {
-    type Input = V;
-
     fn predict(&self, input: &V) -> f64 {
         1.0 / (1.0 + self.0.predict(input).exp())
     }
@@ -192,13 +188,11 @@ impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
     }
 }
 
-impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
+impl<V, F, Df> Model<V> for GeneralizedLinearModel<V, F, Df>
     where F: Fn(f64) -> f64,
           Df: Fn(f64) -> f64,
           V: Vector<Scalar = f64>
 {
-    type Input = V;
-
     fn predict(&self, input: &V) -> f64 {
         let f = &self.g;
         f(self.linear.predict(&input))

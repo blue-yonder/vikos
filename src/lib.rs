@@ -25,18 +25,16 @@ use std::iter::IntoIterator;
 ///
 /// Implementations of this trait can be found in
 /// [models](./model/index.html)
-pub trait Model {
-    /// Input features
-    type Input;
+pub trait Model<X> {
 
     /// Predicts a target for the inputs based on the internal coefficents
-    fn predict(&self, &Self::Input) -> f64;
+    fn predict(&self, &X) -> f64;
 
     /// The number of internal coefficents this model depends on
     fn num_coefficents(&self) -> usize;
 
     /// Value predict derived by the n-th `coefficent` at `input`
-    fn gradient(&self, coefficent: usize, input: &Self::Input) -> f64;
+    fn gradient(&self, coefficent: usize, input: &X) -> f64;
 
     /// Mutable reference to the n-th `coefficent`
     fn coefficent(&mut self, coefficent: usize) -> &mut f64;
@@ -79,7 +77,7 @@ pub trait Cost<Truth> {
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficents
-pub trait Teacher<M: Model> {
+pub trait Teacher<X, M: Model<X>> {
     /// Contains state which changes during the training, but is not part of the expertise
     ///
     /// Examples are the velocity of the coefficents (in stochastic gradient
@@ -95,18 +93,18 @@ pub trait Teacher<M: Model> {
                          training: &mut Self::Training,
                          model: &mut M,
                          cost: &C,
-                         features: &M::Input,
+                         features: &X,
                          truth: Y)
         where C: Cost<Y>,
               Y: Copy;
 }
 
 /// Teaches `model` all events in `history`
-pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
-    where M: Model,
+pub fn learn_history<X, M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
+    where M: Model<X>,
           C: Cost<Truth>,
-          T: Teacher<M>,
-          H: IntoIterator<Item = (M::Input, Truth)>,
+          T: Teacher<X, M>,
+          H: IntoIterator<Item = (X, Truth)>,
           Truth: Copy
 {
     let mut training = teacher.new_training(model);
