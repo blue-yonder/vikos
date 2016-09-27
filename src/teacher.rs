@@ -3,6 +3,7 @@
 use ::training;
 use Teacher;
 use Model;
+use Expert;
 use Cost;
 
 /// Gradient descent
@@ -22,14 +23,15 @@ impl<M> Teacher<M> for GradientDescent
         ()
     }
 
-    fn teach_event<Y, C>(&self,
-                         _training: &mut (),
-                         model: &mut M,
-                         cost: &C,
-                         features: &M::Input,
-                         truth: Y)
+    fn teach_event<X, Y, C>(&self,
+                            _training: &mut (),
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
-              Y: Copy
+              Y: Copy,
+              M: Expert<X>
     {
         let prediction = model.predict(features);
 
@@ -64,14 +66,15 @@ impl<M> Teacher<M> for GradientDescentAl
         0
     }
 
-    fn teach_event<Y, C>(&self,
-                         num_events: &mut usize,
-                         model: &mut M,
-                         cost: &C,
-                         features: &M::Input,
-                         truth: Y)
+    fn teach_event<X, Y, C>(&self,
+                            num_events: &mut usize,
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
-              Y: Copy
+              Y: Copy,
+              M: Expert<X>
     {
         let prediction = model.predict(features);
         let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
@@ -114,14 +117,15 @@ impl<M> Teacher<M> for Momentum
         (0, velocity)
     }
 
-    fn teach_event<Y, C>(&self,
-                         training: &mut (usize, Vec<f64>),
-                         model: &mut M,
-                         cost: &C,
-                         features: &M::Input,
-                         truth: Y)
+    fn teach_event<X, Y, C>(&self,
+                            training: &mut (usize, Vec<f64>),
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
-              Y: Copy
+              Y: Copy,
+              M: Expert<X>
     {
         // let (ref mut num_events, ref mut velocity) = *training; ok?
         let mut num_events = &mut training.0;
@@ -174,14 +178,15 @@ impl<M> Teacher<M> for Nesterov
         (0, velocity)
     }
 
-    fn teach_event<Y, C>(&self,
-                         training: &mut (usize, Vec<f64>),
-                         model: &mut M,
-                         cost: &C,
-                         features: &M::Input,
-                         truth: Y)
+    fn teach_event<X, Y, C>(&self,
+                            training: &mut (usize, Vec<f64>),
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
-              Y: Copy
+              Y: Copy,
+              M: Expert<X>
     {
 
         let mut num_events = &mut training.0;

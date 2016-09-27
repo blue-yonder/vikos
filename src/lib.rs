@@ -4,13 +4,6 @@
 //! independently of the model trained or the cost function that is meant to
 //! be minimized. To get started right away, you may want to
 //! have a look at the [tutorial](./tutorial/index.html).
-//!
-//! # Design
-//! The three most important traits are [Model], [Cost] and [Teacher].
-//!
-//! [Model]: ./trait.Model.html
-//! [Cost]: ./trait.Cost.html
-//! [Teacher]: ./trait.Teacher.html
 
 #![warn(missing_docs)]
 #![cfg_attr(feature="clippy", feature(plugin))]
@@ -21,25 +14,25 @@ extern crate num;
 
 use std::iter::IntoIterator;
 
-/// A Model is a parameterized expert algorithm
-///
-/// Implementations of this trait can be found in
-/// [models](./model/index.html)
+/// Allows accessing and changing coefficents
 pub trait Model {
-    /// Input features
-    type Input;
-
-    /// Predicts a target for the inputs based on the internal coefficents
-    fn predict(&self, &Self::Input) -> f64;
-
     /// The number of internal coefficents this model depends on
     fn num_coefficents(&self) -> usize;
 
-    /// Value predict derived by the n-th `coefficent` at `input`
-    fn gradient(&self, coefficent: usize, input: &Self::Input) -> f64;
-
     /// Mutable reference to the n-th `coefficent`
     fn coefficent(&mut self, coefficent: usize) -> &mut f64;
+}
+
+/// A parameterized expert algorithm
+///
+/// Implementations of this trait can be found in
+/// [models](./model/index.html)
+pub trait Expert<X>: Model {
+    /// Predicts a target for the inputs based on the internal coefficents
+    fn predict(&self, &X) -> f64;
+
+    /// Value predict derived by the n-th `coefficent` at `input`
+    fn gradient(&self, coefficent: usize, input: &X) -> f64;
 }
 
 /// Representing a cost function whose value is supposed be minimized by the
@@ -91,22 +84,23 @@ pub trait Teacher<M: Model> {
     fn new_training(&self, model: &M) -> Self::Training;
 
     /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
-    fn teach_event<Y, C>(&self,
-                         training: &mut Self::Training,
-                         model: &mut M,
-                         cost: &C,
-                         features: &M::Input,
-                         truth: Y)
+    fn teach_event<X, Y, C>(&self,
+                            training: &mut Self::Training,
+                            model: &mut M,
+                            cost: &C,
+                            features: &X,
+                            truth: Y)
         where C: Cost<Y>,
-              Y: Copy;
+              Y: Copy,
+              M: Expert<X>;
 }
 
 /// Teaches `model` all events in `history`
-pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
-    where M: Model,
+pub fn learn_history<X, M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
+    where M: Expert<X>,
           C: Cost<Truth>,
           T: Teacher<M>,
-          H: IntoIterator<Item = (M::Input, Truth)>,
+          H: IntoIterator<Item = (X, Truth)>,
           Truth: Copy
 {
     let mut training = teacher.new_training(model);

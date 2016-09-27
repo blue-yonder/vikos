@@ -1,76 +1,28 @@
 use Model;
+use Expert;
 use linear_algebra::Vector;
-use std::marker::PhantomData;
 
-/// Models the target as a constant `c`
-///
-/// This model predicts a number. The cost function used during training decides
-/// whether this number is a mean, median, or something else.
-///
-/// # Examples
-///
-/// Estimate mean
-///
-/// ```
-/// use vikos::model::Constant;
-/// use vikos::cost::LeastSquares;
-/// use vikos::teacher::GradientDescentAl;
-/// use vikos::learn_history;
-///
-/// let features = ();
-/// let history = [1f64, 3.0, 4.0, 7.0, 8.0, 11.0, 29.0]; //mean is 9
-///
-/// let cost = LeastSquares{};
-/// let mut model = Constant::new(0.0);
-///
-/// let teacher = GradientDescentAl{ l0 : 0.3, t : 4.0 };
-/// learn_history(&teacher, &cost, &mut model, history.iter().cycle().map(|&y|((),y)).take(100));
-/// println!("{}", model.c);
-/// ```
-#[derive(Debug, Default, RustcDecodable, RustcEncodable)]
-pub struct Constant<Input> {
-    /// Any prediction made by this model will have the value of `c`
-    pub c: f64,
-    _phantom: PhantomData<Input>,
-}
+impl Model for f64 {
+    fn num_coefficents(&self) -> usize {
+        1
+    }
 
-impl<I> Constant<I> {
-    /// Creates a new Constant from a `f64`
-    pub fn new(c: f64) -> Constant<I> {
-        Constant {
-            c: c,
-            _phantom: PhantomData::<I> {},
+    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
+        match coefficent {
+            0 => self,
+            _ => panic!("coefficent index out of range"),
         }
     }
 }
 
-impl<I> Clone for Constant<I> {
-    fn clone(&self) -> Self {
-        Constant::new(self.c)
-    }
-}
-
-impl<I> Model for Constant<I> {
-    type Input = I;
-
+impl<I> Expert<I> for f64 {
     fn predict(&self, _: &I) -> f64 {
-        self.c
-    }
-
-    fn num_coefficents(&self) -> usize {
-        1
+        *self
     }
 
     fn gradient(&self, coefficent: usize, _: &I) -> f64 {
         match coefficent {
             0 => 1.0,
-            _ => panic!("coefficent index out of range"),
-        }
-    }
-
-    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
-        match coefficent {
-            0 => &mut self.c,
             _ => panic!("coefficent index out of range"),
         }
     }
@@ -88,14 +40,24 @@ pub struct Linear<V: Vector> {
 impl<V> Model for Linear<V>
     where V: Vector<Scalar = f64>
 {
-    type Input = V;
-
-    fn predict(&self, input: &V) -> V::Scalar {
-        self.m.dot(input) + self.c
-    }
-
     fn num_coefficents(&self) -> usize {
         self.m.dimension() + 1
+    }
+
+    fn coefficent(&mut self, coefficent: usize) -> &mut V::Scalar {
+        if coefficent == self.m.dimension() {
+            &mut self.c
+        } else {
+            self.m.mut_at(coefficent)
+        }
+    }
+}
+
+impl<V> Expert<V> for Linear<V>
+    where V: Vector<Scalar = f64>
+{
+    fn predict(&self, input: &V) -> V::Scalar {
+        self.m.dot(input) + self.c
     }
 
     fn gradient(&self, coefficent: usize, input: &V) -> V::Scalar {
@@ -108,14 +70,6 @@ impl<V> Model for Linear<V>
             input.at(coefficent)
         }
     }
-
-    fn coefficent(&mut self, coefficent: usize) -> &mut V::Scalar {
-        if coefficent == self.m.dimension() {
-            &mut self.c
-        } else {
-            self.m.mut_at(coefficent)
-        }
-    }
 }
 
 /// Models target as `y = 1/(1+e^(m * x + c))`
@@ -125,23 +79,25 @@ pub struct Logistic<V: Vector>(Linear<V>);
 impl<V> Model for Logistic<V>
     where V: Vector<Scalar = f64>
 {
-    type Input = V;
-
-    fn predict(&self, input: &V) -> f64 {
-        1.0 / (1.0 + self.0.predict(input).exp())
-    }
-
     fn num_coefficents(&self) -> usize {
         self.0.num_coefficents()
+    }
+
+    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
+        self.0.coefficent(coefficent)
+    }
+}
+
+impl<V> Expert<V> for Logistic<V>
+    where V: Vector<Scalar = f64>
+{
+    fn predict(&self, input: &V) -> f64 {
+        1.0 / (1.0 + self.0.predict(input).exp())
     }
 
     fn gradient(&self, coefficent: usize, input: &V) -> f64 {
         let p = self.predict(input);
         -p * (1.0 - p) * self.0.gradient(coefficent, input)
-    }
-
-    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
-        self.0.coefficent(coefficent)
     }
 }
 
@@ -197,23 +153,27 @@ impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
           Df: Fn(f64) -> f64,
           V: Vector<Scalar = f64>
 {
-    type Input = V;
+    fn num_coefficents(&self) -> usize {
+        self.linear.num_coefficents()
+    }
 
+    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
+        self.linear.coefficent(coefficent)
+    }
+}
+
+impl<V, F, Df> Expert<V> for GeneralizedLinearModel<V, F, Df>
+    where F: Fn(f64) -> f64,
+          Df: Fn(f64) -> f64,
+          V: Vector<Scalar = f64>
+{
     fn predict(&self, input: &V) -> f64 {
         let f = &self.g;
         f(self.linear.predict(&input))
     }
 
-    fn num_coefficents(&self) -> usize {
-        self.linear.num_coefficents()
-    }
-
     fn gradient(&self, coefficent: usize, input: &V) -> f64 {
         let f = &self.g_derivate;
         f(self.linear.predict(&input)) * self.linear.gradient(coefficent, input)
-    }
-
-    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
-        self.linear.coefficent(coefficent)
     }
 }
