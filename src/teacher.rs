@@ -206,3 +206,49 @@ impl<M> Teacher<M> for Nesterov
         *num_events += 1;
     }
 }
+
+/// Adagard learning algorithm
+///
+/// Adagard divides the learning rate through the square root of the square sum of gradients for
+/// each coefficent. In effect the learning rate is smaller for frequent and larger for infrequent
+/// features.
+/// See [this paper](http://jmlr.org/papers/v12/duchi11a.html) for more information.
+pub struct Adagard{
+    /// The larger this parameter is, the more the coefficents will change with each iteration
+    pub learning_rate : f64,
+    /// Small smoothing term, to avoid division by zero in first iteration
+    pub epsilon : f64
+}
+
+impl<M> Teacher<M> for Adagard
+    where M: Model
+{
+    type Training = Vec<f64>;
+
+    fn new_training(&self, model: &M) -> Vec<f64> {
+
+        let mut squared_gradients = Vec::with_capacity(model.num_coefficents());
+        squared_gradients.resize(model.num_coefficents(), self.epsilon);
+        squared_gradients
+    }
+
+    fn teach_event<X, Y, C>(&self,
+                        squared_gradients: &mut Vec<f64>,
+                        model: &mut M,
+                        cost: &C,
+                        features: &X,
+                        truth: Y)
+    where C: Cost<Y>,
+            Y: Copy,
+            M: Expert<X>
+    {
+
+        let prediction = model.predict(features);
+        for ci in 0..model.num_coefficents() {
+            let gradient = cost.gradient(prediction, truth, model.gradient(ci, features));
+            let delta = -self.learning_rate * gradient / squared_gradients[ci].sqrt();
+            *model.coefficent(ci) += delta;
+            squared_gradients[ci] += gradient.powi(2);
+        }
+    }
+}
