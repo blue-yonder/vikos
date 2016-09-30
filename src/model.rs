@@ -16,15 +16,15 @@ impl Model for f64 {
 }
 
 impl<I> Expert<I> for f64 {
+
+    type Gradient = f64;
+
     fn predict(&self, _: &I) -> f64 {
         *self
     }
 
-    fn gradient(&self, coefficent: usize, _: &I) -> f64 {
-        match coefficent {
-            0 => 1.0,
-            _ => panic!("coefficent index out of range"),
-        }
+    fn gradient(&self, _: &I) -> f64 {
+        1.0
     }
 }
 
@@ -45,10 +45,10 @@ impl<V> Model for Linear<V>
     }
 
     fn coefficent(&mut self, coefficent: usize) -> &mut V::Scalar {
-        if coefficent == self.m.dimension() {
+        if coefficent == 0 {
             &mut self.c
         } else {
-            self.m.mut_at(coefficent)
+            self.m.mut_at(coefficent - 1)
         }
     }
 }
@@ -56,19 +56,15 @@ impl<V> Model for Linear<V>
 impl<V> Expert<V> for Linear<V>
     where V: Vector<Scalar = f64>
 {
+    type Gradient = (V::Scalar, V);
+
     fn predict(&self, input: &V) -> V::Scalar {
         self.m.dot(input) + self.c
     }
 
-    fn gradient(&self, coefficent: usize, input: &V) -> V::Scalar {
-
+    fn gradient(&self, input: &V) -> (V::Scalar, V) {
         use num::One;
-
-        if coefficent == self.m.dimension() {
-            V::Scalar::one() //c
-        } else {
-            input.at(coefficent)
-        }
+        (V::Scalar::one(), input.clone())
     }
 }
 
@@ -91,13 +87,15 @@ impl<V> Model for Logistic<V>
 impl<V> Expert<V> for Logistic<V>
     where V: Vector<Scalar = f64>
 {
+    type Gradient = (V::Scalar, V);
+
     fn predict(&self, input: &V) -> f64 {
         1.0 / (1.0 + self.0.predict(input).exp())
     }
 
-    fn gradient(&self, coefficent: usize, input: &V) -> f64 {
+    fn gradient(&self, input: &V) -> (V::Scalar, V) {
         let p = self.predict(input);
-        -p * (1.0 - p) * self.0.gradient(coefficent, input)
+        self.0.gradient(input).mul_scalar(-p * (1.0 - p))
     }
 }
 
@@ -167,13 +165,15 @@ impl<V, F, Df> Expert<V> for GeneralizedLinearModel<V, F, Df>
           Df: Fn(f64) -> f64,
           V: Vector<Scalar = f64>
 {
+    type Gradient = (V::Scalar, V);
+
     fn predict(&self, input: &V) -> f64 {
         let f = &self.g;
         f(self.linear.predict(&input))
     }
 
-    fn gradient(&self, coefficent: usize, input: &V) -> f64 {
+    fn gradient(&self, input: &V) -> (V::Scalar, V) {
         let f = &self.g_derivate;
-        f(self.linear.predict(&input)) * self.linear.gradient(coefficent, input)
+        self.linear.gradient(input).mul_scalar(f(self.linear.predict(&input)))
     }
 }
