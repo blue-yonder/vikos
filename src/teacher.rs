@@ -135,9 +135,7 @@ impl<M> Teacher<M> for Momentum
               Y: Copy,
               M: Expert<X>
     {
-        // let (ref mut num_events, ref mut velocity) = *training; ok?
-        let mut num_events = &mut training.0;
-        let mut velocity = &mut training.1;
+        let (ref mut num_events, ref mut velocity) = *training;
         let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
         let gradient = cost_gradient(features, &truth, cost, model);
 
