@@ -28,12 +28,13 @@ pub trait Model {
 /// Implementations of this trait can be found in
 /// [models](./model/index.html)
 pub trait Expert<X>: Model {
-
+    /// Type returned by the expert algorithm
+    type Prediction;
     /// Type holding the gradients of the coefficents
     type Gradient: linear_algebra::Vector<Scalar=f64>;
 
     /// Predicts a target for the inputs based on the internal coefficents
-    fn predict(&self, &X) -> f64;
+    fn predict(&self, &X) -> Self::Prediction;
 
     /// Value predict derived by the n-th `coefficent` at `input`
     fn gradient(&self, input: &X) -> Self::Gradient;
@@ -55,13 +56,13 @@ pub trait Expert<X>: Model {
 ///
 /// Implementations of this trait can be found in
 /// [cost](./cost/index.html)
-pub trait Cost<Truth> {
+pub trait Cost<P, T = P> {
 
     /// The outer derivative of the cost function with respect to the prediction.
-    fn outer_derivative(&self, prediction: f64, truth: Truth) -> f64;
+    fn outer_derivative(&self, prediction: P, truth: T) -> f64;
 
     /// Value of the cost function.
-    fn cost(&self, prediction: f64, truth: Truth) -> f64;
+    fn cost(&self, prediction: P, truth: T) -> f64;
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficents
@@ -83,7 +84,7 @@ pub trait Teacher<M: Model> {
                             cost: &C,
                             features: &X,
                             truth: Y)
-        where C: Cost<Y>,
+        where C: Cost<M::Prediction, Y>,
               Y: Copy,
               M: Expert<X>;
 }
@@ -91,7 +92,7 @@ pub trait Teacher<M: Model> {
 /// Teaches `model` all events in `history`
 pub fn learn_history<X, M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
     where M: Expert<X>,
-          C: Cost<Truth>,
+          C: Cost<M::Prediction, Truth>,
           T: Teacher<M>,
           H: IntoIterator<Item = (X, Truth)>,
           Truth: Copy
