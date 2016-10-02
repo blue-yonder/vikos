@@ -16,7 +16,7 @@ impl Model for f64 {
 }
 
 impl<I> Expert<I> for f64 {
-
+    type Prediction = f64;
     type Gradient = f64;
 
     fn predict(&self, _: &I) -> f64 {
@@ -56,6 +56,7 @@ impl<V> Model for Linear<V>
 impl<V> Expert<V> for Linear<V>
     where V: Vector<Scalar = f64>
 {
+    type Prediction = f64;
     type Gradient = (V::Scalar, V);
 
     fn predict(&self, input: &V) -> V::Scalar {
@@ -87,6 +88,7 @@ impl<V> Model for Logistic<V>
 impl<V> Expert<V> for Logistic<V>
     where V: Vector<Scalar = f64>
 {
+    type Prediction = f64;
     type Gradient = (V::Scalar, V);
 
     fn predict(&self, input: &V) -> f64 {
@@ -165,6 +167,7 @@ impl<V, F, Df> Expert<V> for GeneralizedLinearModel<V, F, Df>
           Df: Fn(f64) -> f64,
           V: Vector<Scalar = f64>
 {
+    type Prediction = f64;
     type Gradient = (V::Scalar, V);
 
     fn predict(&self, input: &V) -> f64 {
