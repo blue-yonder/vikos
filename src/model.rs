@@ -3,14 +3,14 @@ use Expert;
 use linear_algebra::Vector;
 
 impl Model for f64 {
-    fn num_coefficents(&self) -> usize {
+    fn num_coefficients(&self) -> usize {
         1
     }
 
-    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
-        match coefficent {
+    fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
+        match coefficient {
             0 => self,
-            _ => panic!("coefficent index out of range"),
+            _ => panic!("coefficient index out of range"),
         }
     }
 }
@@ -20,10 +20,10 @@ impl<I> Expert<I> for f64 {
         *self
     }
 
-    fn gradient(&self, coefficent: usize, _: &I) -> f64 {
-        match coefficent {
+    fn gradient(&self, coefficient: usize, _: &I) -> f64 {
+        match coefficient {
             0 => 1.0,
-            _ => panic!("coefficent index out of range"),
+            _ => panic!("coefficient index out of range"),
         }
     }
 }
@@ -40,15 +40,15 @@ pub struct Linear<V: Vector> {
 impl<V> Model for Linear<V>
     where V: Vector<Scalar = f64>
 {
-    fn num_coefficents(&self) -> usize {
+    fn num_coefficients(&self) -> usize {
         self.m.dimension() + 1
     }
 
-    fn coefficent(&mut self, coefficent: usize) -> &mut V::Scalar {
-        if coefficent == self.m.dimension() {
+    fn coefficient(&mut self, coefficient: usize) -> &mut V::Scalar {
+        if coefficient == self.m.dimension() {
             &mut self.c
         } else {
-            self.m.mut_at(coefficent)
+            self.m.mut_at(coefficient)
         }
     }
 }
@@ -60,14 +60,14 @@ impl<V> Expert<V> for Linear<V>
         self.m.dot(input) + self.c
     }
 
-    fn gradient(&self, coefficent: usize, input: &V) -> V::Scalar {
+    fn gradient(&self, coefficient: usize, input: &V) -> V::Scalar {
 
         use num::One;
 
-        if coefficent == self.m.dimension() {
+        if coefficient == self.m.dimension() {
             V::Scalar::one() //c
         } else {
-            input.at(coefficent)
+            input.at(coefficient)
         }
     }
 }
@@ -79,12 +79,12 @@ pub struct Logistic<V: Vector>(Linear<V>);
 impl<V> Model for Logistic<V>
     where V: Vector<Scalar = f64>
 {
-    fn num_coefficents(&self) -> usize {
-        self.0.num_coefficents()
+    fn num_coefficients(&self) -> usize {
+        self.0.num_coefficients()
     }
 
-    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
-        self.0.coefficent(coefficent)
+    fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
+        self.0.coefficient(coefficient)
     }
 }
 
@@ -95,9 +95,9 @@ impl<V> Expert<V> for Logistic<V>
         1.0 / (1.0 + self.0.predict(input).exp())
     }
 
-    fn gradient(&self, coefficent: usize, input: &V) -> f64 {
+    fn gradient(&self, coefficient: usize, input: &V) -> f64 {
         let p = self.predict(input);
-        -p * (1.0 - p) * self.0.gradient(coefficent, input)
+        -p * (1.0 - p) * self.0.gradient(coefficient, input)
     }
 }
 
@@ -136,7 +136,7 @@ impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
           G: Fn(f64) -> f64,
           Dg: Fn(f64) -> f64
 {
-    /// Creates new model with the coefficents set to zero
+    /// Creates new model with the coefficients set to zero
     pub fn new(g: G, g_derivate: Dg) -> GeneralizedLinearModel<V, G, Dg>
         where V: Default
     {
@@ -153,12 +153,12 @@ impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
           Df: Fn(f64) -> f64,
           V: Vector<Scalar = f64>
 {
-    fn num_coefficents(&self) -> usize {
-        self.linear.num_coefficents()
+    fn num_coefficients(&self) -> usize {
+        self.linear.num_coefficients()
     }
 
-    fn coefficent(&mut self, coefficent: usize) -> &mut f64 {
-        self.linear.coefficent(coefficent)
+    fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
+        self.linear.coefficient(coefficient)
     }
 }
 
@@ -172,8 +172,8 @@ impl<V, F, Df> Expert<V> for GeneralizedLinearModel<V, F, Df>
         f(self.linear.predict(&input))
     }
 
-    fn gradient(&self, coefficent: usize, input: &V) -> f64 {
+    fn gradient(&self, coefficient: usize, input: &V) -> f64 {
         let f = &self.g_derivate;
-        f(self.linear.predict(&input)) * self.linear.gradient(coefficent, input)
+        f(self.linear.predict(&input)) * self.linear.gradient(coefficient, input)
     }
 }
