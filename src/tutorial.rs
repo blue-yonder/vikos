@@ -154,6 +154,6 @@
 //!    mediate among the target and the feature space ([Model](../trait.Model.html)), the model is
 //!    fitted by
 //!  * the training algorithm, modelled with the [Teacher](../trait.Teacher.html) trait, that
-//!    contains the optimization algorithm minimizing the model coefficents.
+//!    contains the optimization algorithm minimizing the model coefficients.
 //!  * the [Cost](../trait.Cost.html) "function" describes the function that should be minimized by
 //!    the algorithm.

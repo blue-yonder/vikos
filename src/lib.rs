@@ -14,13 +14,13 @@ extern crate num;
 
 use std::iter::IntoIterator;
 
-/// Allows accessing and changing coefficents
+/// Allows accessing and changing coefficients
 pub trait Model {
-    /// The number of internal coefficents this model depends on
-    fn num_coefficents(&self) -> usize;
+    /// The number of internal coefficients this model depends on
+    fn num_coefficients(&self) -> usize;
 
-    /// Mutable reference to the n-th `coefficent`
-    fn coefficent(&mut self, coefficent: usize) -> &mut f64;
+    /// Mutable reference to the n-th `coefficient`
+    fn coefficient(&mut self, coefficient: usize) -> &mut f64;
 }
 
 /// A parameterized expert algorithm
@@ -28,11 +28,11 @@ pub trait Model {
 /// Implementations of this trait can be found in
 /// [models](./model/index.html)
 pub trait Expert<X>: Model {
-    /// Predicts a target for the inputs based on the internal coefficents
+    /// Predicts a target for the inputs based on the internal coefficients
     fn predict(&self, &X) -> f64;
 
-    /// Value predict derived by the n-th `coefficent` at `input`
-    fn gradient(&self, coefficent: usize, input: &X) -> f64;
+    /// Value predict derived by the n-th `coefficient` at `input`
+    fn gradient(&self, coefficient: usize, input: &X) -> f64;
 }
 
 /// Representing a cost function whose value is supposed be minimized by the
@@ -53,10 +53,10 @@ pub trait Expert<X>: Model {
 /// [cost](./cost/index.html)
 pub trait Cost<Truth> {
     /// Value of the gradient of the cost function (i.e. the cost function
-    /// derived by the n-th coefficent at x expressed in Error(x) and dY(x)/dx
+    /// derived by the n-th coefficient at x expressed in Error(x) and dY(x)/dx
     ///
     /// This method is called by stochastic gradient descent (SGD)-based
-    /// training algorithm in order to determine the delta of the coefficents
+    /// training algorithm in order to determine the delta of the coefficients
     ///
     /// Implementors of this trait should implement `Cost::outer_derivative` and not overwrite this
     /// method.
@@ -71,11 +71,11 @@ pub trait Cost<Truth> {
     fn cost(&self, prediction: f64, truth: Truth) -> f64;
 }
 
-/// Algorithms used to adapt [Model](./trait.Model.html) coefficents
+/// Algorithms used to adapt [Model](./trait.Model.html) coefficients
 pub trait Teacher<M: Model> {
     /// Contains state which changes during the training, but is not part of the expertise
     ///
-    /// Examples are the velocity of the coefficents (in stochastic gradient
+    /// Examples are the velocity of the coefficients (in stochastic gradient
     /// descent) or the number of events already learned.
     /// This may also be empty
     type Training;
@@ -83,7 +83,7 @@ pub trait Teacher<M: Model> {
     /// Creates an instance holding all mutable state of the algorithm
     fn new_training(&self, model: &M) -> Self::Training;
 
-    /// Changes `model`s coefficents so they minimize the `cost` function (hopefully)
+    /// Changes `model`s coefficients so they minimize the `cost` function (hopefully)
     fn teach_event<X, Y, C>(&self,
                             training: &mut Self::Training,
                             model: &mut M,

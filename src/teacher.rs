@@ -10,7 +10,7 @@ use Cost;
 ///
 /// Simplest possible implementation of gradient descent with fixed learning rate
 pub struct GradientDescent {
-    /// Defines how fast the coefficents of the trained `Model` will change
+    /// Defines how fast the coefficients of the trained `Model` will change
     pub learning_rate: f64,
 }
 
@@ -35,8 +35,8 @@ impl<M> Teacher<M> for GradientDescent
     {
         let prediction = model.predict(features);
 
-        for ci in 0..model.num_coefficents() {
-            *model.coefficent(ci) = *model.coefficent(ci) -
+        for ci in 0..model.num_coefficients() {
+            *model.coefficient(ci) = *model.coefficient(ci) -
                                     self.learning_rate *
                                     cost.gradient(prediction, truth, model.gradient(ci, features));
         }
@@ -79,8 +79,8 @@ impl<M> Teacher<M> for GradientDescentAl
         let prediction = model.predict(features);
         let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
 
-        for ci in 0..model.num_coefficents() {
-            *model.coefficent(ci) = *model.coefficent(ci) -
+        for ci in 0..model.num_coefficients() {
+            *model.coefficient(ci) = *model.coefficient(ci) -
                                     learning_rate *
                                     cost.gradient(prediction, truth, model.gradient(ci, features));
         }
@@ -111,8 +111,8 @@ impl<M> Teacher<M> for Momentum
 
     fn new_training(&self, model: &M) -> (usize, Vec<f64>) {
 
-        let mut velocity = Vec::with_capacity(model.num_coefficents());
-        velocity.resize(model.num_coefficents(), 0.0);
+        let mut velocity = Vec::with_capacity(model.num_coefficients());
+        velocity.resize(model.num_coefficients(), 0.0);
 
         (0, velocity)
     }
@@ -133,11 +133,11 @@ impl<M> Teacher<M> for Momentum
         let prediction = model.predict(features);
         let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
 
-        for ci in 0..model.num_coefficents() {
+        for ci in 0..model.num_coefficients() {
             velocity[ci] = self.inertia * velocity[ci] -
                            learning_rate *
                            cost.gradient(prediction, truth, model.gradient(ci, features));
-            *model.coefficent(ci) = *model.coefficent(ci) + velocity[ci];
+            *model.coefficient(ci) = *model.coefficient(ci) + velocity[ci];
         }
         *num_events += 1;
     }
@@ -172,8 +172,8 @@ impl<M> Teacher<M> for Nesterov
 
     fn new_training(&self, model: &M) -> (usize, Vec<f64>) {
 
-        let mut velocity = Vec::with_capacity(model.num_coefficents());
-        velocity.resize(model.num_coefficents(), 0.0);
+        let mut velocity = Vec::with_capacity(model.num_coefficients());
+        velocity.resize(model.num_coefficients(), 0.0);
 
         (0, velocity)
     }
@@ -194,13 +194,13 @@ impl<M> Teacher<M> for Nesterov
         let prediction = model.predict(features);
         let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
 
-        for ci in 0..model.num_coefficents() {
-            *model.coefficent(ci) = *model.coefficent(ci) + velocity[ci];
+        for ci in 0..model.num_coefficients() {
+            *model.coefficient(ci) = *model.coefficient(ci) + velocity[ci];
         }
-        for ci in 0..model.num_coefficents() {
+        for ci in 0..model.num_coefficients() {
             let delta = -learning_rate *
                         cost.gradient(prediction, truth, model.gradient(ci, features));
-            *model.coefficent(ci) = *model.coefficent(ci) + delta;
+            *model.coefficient(ci) = *model.coefficient(ci) + delta;
             velocity[ci] = self.inertia * velocity[ci] + delta;
         }
         *num_events += 1;
@@ -210,11 +210,11 @@ impl<M> Teacher<M> for Nesterov
 /// Adagard learning algorithm
 ///
 /// Adagard divides the learning rate through the square root of the square sum of gradients for
-/// each coefficent. In effect the learning rate is smaller for frequent and larger for infrequent
+/// each coefficient. In effect the learning rate is smaller for frequent and larger for infrequent
 /// features.
 /// See [this paper](http://jmlr.org/papers/v12/duchi11a.html) for more information.
 pub struct Adagard{
-    /// The larger this parameter is, the more the coefficents will change with each iteration
+    /// The larger this parameter is, the more the coefficients will change with each iteration
     pub learning_rate : f64,
     /// Small smoothing term, to avoid division by zero in first iteration
     pub epsilon : f64
@@ -227,8 +227,8 @@ impl<M> Teacher<M> for Adagard
 
     fn new_training(&self, model: &M) -> Vec<f64> {
 
-        let mut squared_gradients = Vec::with_capacity(model.num_coefficents());
-        squared_gradients.resize(model.num_coefficents(), self.epsilon);
+        let mut squared_gradients = Vec::with_capacity(model.num_coefficients());
+        squared_gradients.resize(model.num_coefficients(), self.epsilon);
         squared_gradients
     }
 
@@ -244,10 +244,10 @@ impl<M> Teacher<M> for Adagard
     {
 
         let prediction = model.predict(features);
-        for ci in 0..model.num_coefficents() {
+        for ci in 0..model.num_coefficients() {
             let gradient = cost.gradient(prediction, truth, model.gradient(ci, features));
             let delta = -self.learning_rate * gradient / squared_gradients[ci].sqrt();
-            *model.coefficent(ci) += delta;
+            *model.coefficient(ci) += delta;
             squared_gradients[ci] += gradient.powi(2);
         }
     }
