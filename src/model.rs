@@ -44,19 +44,11 @@ impl<V> Model for Linear<V>
         self.m.dimension() + 1
     }
 
-<<<<<<< HEAD
     fn coefficient(&mut self, coefficient: usize) -> &mut V::Scalar {
         if coefficient == 0 {
             &mut self.c
         } else {
             self.m.mut_at(coefficient - 1)
-=======
-    fn coefficent(&mut self, coefficent: usize) -> &mut V::Scalar {
-        if coefficent == 0 {
-            &mut self.c
-        } else {
-            self.m.mut_at(coefficent - 1)
->>>>>>> b5d546ffebc39f1870d12426e798ff44c64f3b6f
         }
     }
 }
