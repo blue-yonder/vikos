@@ -21,7 +21,6 @@ struct Features{
 
 // Trait required by `vikos::model::Logistic`
 impl vikos::linear_algebra::Vector for Features{
-    type Scalar = f64;
 
     fn dimension(&self) -> usize{
         4

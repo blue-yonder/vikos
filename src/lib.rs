@@ -31,7 +31,7 @@ pub trait Expert<X>: Model {
     /// Type returned by the expert algorithm
     type Prediction;
     /// Type holding the gradients of the coefficents
-    type Gradient: linear_algebra::Vector<Scalar=f64>;
+    type Gradient: linear_algebra::Vector;
 
     /// Predicts a target for the inputs based on the internal coefficents
     fn predict(&self, &X) -> Self::Prediction;

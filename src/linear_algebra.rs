@@ -1,26 +1,20 @@
-use num::{Num, Zero, One};
-use rustc_serialize::{Encodable, Decodable};
-use std::fmt::Debug;
-
 /// Vector whose dimension is known at runtime
 ///
 /// Assumes the `Vector` is represented as a
 /// tuple of numbers representing its projection
 /// along orthogonal base vectors
 pub trait Vector: Clone {
-    /// Underlying scalar type of `Vector` type
-    type Scalar: Num + Zero + One + Copy + Encodable + Decodable + Default + Debug;
     /// Maximum allowed index for `at` and `mut_at`
     fn dimension(&self) -> usize;
     /// Length of projection along `i`-th base
-    fn at(&self, i: usize) -> Self::Scalar;
+    fn at(&self, i: usize) -> f64;
     /// Mutable access to length of projection along `i`-th base
-    fn mut_at(&mut self, i: usize) -> &mut Self::Scalar;
+    fn mut_at(&mut self, i: usize) -> &mut f64;
     /// Scalar product
     ///
     /// Default implementation using `at` and `dimension` is provided
-    fn dot(&self, other: &Self) -> Self::Scalar {
-        let mut result = Self::Scalar::zero();
+    fn dot(&self, other: &Self) -> f64 {
+        let mut result = 0.0;
         for i in 0..self.dimension() {
             result = result + self.at(i) * other.at(i)
         }
@@ -29,7 +23,7 @@ pub trait Vector: Clone {
     /// Scalar Multiplication
     ///
     /// Default implementation using `at` and `dimension` is provided
-    fn mul_scalar(&self, scalar: Self::Scalar) -> Self{
+    fn mul_scalar(&self, scalar: f64) -> Self{
         let mut copy = self.clone();
         for i in 0..self.dimension() {
             *copy.mut_at(i) = copy.at(i) * scalar
@@ -39,7 +33,6 @@ pub trait Vector: Clone {
 }
 
 impl Vector for f64 {
-    type Scalar = f64;
 
     fn dimension(&self) -> usize {
         1
@@ -61,8 +54,6 @@ impl Vector for f64 {
 macro_rules! vec_impl_for_array {
     ($v:expr) => {
         impl Vector for [f64; $v] {
-
-            type Scalar = f64;
 
             fn dimension(&self) -> usize{ $v }
 
@@ -110,29 +101,27 @@ vec_impl_for_array! { 30 }
 vec_impl_for_array! { 31 }
 vec_impl_for_array! { 32 }
 
-impl<V> Vector for (V::Scalar, V) where V: Vector{
-
-    type Scalar = V::Scalar;
+impl<V> Vector for (f64, V) where V: Vector{
 
     fn dimension(&self) -> usize {
         self.1.dimension() + 1
     }
 
-    fn at(&self, index: usize) -> V::Scalar {
+    fn at(&self, index: usize) -> f64 {
         match index {
             0 => self.0,
             _ => self.1.at(index - 1)
         }
     }
 
-    fn mut_at(&mut self, index: usize) -> &mut V::Scalar {
+    fn mut_at(&mut self, index: usize) -> &mut f64 {
         match index {
             0 => &mut self.0,
             _ => self.1.mut_at(index - 1)
         }
     }
 
-    fn dot(&self, other: &Self) -> V::Scalar {
+    fn dot(&self, other: &Self) -> f64 {
         self.0 * other.0 + self.1.dot(&other.1)
     }
 }
