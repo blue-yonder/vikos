@@ -45,8 +45,13 @@ impl<M> Teacher<M> for GradientDescent
               M: Expert<X>
     {
         let gradient = cost_gradient(features, truth, cost, model);
+<<<<<<< HEAD
         for ci in 0..model.num_coefficients() {
             *model.coefficient(ci) = *model.coefficient(ci) -
+=======
+        for ci in 0..model.num_coefficents() {
+            *model.coefficent(ci) = *model.coefficent(ci) -
+>>>>>>> b5d546ffebc39f1870d12426e798ff44c64f3b6f
                                     self.learning_rate * gradient.at(ci);
         }
     }
@@ -87,8 +92,13 @@ impl<M> Teacher<M> for GradientDescentAl
     {
         let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
         let gradient = cost_gradient(features, truth, cost, model);
+<<<<<<< HEAD
         for ci in 0..model.num_coefficients() {
             *model.coefficient(ci) = *model.coefficient(ci) -
+=======
+        for ci in 0..model.num_coefficents() {
+            *model.coefficent(ci) = *model.coefficent(ci) -
+>>>>>>> b5d546ffebc39f1870d12426e798ff44c64f3b6f
                                     learning_rate * gradient.at(ci);
         }
         *num_events += 1;
@@ -142,7 +152,11 @@ impl<M> Teacher<M> for Momentum
             velocity[ci] = self.inertia * velocity[ci] -
                            learning_rate * gradient.at(ci);
 
+<<<<<<< HEAD
             *model.coefficient(ci) = *model.coefficient(ci) + velocity[ci];
+=======
+            *model.coefficent(ci) = *model.coefficent(ci) + velocity[ci];
+>>>>>>> b5d546ffebc39f1870d12426e798ff44c64f3b6f
         }
         *num_events += 1;
     }
@@ -198,11 +212,19 @@ impl<M> Teacher<M> for Nesterov
         let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
         let gradient = cost_gradient(features, truth, cost, model);
 
+<<<<<<< HEAD
         for ci in 0..model.num_coefficients() {
             *model.coefficient(ci) = *model.coefficient(ci) + velocity[ci];
             let delta = -learning_rate * gradient.at(ci);
 
             *model.coefficient(ci) = *model.coefficient(ci) + delta;
+=======
+        for ci in 0..model.num_coefficents() {
+            *model.coefficent(ci) = *model.coefficent(ci) + velocity[ci];
+            let delta = -learning_rate * gradient.at(ci);
+
+            *model.coefficent(ci) = *model.coefficent(ci) + delta;
+>>>>>>> b5d546ffebc39f1870d12426e798ff44c64f3b6f
             velocity[ci] = self.inertia * velocity[ci] + delta;
         }
         *num_events += 1;
@@ -245,9 +267,15 @@ impl<M> Teacher<M> for Adagard
             M: Expert<X>
     {
         let gradient = cost_gradient(features, truth, cost, model);
+<<<<<<< HEAD
         for ci in 0..model.num_coefficients() {
             let delta = -self.learning_rate * gradient.at(ci) / squared_gradients[ci].sqrt();
             *model.coefficient(ci) += delta;
+=======
+        for ci in 0..model.num_coefficents() {
+            let delta = -self.learning_rate * gradient.at(ci) / squared_gradients[ci].sqrt();
+            *model.coefficent(ci) += delta;
+>>>>>>> b5d546ffebc39f1870d12426e798ff44c64f3b6f
             squared_gradients[ci] += gradient.at(ci).powi(2);
         }
     }
