@@ -224,7 +224,7 @@ fn logistic_sgd_2d_max_likelihood() {
     learn_history(&teacher,
                   &cost,
                   &mut model,
-                  history.iter().cycle().take(20).cloned());
+                  history.iter().cycle().take(25).cloned());
 
     println!("{:?}", model);
 
@@ -258,7 +258,7 @@ fn logistic_sgd_2d_max_likelihood_bool() {
     learn_history(&teacher,
                   &cost,
                   &mut model,
-                  history.iter().cycle().take(20).cloned());
+                  history.iter().cycle().take(25).cloned());
 
     println!("{:?}", model);
 
@@ -327,7 +327,7 @@ fn generalized_linear_model_as_logistic_regression() {
     learn_history(&teacher,
                   &cost,
                   &mut model,
-                  history.iter().cycle().take(20).cloned());
+                  history.iter().cycle().take(25).cloned());
 
     let classification_errors = history.iter()
         .map(|&(input, truth)| model.predict(&input).round() == if truth { 1.0 } else { 0.0 })

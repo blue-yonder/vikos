@@ -28,11 +28,16 @@ pub trait Model {
 /// Implementations of this trait can be found in
 /// [models](./model/index.html)
 pub trait Expert<X>: Model {
-    /// Predicts a target for the inputs based on the internal coefficients
-    fn predict(&self, &X) -> f64;
+    /// Type returned by the expert algorithm
+    type Prediction;
+    /// Type holding the gradients of the coefficents
+    type Gradient: linear_algebra::Vector;
 
-    /// Value predict derived by the n-th `coefficient` at `input`
-    fn gradient(&self, coefficient: usize, input: &X) -> f64;
+    /// Predicts a target for the inputs based on the internal coefficents
+    fn predict(&self, &X) -> Self::Prediction;
+
+    /// Value predict derived by the n-th `coefficent` at `input`
+    fn gradient(&self, input: &X) -> Self::Gradient;
 }
 
 /// Representing a cost function whose value is supposed be minimized by the
@@ -51,24 +56,13 @@ pub trait Expert<X>: Model {
 ///
 /// Implementations of this trait can be found in
 /// [cost](./cost/index.html)
-pub trait Cost<Truth> {
-    /// Value of the gradient of the cost function (i.e. the cost function
-    /// derived by the n-th coefficient at x expressed in Error(x) and dY(x)/dx
-    ///
-    /// This method is called by stochastic gradient descent (SGD)-based
-    /// training algorithm in order to determine the delta of the coefficients
-    ///
-    /// Implementors of this trait should implement `Cost::outer_derivative` and not overwrite this
-    /// method.
-    fn gradient(&self, prediction: f64, truth: Truth, derivative_of_model: f64) -> f64 {
-        self.outer_derivative(prediction, truth) * derivative_of_model
-    }
+pub trait Cost<P, T = P> {
 
     /// The outer derivative of the cost function with respect to the prediction.
-    fn outer_derivative(&self, prediction: f64, truth: Truth) -> f64;
+    fn outer_derivative(&self, prediction: P, truth: T) -> f64;
 
     /// Value of the cost function.
-    fn cost(&self, prediction: f64, truth: Truth) -> f64;
+    fn cost(&self, prediction: P, truth: T) -> f64;
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficients
@@ -90,7 +84,7 @@ pub trait Teacher<M: Model> {
                             cost: &C,
                             features: &X,
                             truth: Y)
-        where C: Cost<Y>,
+        where C: Cost<M::Prediction, Y>,
               Y: Copy,
               M: Expert<X>;
 }
@@ -98,7 +92,7 @@ pub trait Teacher<M: Model> {
 /// Teaches `model` all events in `history`
 pub fn learn_history<X, M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
     where M: Expert<X>,
-          C: Cost<Truth>,
+          C: Cost<M::Prediction, Truth>,
           T: Teacher<M>,
           H: IntoIterator<Item = (X, Truth)>,
           Truth: Copy

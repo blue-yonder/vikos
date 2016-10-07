@@ -16,15 +16,15 @@ impl Model for f64 {
 }
 
 impl<I> Expert<I> for f64 {
+    type Prediction = f64;
+    type Gradient = f64;
+
     fn predict(&self, _: &I) -> f64 {
         *self
     }
 
-    fn gradient(&self, coefficient: usize, _: &I) -> f64 {
-        match coefficient {
-            0 => 1.0,
-            _ => panic!("coefficient index out of range"),
-        }
+    fn gradient(&self, _: &I) -> f64 {
+        1.0
     }
 }
 
@@ -59,10 +59,10 @@ impl<V> Model for Linear<V> where V: Vector
     }
 
     fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
-        if coefficient == self.m.dimension() {
+        if coefficient == 0 {
             &mut self.c
         } else {
-            self.m.mut_at(coefficient)
+            self.m.mut_at(coefficient - 1)
         }
     }
 }
@@ -85,17 +85,15 @@ impl Expert<f64> for Linear<f64>
 
 impl<V> Expert<V> for Linear<V> where V: Vector
 {
+    type Prediction = f64;
+    type Gradient = (f64, V);
+
     fn predict(&self, input: &V) -> f64 {
         self.m.dot(input) + self.c
     }
 
-    fn gradient(&self, coefficient: usize, input: &V) -> f64 {
-
-        if coefficient == self.m.dimension() {
-            1.0 //derive by c
-        } else {
-            input.at(coefficient) //derive by m
-        }
+    fn gradient(&self, input: &V) -> (f64, V) {
+        (1.0, input.clone())
     }
 }
 
@@ -116,13 +114,16 @@ impl<V> Model for Logistic<V> where Linear<V>: Model
 
 impl<V> Expert<V> for Logistic<V> where Linear<V>: Expert<V>
 {
+    type Prediction = f64;
+    type Gradient = (f64, V);
+
     fn predict(&self, input: &V) -> f64 {
         1.0 / (1.0 + self.0.predict(input).exp())
     }
 
-    fn gradient(&self, coefficient: usize, input: &V) -> f64 {
+    fn gradient(&self, input: &V) -> (f64, V) {
         let p = self.predict(input);
-        -p * (1.0 - p) * self.0.gradient(coefficient, input)
+        self.0.gradient(input).mul_scalar(-p * (1.0 - p))
     }
 }
 
@@ -191,13 +192,16 @@ impl<V, F, Df> Expert<V> for GeneralizedLinearModel<V, F, Df>
           Df: Fn(f64) -> f64,
           Linear<V> : Expert<V>
 {
+    type Prediction = f64;
+    type Gradient = (f64, V);
+
     fn predict(&self, input: &V) -> f64 {
         let f = &self.g;
         f(self.linear.predict(&input))
     }
 
-    fn gradient(&self, coefficient: usize, input: &V) -> f64 {
+    fn gradient(&self, input: &V) -> (f64, V) {
         let f = &self.g_derivate;
-        f(self.linear.predict(&input)) * self.linear.gradient(coefficient, input)
+        self.linear.gradient(input).mul_scalar(f(self.linear.predict(&input)))
     }
 }

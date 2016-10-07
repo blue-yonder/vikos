@@ -20,6 +20,16 @@ pub trait Vector: Clone{
         }
         result
     }
+    /// Scalar Multiplication
+    ///
+    /// Default implementation using `at` and `dimension` is provided
+    fn mul_scalar(&self, scalar: f64) -> Self{
+        let mut copy = self.clone();
+        for i in 0..self.dimension() {
+            *copy.mut_at(i) = copy.at(i) * scalar
+        }
+        copy
+    }
 }
 
 macro_rules! vec_impl_for_array {
@@ -71,6 +81,31 @@ vec_impl_for_array! { 29 }
 vec_impl_for_array! { 30 }
 vec_impl_for_array! { 31 }
 vec_impl_for_array! { 32 }
+
+impl<V> Vector for (f64, V) where V: Vector{
+
+    fn dimension(&self) -> usize {
+        self.1.dimension() + 1
+    }
+
+    fn at(&self, index: usize) -> f64 {
+        match index {
+            0 => self.0,
+            _ => self.1.at(index - 1)
+        }
+    }
+
+    fn mut_at(&mut self, index: usize) -> &mut f64 {
+        match index {
+            0 => &mut self.0,
+            _ => self.1.mut_at(index - 1)
+        }
+    }
+
+    fn dot(&self, other: &Self) -> f64 {
+        self.0 * other.0 + self.1.dot(&other.1)
+    }
+}
 
 #[cfg(test)]
 mod tests {
