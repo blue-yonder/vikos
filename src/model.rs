@@ -34,17 +34,16 @@ pub struct Linear<V: Vector> {
     /// Slope
     pub m: V,
     /// Offset
-    pub c: V::Scalar,
+    pub c: f64,
 }
 
-impl<V> Model for Linear<V>
-    where V: Vector<Scalar = f64>
+impl<V> Model for Linear<V> where V: Vector
 {
     fn num_coefficients(&self) -> usize {
         self.m.dimension() + 1
     }
 
-    fn coefficient(&mut self, coefficient: usize) -> &mut V::Scalar {
+    fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
         if coefficient == self.m.dimension() {
             &mut self.c
         } else {
@@ -53,21 +52,18 @@ impl<V> Model for Linear<V>
     }
 }
 
-impl<V> Expert<V> for Linear<V>
-    where V: Vector<Scalar = f64>
+impl<V> Expert<V> for Linear<V> where V: Vector
 {
-    fn predict(&self, input: &V) -> V::Scalar {
+    fn predict(&self, input: &V) -> f64 {
         self.m.dot(input) + self.c
     }
 
-    fn gradient(&self, coefficient: usize, input: &V) -> V::Scalar {
-
-        use num::One;
+    fn gradient(&self, coefficient: usize, input: &V) -> f64 {
 
         if coefficient == self.m.dimension() {
-            V::Scalar::one() //c
+            1.0 //derive by c
         } else {
-            input.at(coefficient)
+            input.at(coefficient) //derive by m
         }
     }
 }
@@ -77,7 +73,7 @@ impl<V> Expert<V> for Linear<V>
 pub struct Logistic<V: Vector>(Linear<V>);
 
 impl<V> Model for Logistic<V>
-    where V: Vector<Scalar = f64>
+    where V: Vector
 {
     fn num_coefficients(&self) -> usize {
         self.0.num_coefficients()
@@ -89,7 +85,7 @@ impl<V> Model for Logistic<V>
 }
 
 impl<V> Expert<V> for Logistic<V>
-    where V: Vector<Scalar = f64>
+    where V: Vector
 {
     fn predict(&self, input: &V) -> f64 {
         1.0 / (1.0 + self.0.predict(input).exp())
@@ -151,7 +147,7 @@ impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
 impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
     where F: Fn(f64) -> f64,
           Df: Fn(f64) -> f64,
-          V: Vector<Scalar = f64>
+          V: Vector
 {
     fn num_coefficients(&self) -> usize {
         self.linear.num_coefficients()
@@ -165,7 +161,7 @@ impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
 impl<V, F, Df> Expert<V> for GeneralizedLinearModel<V, F, Df>
     where F: Fn(f64) -> f64,
           Df: Fn(f64) -> f64,
-          V: Vector<Scalar = f64>
+          V: Vector
 {
     fn predict(&self, input: &V) -> f64 {
         let f = &self.g;

@@ -1,26 +1,20 @@
-use num::{Num, Zero, One};
-use rustc_serialize::{Encodable, Decodable};
-use std::fmt::Debug;
-
 /// Vector whose dimension is known at runtime
 ///
 /// Assumes the `Vector` is represented as a
 /// tuple of numbers representing its projection
 /// along orthogonal base vectors
 pub trait Vector: Clone {
-    /// Underlying scalar type of `Vector` type
-    type Scalar: Num + Zero + One + Copy + Encodable + Decodable + Default + Debug;
     /// Maximum allowed index for `at` and `mut_at`
     fn dimension(&self) -> usize;
     /// Length of projection along `i`-th base
-    fn at(&self, i: usize) -> Self::Scalar;
+    fn at(&self, i: usize) -> f64;
     /// Mutable access to length of projection along `i`-th base
-    fn mut_at(&mut self, i: usize) -> &mut Self::Scalar;
+    fn mut_at(&mut self, i: usize) -> &mut f64;
     /// Scalar product
     ///
     /// Default implementation using `at` and `dimension` is provided
-    fn dot(&self, other: &Self) -> Self::Scalar {
-        let mut result = Self::Scalar::zero();
+    fn dot(&self, other: &Self) -> f64 {
+        let mut result = 0.0;
         for i in 0..self.dimension() {
             result = result + self.at(i) * other.at(i)
         }
@@ -29,7 +23,6 @@ pub trait Vector: Clone {
 }
 
 impl Vector for f64 {
-    type Scalar = f64;
 
     fn dimension(&self) -> usize {
         1
@@ -51,8 +44,6 @@ impl Vector for f64 {
 macro_rules! vec_impl_for_array {
     ($v:expr) => {
         impl Vector for [f64; $v] {
-
-            type Scalar = f64;
 
             fn dimension(&self) -> usize{ $v }
 
