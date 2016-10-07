@@ -30,11 +30,26 @@ impl<I> Expert<I> for f64 {
 
 /// Models the target as `y = m * x + c`
 #[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
-pub struct Linear<V: Vector> {
+pub struct Linear<V> {
     /// Slope
     pub m: V,
     /// Offset
     pub c: f64,
+}
+
+impl Model for Linear<f64>
+{
+    fn num_coefficients(&self) -> usize {
+        2
+    }
+
+    fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
+        if coefficient == 1 {
+            &mut self.c
+        } else {
+            &mut self.m
+        }
+    }
 }
 
 impl<V> Model for Linear<V> where V: Vector
@@ -48,6 +63,22 @@ impl<V> Model for Linear<V> where V: Vector
             &mut self.c
         } else {
             self.m.mut_at(coefficient)
+        }
+    }
+}
+
+impl Expert<f64> for Linear<f64>
+{
+    fn predict(&self, input: &f64) -> f64 {
+        self.m * input + self.c
+    }
+
+    fn gradient(&self, coefficient: usize, input: &f64) -> f64 {
+
+        if coefficient == 1 {
+            1.0 //derive by c
+        } else {
+            *input //derive by m
         }
     }
 }
@@ -70,10 +101,9 @@ impl<V> Expert<V> for Linear<V> where V: Vector
 
 /// Models target as `y = 1/(1+e^(m * x + c))`
 #[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
-pub struct Logistic<V: Vector>(Linear<V>);
+pub struct Logistic<V>(Linear<V>);
 
-impl<V> Model for Logistic<V>
-    where V: Vector
+impl<V> Model for Logistic<V> where Linear<V>: Model
 {
     fn num_coefficients(&self) -> usize {
         self.0.num_coefficients()
@@ -84,8 +114,7 @@ impl<V> Model for Logistic<V>
     }
 }
 
-impl<V> Expert<V> for Logistic<V>
-    where V: Vector
+impl<V> Expert<V> for Logistic<V> where Linear<V>: Expert<V>
 {
     fn predict(&self, input: &V) -> f64 {
         1.0 / (1.0 + self.0.predict(input).exp())
@@ -118,7 +147,7 @@ impl<V> Expert<V> for Logistic<V>
 ///               history.iter().cloned());
 /// ```
 #[derive(Clone)]
-pub struct GeneralizedLinearModel<V: Vector, G, Dg> {
+pub struct GeneralizedLinearModel<V, G, Dg> {
     /// `Linear` term of the generalized linear `Model`
     pub linear: Linear<V>,
     /// Outer function applied to the result of `linear`
@@ -128,8 +157,7 @@ pub struct GeneralizedLinearModel<V: Vector, G, Dg> {
 }
 
 impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
-    where V: Vector,
-          G: Fn(f64) -> f64,
+    where G: Fn(f64) -> f64,
           Dg: Fn(f64) -> f64
 {
     /// Creates new model with the coefficients set to zero
@@ -147,7 +175,7 @@ impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
 impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
     where F: Fn(f64) -> f64,
           Df: Fn(f64) -> f64,
-          V: Vector
+          Linear<V> : Model
 {
     fn num_coefficients(&self) -> usize {
         self.linear.num_coefficients()
@@ -161,7 +189,7 @@ impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
 impl<V, F, Df> Expert<V> for GeneralizedLinearModel<V, F, Df>
     where F: Fn(f64) -> f64,
           Df: Fn(f64) -> f64,
-          V: Vector
+          Linear<V> : Expert<V>
 {
     fn predict(&self, input: &V) -> f64 {
         let f = &self.g;
