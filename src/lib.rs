@@ -14,25 +14,25 @@ extern crate num;
 
 use std::iter::IntoIterator;
 
-/// Allows accessing and changing coefficients
-pub trait Model {
+/// A parameterized expert algorithm
+///
+/// Implementations of this trait can be found in
+/// [models](./model/index.html)
+pub trait Model{
+    /// Input from which to predict the target
+    type Features;
+
     /// The number of internal coefficients this model depends on
     fn num_coefficients(&self) -> usize;
 
     /// Mutable reference to the n-th `coefficient`
     fn coefficient(&mut self, coefficient: usize) -> &mut f64;
-}
 
-/// A parameterized expert algorithm
-///
-/// Implementations of this trait can be found in
-/// [models](./model/index.html)
-pub trait Expert<X>: Model {
     /// Predicts a target for the inputs based on the internal coefficients
-    fn predict(&self, &X) -> f64;
+    fn predict(&self, &Self::Features) -> f64;
 
     /// Value predict derived by the n-th `coefficient` at `input`
-    fn gradient(&self, coefficient: usize, input: &X) -> f64;
+    fn gradient(&self, coefficient: usize, input: &Self::Features) -> f64;
 }
 
 /// Representing a cost function whose value is supposed be minimized by the
@@ -84,23 +84,22 @@ pub trait Teacher<M: Model> {
     fn new_training(&self, model: &M) -> Self::Training;
 
     /// Changes `model`s coefficients so they minimize the `cost` function (hopefully)
-    fn teach_event<X, Y, C>(&self,
+    fn teach_event<Y, C>(&self,
                             training: &mut Self::Training,
                             model: &mut M,
                             cost: &C,
-                            features: &X,
+                            features: &M::Features,
                             truth: Y)
         where C: Cost<Y>,
-              Y: Copy,
-              M: Expert<X>;
+              Y: Copy;
 }
 
 /// Teaches `model` all events in `history`
-pub fn learn_history<X, M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
-    where M: Expert<X>,
+pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
+    where M: Model,
           C: Cost<Truth>,
           T: Teacher<M>,
-          H: IntoIterator<Item = (X, Truth)>,
+          H: IntoIterator<Item = (M::Features, Truth)>,
           Truth: Copy
 {
     let mut training = teacher.new_training(model);

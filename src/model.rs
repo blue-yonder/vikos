@@ -1,8 +1,9 @@
 use Model;
-use Expert;
 use linear_algebra::Vector;
 
 impl Model for f64 {
+    type Features = ();
+
     fn num_coefficients(&self) -> usize {
         1
     }
@@ -13,14 +14,12 @@ impl Model for f64 {
             _ => panic!("coefficient index out of range"),
         }
     }
-}
 
-impl<I> Expert<I> for f64 {
-    fn predict(&self, _: &I) -> f64 {
+    fn predict(&self, _: &()) -> f64 {
         *self
     }
 
-    fn gradient(&self, coefficient: usize, _: &I) -> f64 {
+    fn gradient(&self, coefficient: usize, _: &()) -> f64 {
         match coefficient {
             0 => 1.0,
             _ => panic!("coefficient index out of range"),
@@ -39,6 +38,8 @@ pub struct Linear<V> {
 
 impl Model for Linear<f64>
 {
+    type Features = f64;
+
     fn num_coefficients(&self) -> usize {
         2
     }
@@ -50,25 +51,7 @@ impl Model for Linear<f64>
             &mut self.m
         }
     }
-}
 
-impl<V> Model for Linear<V> where V: Vector
-{
-    fn num_coefficients(&self) -> usize {
-        self.m.dimension() + 1
-    }
-
-    fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
-        if coefficient == self.m.dimension() {
-            &mut self.c
-        } else {
-            self.m.mut_at(coefficient)
-        }
-    }
-}
-
-impl Expert<f64> for Linear<f64>
-{
     fn predict(&self, input: &f64) -> f64 {
         self.m * input + self.c
     }
@@ -83,8 +66,22 @@ impl Expert<f64> for Linear<f64>
     }
 }
 
-impl<V> Expert<V> for Linear<V> where V: Vector
+impl<V> Model for Linear<V> where V: Vector
 {
+    type Features = V;
+
+    fn num_coefficients(&self) -> usize {
+        self.m.dimension() + 1
+    }
+
+    fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
+        if coefficient == self.m.dimension() {
+            &mut self.c
+        } else {
+            self.m.mut_at(coefficient)
+        }
+    }
+
     fn predict(&self, input: &V) -> f64 {
         self.m.dot(input) + self.c
     }
@@ -103,8 +100,10 @@ impl<V> Expert<V> for Linear<V> where V: Vector
 #[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
 pub struct Logistic<V>(Linear<V>);
 
-impl<V> Model for Logistic<V> where Linear<V>: Model
+impl<V> Model for Logistic<V> where Linear<V>: Model<Features=V>
 {
+    type Features = V;
+
     fn num_coefficients(&self) -> usize {
         self.0.num_coefficients()
     }
@@ -112,10 +111,7 @@ impl<V> Model for Logistic<V> where Linear<V>: Model
     fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
         self.0.coefficient(coefficient)
     }
-}
 
-impl<V> Expert<V> for Logistic<V> where Linear<V>: Expert<V>
-{
     fn predict(&self, input: &V) -> f64 {
         1.0 / (1.0 + self.0.predict(input).exp())
     }
@@ -175,8 +171,10 @@ impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
 impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
     where F: Fn(f64) -> f64,
           Df: Fn(f64) -> f64,
-          Linear<V> : Model
+          Linear<V> : Model<Features=V>
 {
+    type Features = V;
+
     fn num_coefficients(&self) -> usize {
         self.linear.num_coefficients()
     }
@@ -184,13 +182,7 @@ impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
     fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
         self.linear.coefficient(coefficient)
     }
-}
 
-impl<V, F, Df> Expert<V> for GeneralizedLinearModel<V, F, Df>
-    where F: Fn(f64) -> f64,
-          Df: Fn(f64) -> f64,
-          Linear<V> : Expert<V>
-{
     fn predict(&self, input: &V) -> f64 {
         let f = &self.g;
         f(self.linear.predict(&input))

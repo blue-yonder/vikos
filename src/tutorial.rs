@@ -42,13 +42,13 @@
 //! learn_history(&teacher,
 //!               &cost,
 //!               &mut model,
-//!               history.iter().cycle().take(100).cloned());
+//!               history.iter().cycle().map(|&(x,y)|((),y)).take(100));
 //! // Since we know the model's type is `f64`, we can just print it
 //! println!("{}", model);
 //! ```
 //! As far as the mean is concerned, the first element of each tuple, i.e., the feature, is just
-//! ignored. The code would also compile if the first element would be an empty tuple or any other
-//! type for that matter.
+//! ignored. We use the map expression to replace it with an empty tuple '()' to show that this
+//! model does not use features
 //!
 //! ## Estimating the median target value
 //!
@@ -72,7 +72,7 @@
 //! learn_history(&teacher,
 //!               &cost,
 //!               &mut model,
-//!               history.iter().cycle().take(100).cloned());
+//!               history.iter().cycle().map(|&(x,y)|((),y)).take(100));
 //! ```
 //! Most notably we changed the cost function to train for the median. We also had to
 //! increase our learning rate to be able to converge to `7` more quickly. Maybe we
@@ -102,7 +102,7 @@
 //! learn_history(&teacher,
 //!               &cost,
 //!               &mut model,
-//!               history.iter().cycle().take(100).cloned());
+//!               history.iter().cycle().map(|&(x,y)|((),y)).take(100));
 //! println!("{}", model);
 //! ```
 //! The momentum term allowed us to drop our learning rate way quicker and to retrieve a
@@ -115,7 +115,7 @@
 //! We now use a linear model
 //!
 //! ```
-//! use vikos::{model, cost, teacher, learn_history, Expert};
+//! use vikos::{model, cost, teacher, learn_history, Model};
 //! // Best described by 2 * m - 3
 //! let history = [
 //!    (2.0, 1.0), (3.0, 3.0), (3.5, 4.0),
