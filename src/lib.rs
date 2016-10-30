@@ -52,17 +52,6 @@ pub trait Model{
 /// Implementations of this trait can be found in
 /// [cost](./cost/index.html)
 pub trait Cost<Truth> {
-    /// Value of the gradient of the cost function (i.e. the cost function
-    /// derived by the n-th coefficient at x expressed in Error(x) and dY(x)/dx
-    ///
-    /// This method is called by stochastic gradient descent (SGD)-based
-    /// training algorithm in order to determine the delta of the coefficients
-    ///
-    /// Implementors of this trait should implement `Cost::outer_derivative` and not overwrite this
-    /// method.
-    fn gradient(&self, prediction: f64, truth: Truth, derivative_of_model: f64) -> f64 {
-        self.outer_derivative(prediction, truth) * derivative_of_model
-    }
 
     /// The outer derivative of the cost function with respect to the prediction.
     fn outer_derivative(&self, prediction: f64, truth: Truth) -> f64;
@@ -113,7 +102,6 @@ pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, hi
 pub mod model;
 /// Implementations of `Cost` trait
 pub mod cost;
-pub mod training;
 pub mod teacher;
 /// Defines linear algebra traits used for some model parameters
 pub mod linear_algebra;

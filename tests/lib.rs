@@ -1,6 +1,6 @@
 extern crate vikos;
 
-use vikos::{cost, model, training, teacher};
+use vikos::{cost, model, teacher};
 use std::default::Default;
 
 #[test]
@@ -20,9 +20,7 @@ fn estimate_median() {
     for &truth in history.iter().cycle().take(150) {
 
         teacher.teach_event(&mut training, &mut model, &cost, &features, truth);
-        println!("model: {:?}, learning_rate: {:?}",
-                 model,
-                 training::annealed_learning_rate(training, teacher.l0, teacher.t));
+        println!("model: {:?}", model);
     }
 
     assert!(model < 7.1);
@@ -46,9 +44,7 @@ fn estimate_mean() {
     for &truth in history.iter().cycle().take(100) {
 
         teacher.teach_event(&mut training, &mut model, &cost, &features, truth);
-        println!("model: {:?}, learning_rate: {:?}",
-                 model,
-                 training::annealed_learning_rate(training, teacher.l0, teacher.t));
+        println!("model: {:?}", model);
     }
 
     assert!(model < 9.1);

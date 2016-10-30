@@ -1,9 +1,29 @@
 //! Learning algorithms implementing `Teacher` trait
 
-use ::training;
 use Teacher;
 use Model;
 use Cost;
+
+/// Calculates annealed learning rate
+///
+/// Smaller `t` will decrease the learning rate faster
+/// After `t` events the start learning rate will be a half of `start`,
+/// after two times `t` events the learning rate will be one third of `start`,
+/// and so on.
+fn annealed_learning_rate(num_events: usize, start: f64, t: f64) -> f64 {
+    start / (1.0 + num_events as f64 / t)
+}
+
+/// Value of the gradient of the cost function (i.e. the cost function
+/// derived by the n-th coefficient at x expressed in Error(x) and dY(x)/dx
+///
+/// This method is called by stochastic gradient descent (SGD)-based
+/// training algorithm in order to determine the delta of the coefficients
+fn gradient<T, C>(cost: &C, prediction: f64, truth: T, derivative_of_model: f64) -> f64
+    where C: Cost<T>
+{
+    cost.outer_derivative(prediction, truth) * derivative_of_model
+}
 
 /// Gradient descent
 ///
@@ -36,7 +56,7 @@ impl<M> Teacher<M> for GradientDescent
         for ci in 0..model.num_coefficients() {
             *model.coefficient(ci) = *model.coefficient(ci) -
                                     self.learning_rate *
-                                    cost.gradient(prediction, truth, model.gradient(ci, features));
+                                    gradient(cost, prediction, truth, model.gradient(ci, features));
         }
     }
 }
@@ -74,12 +94,12 @@ impl<M> Teacher<M> for GradientDescentAl
               Y: Copy
     {
         let prediction = model.predict(features);
-        let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
+        let learning_rate = annealed_learning_rate(*num_events, self.l0, self.t);
 
         for ci in 0..model.num_coefficients() {
             *model.coefficient(ci) = *model.coefficient(ci) -
                                     learning_rate *
-                                    cost.gradient(prediction, truth, model.gradient(ci, features));
+                                    gradient(cost, prediction, truth, model.gradient(ci, features));
         }
         *num_events += 1;
     }
@@ -127,12 +147,12 @@ impl<M> Teacher<M> for Momentum
         let mut num_events = &mut training.0;
         let mut velocity = &mut training.1;
         let prediction = model.predict(features);
-        let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
+        let learning_rate = annealed_learning_rate(*num_events, self.l0, self.t);
 
         for ci in 0..model.num_coefficients() {
             velocity[ci] = self.inertia * velocity[ci] -
                            learning_rate *
-                           cost.gradient(prediction, truth, model.gradient(ci, features));
+                           gradient(cost, prediction, truth, model.gradient(ci, features));
             *model.coefficient(ci) = *model.coefficient(ci) + velocity[ci];
         }
         *num_events += 1;
@@ -187,14 +207,14 @@ impl<M> Teacher<M> for Nesterov
         let mut num_events = &mut training.0;
         let mut velocity = &mut training.1;
         let prediction = model.predict(features);
-        let learning_rate = training::annealed_learning_rate(*num_events, self.l0, self.t);
+        let learning_rate = annealed_learning_rate(*num_events, self.l0, self.t);
 
         for ci in 0..model.num_coefficients() {
             *model.coefficient(ci) = *model.coefficient(ci) + velocity[ci];
         }
         for ci in 0..model.num_coefficients() {
             let delta = -learning_rate *
-                        cost.gradient(prediction, truth, model.gradient(ci, features));
+                        gradient(cost, prediction, truth, model.gradient(ci, features));
             *model.coefficient(ci) = *model.coefficient(ci) + delta;
             velocity[ci] = self.inertia * velocity[ci] + delta;
         }
@@ -239,7 +259,7 @@ impl<M> Teacher<M> for Adagard
 
         let prediction = model.predict(features);
         for ci in 0..model.num_coefficients() {
-            let gradient = cost.gradient(prediction, truth, model.gradient(ci, features));
+            let gradient = gradient(cost, prediction, truth, model.gradient(ci, features));
             let delta = -self.learning_rate * gradient / squared_gradients[ci].sqrt();
             *model.coefficient(ci) += delta;
             squared_gradients[ci] += gradient.powi(2);
