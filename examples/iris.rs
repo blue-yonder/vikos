@@ -10,42 +10,7 @@ use std::default::Default;
 
 const PATH : &'static str = "examples/data/iris.csv";
 
-/// A custom type used to hold all features
-#[derive(Clone, Default, RustcDecodable)]
-struct Features{
-    sepal_length : f64,
-    sepal_width : f64,
-    petal_length : f64,
-    petal_width : f64
-}
-
-// Trait required by `vikos::model::Logistic`
-impl vikos::linear_algebra::Vector for Features{
-
-    fn dimension(&self) -> usize{
-        4
-    }
-
-    fn at(&self, index : usize) -> f64{
-        match index{
-            0 => self.sepal_length,
-            1 => self.sepal_width,
-            2 => self.petal_length,
-            3 => self.petal_width,
-            _ => panic!("out of bounds")
-        }
-    }
-
-    fn mut_at(&mut self, index : usize) -> & mut f64{
-        match index{
-            0 => &mut self.sepal_length,
-            1 => &mut self.sepal_width,
-            2 => &mut self.petal_length,
-            3 => &mut self.petal_width,
-            _ => panic!("out of bounds")
-        }
-    }
-}
+type Features = [f64;4];
 
 fn main() {
 
