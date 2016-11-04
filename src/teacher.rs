@@ -34,7 +34,7 @@ pub struct GradientDescent {
 }
 
 impl<M> Teacher<M> for GradientDescent
-    where M: Model
+    where M: Model<Target = f64>
 {
     type Training = ();
 
@@ -43,20 +43,21 @@ impl<M> Teacher<M> for GradientDescent
     }
 
     fn teach_event<Y, C>(&self,
-                            _training: &mut (),
-                            model: &mut M,
-                            cost: &C,
-                            features: &M::Features,
-                            truth: Y)
+                         _training: &mut (),
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
         where C: Cost<Y>,
               Y: Copy
     {
         let prediction = model.predict(features);
 
         for ci in 0..model.num_coefficients() {
-            *model.coefficient(ci) = *model.coefficient(ci) -
-                                    self.learning_rate *
-                                    gradient(cost, prediction, truth, model.gradient(ci, features));
+            *model.coefficient(ci) =
+                *model.coefficient(ci) -
+                self.learning_rate *
+                gradient(cost, prediction, truth, model.gradient(ci, features));
         }
     }
 }
@@ -76,7 +77,7 @@ pub struct GradientDescentAl {
 }
 
 impl<M> Teacher<M> for GradientDescentAl
-    where M: Model
+    where M: Model<Target = f64>
 {
     type Training = usize;
 
@@ -85,11 +86,11 @@ impl<M> Teacher<M> for GradientDescentAl
     }
 
     fn teach_event<Y, C>(&self,
-                            num_events: &mut usize,
-                            model: &mut M,
-                            cost: &C,
-                            features: &M::Features,
-                            truth: Y)
+                         num_events: &mut usize,
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
         where C: Cost<Y>,
               Y: Copy
     {
@@ -97,9 +98,9 @@ impl<M> Teacher<M> for GradientDescentAl
         let learning_rate = annealed_learning_rate(*num_events, self.l0, self.t);
 
         for ci in 0..model.num_coefficients() {
-            *model.coefficient(ci) = *model.coefficient(ci) -
-                                    learning_rate *
-                                    gradient(cost, prediction, truth, model.gradient(ci, features));
+            *model.coefficient(ci) =
+                *model.coefficient(ci) -
+                learning_rate * gradient(cost, prediction, truth, model.gradient(ci, features));
         }
         *num_events += 1;
     }
@@ -122,7 +123,7 @@ pub struct Momentum {
 }
 
 impl<M> Teacher<M> for Momentum
-    where M: Model
+    where M: Model<Target = f64>
 {
     type Training = (usize, Vec<f64>);
 
@@ -135,11 +136,11 @@ impl<M> Teacher<M> for Momentum
     }
 
     fn teach_event<Y, C>(&self,
-                            training: &mut (usize, Vec<f64>),
-                            model: &mut M,
-                            cost: &C,
-                            features: &M::Features,
-                            truth: Y)
+                         training: &mut (usize, Vec<f64>),
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
         where C: Cost<Y>,
               Y: Copy
     {
@@ -182,7 +183,7 @@ pub struct Nesterov {
 }
 
 impl<M> Teacher<M> for Nesterov
-    where M: Model
+    where M: Model<Target = f64>
 {
     type Training = (usize, Vec<f64>);
 
@@ -195,11 +196,11 @@ impl<M> Teacher<M> for Nesterov
     }
 
     fn teach_event<Y, C>(&self,
-                            training: &mut (usize, Vec<f64>),
-                            model: &mut M,
-                            cost: &C,
-                            features: &M::Features,
-                            truth: Y)
+                         training: &mut (usize, Vec<f64>),
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
         where C: Cost<Y>,
               Y: Copy
     {
@@ -228,15 +229,15 @@ impl<M> Teacher<M> for Nesterov
 /// each coefficient. In effect the learning rate is smaller for frequent and larger for infrequent
 /// features.
 /// See [this paper](http://jmlr.org/papers/v12/duchi11a.html) for more information.
-pub struct Adagard{
+pub struct Adagard {
     /// The larger this parameter is, the more the coefficients will change with each iteration
-    pub learning_rate : f64,
+    pub learning_rate: f64,
     /// Small smoothing term, to avoid division by zero in first iteration
-    pub epsilon : f64
+    pub epsilon: f64,
 }
 
 impl<M> Teacher<M> for Adagard
-    where M: Model
+    where M: Model<Target = f64>
 {
     type Training = Vec<f64>;
 
@@ -248,13 +249,13 @@ impl<M> Teacher<M> for Adagard
     }
 
     fn teach_event<Y, C>(&self,
-                        squared_gradients: &mut Vec<f64>,
-                        model: &mut M,
-                        cost: &C,
-                        features: &M::Features,
-                        truth: Y)
-    where C: Cost<Y>,
-            Y: Copy
+                         squared_gradients: &mut Vec<f64>,
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
+        where C: Cost<Y>,
+              Y: Copy
     {
 
         let prediction = model.predict(features);

@@ -3,6 +3,7 @@ use linear_algebra::Vector;
 
 impl Model for f64 {
     type Features = ();
+    type Target = f64;
 
     fn num_coefficients(&self) -> usize {
         1
@@ -36,9 +37,9 @@ pub struct Linear<V> {
     pub c: f64,
 }
 
-impl Model for Linear<f64>
-{
+impl Model for Linear<f64> {
     type Features = f64;
+    type Target = f64;
 
     fn num_coefficients(&self) -> usize {
         2
@@ -66,9 +67,11 @@ impl Model for Linear<f64>
     }
 }
 
-impl<V> Model for Linear<V> where V: Vector
+impl<V> Model for Linear<V>
+    where V: Vector
 {
     type Features = V;
+    type Target = f64;
 
     fn num_coefficients(&self) -> usize {
         self.m.dimension() + 1
@@ -100,9 +103,11 @@ impl<V> Model for Linear<V> where V: Vector
 #[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
 pub struct Logistic<V>(Linear<V>);
 
-impl<V> Model for Logistic<V> where Linear<V>: Model<Features=V>
+impl<V> Model for Logistic<V>
+    where Linear<V>: Model<Features = V, Target = f64>
 {
     type Features = V;
+    type Target = f64;
 
     fn num_coefficients(&self) -> usize {
         self.0.num_coefficients()
@@ -171,9 +176,10 @@ impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
 impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
     where F: Fn(f64) -> f64,
           Df: Fn(f64) -> f64,
-          Linear<V> : Model<Features=V>
+          Linear<V>: Model<Features = V, Target = f64>
 {
     type Features = V;
+    type Target = f64;
 
     fn num_coefficients(&self) -> usize {
         self.linear.num_coefficients()
