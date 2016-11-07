@@ -6,7 +6,7 @@ use Cost;
 pub struct LeastSquares;
 
 impl Cost<f64> for LeastSquares {
-    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
+    fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
         let error = prediction - truth;
         2.0 * error
     }
@@ -23,7 +23,7 @@ impl Cost<f64> for LeastSquares {
 pub struct LeastAbsoluteDeviation;
 
 impl Cost<f64> for LeastAbsoluteDeviation {
-    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
+    fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
         let error = prediction - truth;
         if error > 0.0 {
             1.0
@@ -76,7 +76,7 @@ impl Cost<f64> for LeastAbsoluteDeviation {
 pub struct MaxLikelihood;
 
 impl Cost<f64> for MaxLikelihood {
-    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
+    fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
         ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
     }
     fn cost(&self, prediction: f64, truth: f64) -> f64 {
@@ -85,11 +85,24 @@ impl Cost<f64> for MaxLikelihood {
 }
 
 impl Cost<bool> for MaxLikelihood {
-    fn outer_derivative(&self, prediction: f64, truth: bool) -> f64 {
+    fn outer_derivative(&self, prediction: &f64, truth: bool) -> f64 {
         1. / if truth { -prediction } else { 1.0 - prediction }
     }
     fn cost(&self, prediction: f64, truth: bool) -> f64 {
         -(if truth { prediction } else { 1.0 - prediction }).ln()
+    }
+}
+
+impl Cost<usize, [f64; 3]> for MaxLikelihood {
+    fn outer_derivative(&self, prediction: &[f64; 3], truth: usize) -> [f64; 3] {
+        let mut derivation = [0.0; 3];
+        for i in 0..3 {
+            derivation[i] = self.outer_derivative(&prediction[i], truth == i);
+        }
+        derivation
+    }
+    fn cost(&self, prediction: [f64; 3], truth: usize) -> f64 {
+        (0..3).fold(0.0, |s, i| s + self.cost(prediction[i], i == truth))
     }
 }
 
@@ -112,7 +125,7 @@ mod test {
 
     // Returns absolute difference between derivate and approximation
     fn check_derivate<T: Copy>(cost: &Cost<T>, prediction: f64, truth: T) -> f64 {
-        let derivate = cost.outer_derivative(prediction, truth);
+        let derivate = cost.outer_derivative(&prediction, truth);
         let approx = approx_derivate(cost, prediction, truth);
         println!("derivation: {}, approximation: {}", derivate, approx);
         (derivate - approx).abs()
@@ -142,9 +155,9 @@ mod test {
         assert!(check_derivate(&cost, 0.8, true) < 0.001);
         assert!(check_derivate(&cost, 0.2, 0.0) < 0.001);
         assert!(check_derivate(&cost, 0.8, 1.0) < 0.001);
-        assert_eq!(cost.outer_derivative(0.2, false),
-                   cost.outer_derivative(0.2, 0.0));
-        assert_eq!(cost.outer_derivative(0.8, true),
-                   cost.outer_derivative(0.8, 1.0));
+        assert_eq!(cost.outer_derivative(&0.2, false),
+                   cost.outer_derivative(&0.2, 0.0));
+        assert_eq!(cost.outer_derivative(&0.8, true),
+                   cost.outer_derivative(&0.8, 1.0));
     }
 }

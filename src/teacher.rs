@@ -22,7 +22,7 @@ fn annealed_learning_rate(num_events: usize, start: f64, t: f64) -> f64 {
 fn gradient<T, C>(cost: &C, prediction: f64, truth: T, derivative_of_model: f64) -> f64
     where C: Cost<T>
 {
-    cost.outer_derivative(prediction, truth) * derivative_of_model
+    cost.outer_derivative(&prediction, truth) * derivative_of_model
 }
 
 /// Gradient descent

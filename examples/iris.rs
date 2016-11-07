@@ -39,8 +39,11 @@ impl Model for IrisModel {
          self.class_models[2].predict(input)]
     }
 
-    fn gradient(&self, coefficient: usize, input: &Self::Features) -> f64 {
-        0.0
+    fn gradient(&self, coefficient: usize, input: &Self::Features) -> [f64; 3] {
+        let index = coefficient / (4 + 1);
+        let mut result = [0.0; 3];
+        result[index] = self.class_models[index].gradient(coefficient % (4 + 1), input);
+        result
     }
 }
 
@@ -64,9 +67,20 @@ impl Teacher<IrisModel> for IrisTeacher {
                          cost: &C,
                          features: &Features,
                          truth: Y)
-        where C: Cost<Y>,
+        where C: Cost<Y, [f64; 3]>,
               Y: Copy
     {
+        let prediction = model.predict(features);
+        let cost = cost.outer_derivative(&prediction, truth);
+
+        for ci in 0..model.num_coefficients() {
+            let inner_derivative = model.gradient(ci, features);
+            //     let delta = -learning_rate *
+            //                 gradient(cost, prediction, truth, model.gradient(ci, features));
+            //     *model.coefficient(ci) = *model.coefficient(ci) + delta;
+            //     velocity[ci] = self.inertia * velocity[ci] + delta;
+        }
+        // *num_events += 1;
     }
 }
 
@@ -104,6 +118,8 @@ fn main() {
                 _ => panic!("unknown Iris class: {}", truth),
             };
 
+            teacher.teach_event(&mut training, &mut model, &cost, &features, class);
+
             for i in 0..3 {
                 teacher.teacher.teach_event(&mut training[i],
                                             &mut model.class_models[i],
@@ -114,17 +130,9 @@ fn main() {
 
             // Make prediction using current expertise
             let p = model.predict(&features);
-            let prediction = if p[0] > p[1] {
-                if p[0] > p[2] { "setosa" } else { "virginica" }
-            } else {
-                if p[1] > p[2] {
-                    "versicolor"
-                } else {
-                    "virginica"
-                }
-            };
+            let prediction = (0..3).fold(0, |m, c| if p[c] > p[m] { c } else { m });
 
-            if prediction == truth {
+            if prediction == class {
                 hit += 1;
             } else {
                 miss += 1;
