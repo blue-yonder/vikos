@@ -3,6 +3,7 @@
 use Teacher;
 use Model;
 use Cost;
+use linear_algebra::Vector;
 
 /// Calculates annealed learning rate
 ///
@@ -19,10 +20,11 @@ fn annealed_learning_rate(num_events: usize, start: f64, t: f64) -> f64 {
 ///
 /// This method is called by stochastic gradient descent (SGD)-based
 /// training algorithm in order to determine the delta of the coefficients
-fn gradient<T, C>(cost: &C, prediction: f64, truth: T, derivative_of_model: f64) -> f64
-    where C: Cost<T>
+fn gradient<T, P, C>(cost: &C, prediction: &P, truth: T, derivative_of_model: &P) -> f64
+    where C: Cost<T, P>,
+          P: Vector
 {
-    cost.outer_derivative(&prediction, truth) * derivative_of_model
+    cost.outer_derivative(&prediction, truth).dot(derivative_of_model)
 }
 
 /// Gradient descent
@@ -57,7 +59,7 @@ impl<M> Teacher<M> for GradientDescent
             *model.coefficient(ci) =
                 *model.coefficient(ci) -
                 self.learning_rate *
-                gradient(cost, prediction, truth, model.gradient(ci, features));
+                gradient(cost, &prediction, truth, &model.gradient(ci, features));
         }
     }
 }
@@ -100,7 +102,7 @@ impl<M> Teacher<M> for GradientDescentAl
         for ci in 0..model.num_coefficients() {
             *model.coefficient(ci) =
                 *model.coefficient(ci) -
-                learning_rate * gradient(cost, prediction, truth, model.gradient(ci, features));
+                learning_rate * gradient(cost, &prediction, truth, &model.gradient(ci, features));
         }
         *num_events += 1;
     }
@@ -153,7 +155,7 @@ impl<M> Teacher<M> for Momentum
         for ci in 0..model.num_coefficients() {
             velocity[ci] = self.inertia * velocity[ci] -
                            learning_rate *
-                           gradient(cost, prediction, truth, model.gradient(ci, features));
+                           gradient(cost, &prediction, truth, &model.gradient(ci, features));
             *model.coefficient(ci) = *model.coefficient(ci) + velocity[ci];
         }
         *num_events += 1;
@@ -183,7 +185,8 @@ pub struct Nesterov {
 }
 
 impl<M> Teacher<M> for Nesterov
-    where M: Model<Target = f64>
+    where M: Model,
+          M::Target: Vector
 {
     type Training = (usize, Vec<f64>);
 
@@ -201,7 +204,7 @@ impl<M> Teacher<M> for Nesterov
                          cost: &C,
                          features: &M::Features,
                          truth: Y)
-        where C: Cost<Y>,
+        where C: Cost<Y, M::Target>,
               Y: Copy
     {
         let mut num_events = &mut training.0;
@@ -214,7 +217,7 @@ impl<M> Teacher<M> for Nesterov
         }
         for ci in 0..model.num_coefficients() {
             let delta = -learning_rate *
-                        gradient(cost, prediction, truth, model.gradient(ci, features));
+                        gradient(cost, &prediction, truth, &model.gradient(ci, features));
             *model.coefficient(ci) = *model.coefficient(ci) + delta;
             velocity[ci] = self.inertia * velocity[ci] + delta;
         }
@@ -259,7 +262,7 @@ impl<M> Teacher<M> for Adagard
 
         let prediction = model.predict(features);
         for ci in 0..model.num_coefficients() {
-            let gradient = gradient(cost, prediction, truth, model.gradient(ci, features));
+            let gradient = gradient(cost, &prediction, truth, &model.gradient(ci, features));
             let delta = -self.learning_rate * gradient / squared_gradients[ci].sqrt();
             *model.coefficient(ci) += delta;
             squared_gradients[ci] += gradient.powi(2);

@@ -20,6 +20,20 @@ pub trait Vector: Clone {
         }
         result
     }
+
+    /// Multiplies each element of the vector with `scalar`
+    fn mut_scalar_mul(&mut self, scalar: f64) {
+        for i in 0..self.dimension() {
+            *self.mut_at(i) *= scalar;
+        }
+    }
+
+    /// Multiplies each element of the vector with `scalar`
+    fn scalar_mul(self, scalar: f64) -> Self {
+        let mut result = self;
+        result.mut_scalar_mul(scalar);
+        result
+    }
 }
 
 macro_rules! vec_impl_for_array {
@@ -54,6 +68,14 @@ impl Vector for f64 {
 
     fn dot(&self, other: &Self) -> f64 {
         self * other
+    }
+
+    fn mut_scalar_mul(&mut self, scalar: f64) {
+        *self *= scalar
+    }
+
+    fn scalar_mul(self, scalar: f64) -> Self {
+        self * scalar
     }
 }
 

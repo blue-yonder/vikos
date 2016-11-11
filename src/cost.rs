@@ -1,4 +1,5 @@
 use Cost;
+use linear_algebra::Vector;
 
 /// Pass an instance of this type to a training algorithm to optimize for C=Error^2
 ///
@@ -93,16 +94,18 @@ impl Cost<bool> for MaxLikelihood {
     }
 }
 
-impl Cost<usize, [f64; 3]> for MaxLikelihood {
-    fn outer_derivative(&self, prediction: &[f64; 3], truth: usize) -> [f64; 3] {
-        let mut derivation = [0.0; 3];
-        for i in 0..3 {
-            derivation[i] = self.outer_derivative(&prediction[i], truth == i);
+impl<V> Cost<usize, V> for MaxLikelihood
+    where V: Vector
+{
+    fn outer_derivative(&self, prediction: &V, truth: usize) -> V {
+        let mut derivation = prediction.clone();
+        for i in 0..prediction.dimension() {
+            *derivation.mut_at(i) = self.outer_derivative(&prediction.at(i), truth == i);
         }
         derivation
     }
-    fn cost(&self, prediction: [f64; 3], truth: usize) -> f64 {
-        (0..3).fold(0.0, |s, i| s + self.cost(prediction[i], i == truth))
+    fn cost(&self, prediction: V, truth: usize) -> f64 {
+        (0..prediction.dimension()).fold(0.0, |s, i| s + self.cost(prediction.at(i), i == truth))
     }
 }
 

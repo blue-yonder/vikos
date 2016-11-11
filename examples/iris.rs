@@ -6,7 +6,6 @@ extern crate vikos;
 extern crate rustc_serialize;
 
 use vikos::{Teacher, Model, Cost};
-use vikos::linear_algebra::Vector;
 use std::default::Default;
 
 const PATH: &'static str = "examples/data/iris.csv";
@@ -48,63 +47,9 @@ impl Model for IrisModel {
     }
 }
 
-struct IrisTeacher {
-    /// Start learning rate
-    pub l0: f64,
-    /// Smaller t will decrease the learning rate faster
-    ///
-    /// After t events the start learning rate will be a half `l0`,
-    /// after two t events the learning rate will be one third `l0`,
-    /// and so on.
-    pub t: f64,
-    /// To simulate friction, please select a value smaller than 1 (recommended)
-    pub inertia: f64,
-}
-
-impl<M> Teacher<M> for IrisTeacher
-    where M: Model<Target = [f64; 3]>
-{
-    type Training = (usize, Vec<f64>);
-
-    fn new_training(&self, model: &M) -> (usize, Vec<f64>) {
-
-        let mut velocity = Vec::with_capacity(model.num_coefficients());
-        velocity.resize(model.num_coefficients(), 0.0);
-
-        (0, velocity)
-    }
-
-    fn teach_event<Y, C>(&self,
-                         training: &mut Self::Training,
-                         model: &mut M,
-                         cost: &C,
-                         features: &M::Features,
-                         truth: Y)
-        where C: Cost<Y, [f64; 3]>,
-              Y: Copy
-    {
-        let mut num_events = &mut training.0;
-        let mut velocity = &mut training.1;
-        let prediction = model.predict(features);
-        let learning_rate = self.l0 / (1.0 + *num_events as f64 / self.t);
-
-        for ci in 0..model.num_coefficients() {
-            *model.coefficient(ci) = *model.coefficient(ci) + velocity[ci];
-        }
-        for ci in 0..model.num_coefficients() {
-            let delta = -learning_rate *
-                        cost.outer_derivative(&prediction, truth)
-                .dot(&model.gradient(ci, features));
-            *model.coefficient(ci) = *model.coefficient(ci) + delta;
-            velocity[ci] = self.inertia * velocity[ci] + delta;
-        }
-        *num_events += 1;
-    }
-}
-
 fn main() {
 
-    let teacher = IrisTeacher {
+    let teacher = vikos::teacher::Nesterov {
         l0: 0.0001,
         t: 1000.0,
         inertia: 0.99,
