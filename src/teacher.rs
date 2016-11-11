@@ -36,7 +36,8 @@ pub struct GradientDescent {
 }
 
 impl<M> Teacher<M> for GradientDescent
-    where M: Model<Target = f64>
+    where M: Model,
+          M::Target: Vector
 {
     type Training = ();
 
@@ -50,7 +51,7 @@ impl<M> Teacher<M> for GradientDescent
                          cost: &C,
                          features: &M::Features,
                          truth: Y)
-        where C: Cost<Y>,
+        where C: Cost<Y, M::Target>,
               Y: Copy
     {
         let prediction = model.predict(features);
@@ -79,7 +80,8 @@ pub struct GradientDescentAl {
 }
 
 impl<M> Teacher<M> for GradientDescentAl
-    where M: Model<Target = f64>
+    where M: Model,
+          M::Target: Vector
 {
     type Training = usize;
 
@@ -93,7 +95,7 @@ impl<M> Teacher<M> for GradientDescentAl
                          cost: &C,
                          features: &M::Features,
                          truth: Y)
-        where C: Cost<Y>,
+        where C: Cost<Y, M::Target>,
               Y: Copy
     {
         let prediction = model.predict(features);
@@ -125,7 +127,8 @@ pub struct Momentum {
 }
 
 impl<M> Teacher<M> for Momentum
-    where M: Model<Target = f64>
+    where M: Model,
+          M::Target: Vector
 {
     type Training = (usize, Vec<f64>);
 
@@ -143,12 +146,10 @@ impl<M> Teacher<M> for Momentum
                          cost: &C,
                          features: &M::Features,
                          truth: Y)
-        where C: Cost<Y>,
+        where C: Cost<Y, M::Target>,
               Y: Copy
     {
-        // let (ref mut num_events, ref mut velocity) = *training; ok?
-        let mut num_events = &mut training.0;
-        let mut velocity = &mut training.1;
+        let (ref mut num_events, ref mut velocity) = *training;
         let prediction = model.predict(features);
         let learning_rate = annealed_learning_rate(*num_events, self.l0, self.t);
 
@@ -207,8 +208,7 @@ impl<M> Teacher<M> for Nesterov
         where C: Cost<Y, M::Target>,
               Y: Copy
     {
-        let mut num_events = &mut training.0;
-        let mut velocity = &mut training.1;
+        let (ref mut num_events, ref mut velocity) = *training;
         let prediction = model.predict(features);
         let learning_rate = annealed_learning_rate(*num_events, self.l0, self.t);
 
@@ -239,7 +239,8 @@ pub struct Adagard {
 }
 
 impl<M> Teacher<M> for Adagard
-    where M: Model<Target = f64>
+    where M: Model,
+          M::Target: Vector
 {
     type Training = Vec<f64>;
 
@@ -256,7 +257,7 @@ impl<M> Teacher<M> for Adagard
                          cost: &C,
                          features: &M::Features,
                          truth: Y)
-        where C: Cost<Y>,
+        where C: Cost<Y, M::Target>,
               Y: Copy
     {
 
