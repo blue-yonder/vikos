@@ -3,7 +3,7 @@
 /// Assumes the `Vector` is represented as a
 /// tuple of numbers representing its projection
 /// along orthogonal base vectors
-pub trait Vector: Clone{
+pub trait Vector: Clone {
     /// Maximum allowed index for `at` and `mut_at`
     fn dimension(&self) -> usize;
     /// Length of projection along `i`-th base
@@ -36,6 +36,24 @@ macro_rules! vec_impl_for_array {
                 &mut self[index]
             }
         }
+    }
+}
+
+impl Vector for f64 {
+    fn dimension(&self) -> usize {
+        1
+    }
+    fn at(&self, i: usize) -> f64 {
+        assert!(i == 0);
+        *self
+    }
+    fn mut_at(&mut self, i: usize) -> &mut f64 {
+        assert!(i == 0);
+        self
+    }
+
+    fn dot(&self, other: &Self) -> f64 {
+        self * other
     }
 }
 

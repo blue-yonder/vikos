@@ -37,36 +37,6 @@ pub struct Linear<V> {
     pub c: f64,
 }
 
-impl Model for Linear<f64> {
-    type Features = f64;
-    type Target = f64;
-
-    fn num_coefficients(&self) -> usize {
-        2
-    }
-
-    fn coefficient(&mut self, coefficient: usize) -> &mut f64 {
-        if coefficient == 1 {
-            &mut self.c
-        } else {
-            &mut self.m
-        }
-    }
-
-    fn predict(&self, input: &f64) -> f64 {
-        self.m * input + self.c
-    }
-
-    fn gradient(&self, coefficient: usize, input: &f64) -> f64 {
-
-        if coefficient == 1 {
-            1.0 //derive by c
-        } else {
-            *input //derive by m
-        }
-    }
-}
-
 impl<V> Model for Linear<V>
     where V: Vector
 {

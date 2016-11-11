@@ -204,7 +204,6 @@ impl<M> Teacher<M> for Nesterov
         where C: Cost<Y>,
               Y: Copy
     {
-
         let mut num_events = &mut training.0;
         let mut velocity = &mut training.1;
         let prediction = model.predict(features);
