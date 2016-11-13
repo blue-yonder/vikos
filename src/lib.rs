@@ -100,7 +100,7 @@ pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, hi
         teacher.teach_event(&mut training, model, cost, &features, truth);
     }
 }
-
+mod array;
 /// Implementations of `Model` trait
 pub mod model;
 /// Implementations of `Cost` trait

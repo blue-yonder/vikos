@@ -1,5 +1,6 @@
 use Model;
 use linear_algebra::Vector;
+use array;
 
 impl Model for f64 {
     type Features = ();
@@ -167,5 +168,51 @@ impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
     fn gradient(&self, coefficient: usize, input: &V) -> f64 {
         let f = &self.g_derivate;
         f(self.linear.predict(&input)) * self.linear.gradient(coefficient, input)
+    }
+}
+
+/// One vs Rest strategy for multi classification
+///
+/// Implementation assumes that the number of coefficients
+/// is the same for all models.
+#[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
+pub struct OneVsRest<T>(T);
+
+impl<T> Model for OneVsRest<T>
+    where T: array::Array,
+          T::Element: Model<Target = f64>
+{
+    type Features = <T::Element as Model>::Features;
+    type Target = T::Vector;
+
+    fn num_coefficients(&self) -> usize {
+        let models = &self.0;
+        models.length() * models.at_ref(0).num_coefficients()
+    }
+
+    fn coefficient(&mut self, index: usize) -> &mut f64 {
+        // If our one vs Rest classifier consists of three models a,b,c with three coefficients 1,2
+        // ,3 each we list the coefficients of the combined model as a1,b1,c1,a2,b2,c2,a3,b3,c3.
+        let models = &mut self.0;
+        let class = index % models.length();
+        let n = index / models.length();
+        models.at_mut(class).coefficient(n)
+    }
+
+    fn predict(&self, input: &Self::Features) -> Self::Target {
+        let models = &self.0;
+        let mut result = Self::Target::zero(models.length());
+        for i in 0..models.length() {
+            *result.mut_at(i) = models.at_ref(i).predict(input);
+        }
+        result
+    }
+
+    fn gradient(&self, coefficient: usize, input: &Self::Features) -> Self::Target {
+        let models = &self.0;
+        let class = coefficient % models.length();
+        let mut result = Self::Target::zero(models.length());
+        *result.mut_at(class) = models.at_ref(class).gradient(coefficient / models.length(), input);
+        result
     }
 }
