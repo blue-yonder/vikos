@@ -1,4 +1,5 @@
 use Cost;
+use linear_algebra::Vector;
 
 /// Pass an instance of this type to a training algorithm to optimize for C=Error^2
 ///
@@ -6,7 +7,7 @@ use Cost;
 pub struct LeastSquares;
 
 impl Cost<f64> for LeastSquares {
-    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
+    fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
         let error = prediction - truth;
         2.0 * error
     }
@@ -23,7 +24,7 @@ impl Cost<f64> for LeastSquares {
 pub struct LeastAbsoluteDeviation;
 
 impl Cost<f64> for LeastAbsoluteDeviation {
-    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
+    fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
         let error = prediction - truth;
         if error > 0.0 {
             1.0
@@ -76,7 +77,7 @@ impl Cost<f64> for LeastAbsoluteDeviation {
 pub struct MaxLikelihood;
 
 impl Cost<f64> for MaxLikelihood {
-    fn outer_derivative(&self, prediction: f64, truth: f64) -> f64 {
+    fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
         ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
     }
     fn cost(&self, prediction: f64, truth: f64) -> f64 {
@@ -85,11 +86,26 @@ impl Cost<f64> for MaxLikelihood {
 }
 
 impl Cost<bool> for MaxLikelihood {
-    fn outer_derivative(&self, prediction: f64, truth: bool) -> f64 {
+    fn outer_derivative(&self, prediction: &f64, truth: bool) -> f64 {
         1. / if truth { -prediction } else { 1.0 - prediction }
     }
     fn cost(&self, prediction: f64, truth: bool) -> f64 {
         -(if truth { prediction } else { 1.0 - prediction }).ln()
+    }
+}
+
+impl<V> Cost<usize, V> for MaxLikelihood
+    where V: Vector
+{
+    fn outer_derivative(&self, prediction: &V, truth: usize) -> V {
+        let mut derivation = prediction.clone();
+        for i in 0..prediction.dimension() {
+            *derivation.mut_at(i) = self.outer_derivative(&prediction.at(i), truth == i);
+        }
+        derivation
+    }
+    fn cost(&self, prediction: V, truth: usize) -> f64 {
+        (0..prediction.dimension()).fold(0.0, |s, i| s + self.cost(prediction.at(i), i == truth))
     }
 }
 
@@ -112,7 +128,7 @@ mod test {
 
     // Returns absolute difference between derivate and approximation
     fn check_derivate<T: Copy>(cost: &Cost<T>, prediction: f64, truth: T) -> f64 {
-        let derivate = cost.outer_derivative(prediction, truth);
+        let derivate = cost.outer_derivative(&prediction, truth);
         let approx = approx_derivate(cost, prediction, truth);
         println!("derivation: {}, approximation: {}", derivate, approx);
         (derivate - approx).abs()
@@ -142,9 +158,9 @@ mod test {
         assert!(check_derivate(&cost, 0.8, true) < 0.001);
         assert!(check_derivate(&cost, 0.2, 0.0) < 0.001);
         assert!(check_derivate(&cost, 0.8, 1.0) < 0.001);
-        assert_eq!(cost.outer_derivative(0.2, false),
-                   cost.outer_derivative(0.2, 0.0));
-        assert_eq!(cost.outer_derivative(0.8, true),
-                   cost.outer_derivative(0.8, 1.0));
+        assert_eq!(cost.outer_derivative(&0.2, false),
+                   cost.outer_derivative(&0.2, 0.0));
+        assert_eq!(cost.outer_derivative(&0.8, true),
+                   cost.outer_derivative(&0.8, 1.0));
     }
 }

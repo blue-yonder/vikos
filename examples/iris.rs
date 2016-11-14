@@ -8,29 +8,27 @@ extern crate rustc_serialize;
 use vikos::{Teacher, Model};
 use std::default::Default;
 
-const PATH : &'static str = "examples/data/iris.csv";
+const PATH: &'static str = "examples/data/iris.csv";
 
-type Features = [f64;4];
+type Features = [f64; 4];
 
 fn main() {
 
-    let teacher = vikos::teacher::Nesterov{l0 : 0.0001, t: 1000.0, inertia: 0.99};
-    let cost = vikos::cost::MaxLikelihood{};
+    let teacher = vikos::teacher::Nesterov {
+        l0: 0.0001,
+        t: 1000.0,
+        inertia: 0.99,
+    };
+    let cost = vikos::cost::MaxLikelihood {};
 
-    // We train three binary classifiers. One for each specis of iris.
-    // Each of this classifiers will tell us the propability of an
-    // observation belonging to its particular class
-    let mut setosa = vikos::model::Logistic::default();
-    let mut versicolor = vikos::model::Logistic::default();
-    let mut virginica = vikos::model::Logistic::default();
+    // Train three individual three Logistic models, one for each class of Iris.
+    let mut model = vikos::model::OneVsRest::<[vikos::model::Logistic<_>; 3]>::default();
 
     // Each of the classifieres has its own training state
-    let mut train_setosa = teacher.new_training(&setosa);
-    let mut train_versicolor = teacher.new_training(&versicolor);
-    let mut train_virginica = teacher.new_training(&virginica);
+    let mut training = teacher.new_training(&model);
 
     // Read iris Data
-    for epoch in 0..300{
+    for epoch in 0..300 {
         let mut rdr = csv::Reader::from_file(PATH).expect("File is ok");
         let mut hit = 0;
         let mut miss = 0;
@@ -38,22 +36,25 @@ fn main() {
         for row in rdr.decode() {
 
             // Learn event
-            let (truth, features) : (String, Features) = row.unwrap();
-            teacher.teach_event(&mut train_setosa, &mut setosa, &cost, &features, truth == "setosa");
-            teacher.teach_event(&mut train_versicolor, &mut versicolor, &cost, &features, truth == "versicolor");
-            teacher.teach_event(&mut train_virginica, &mut virginica, &cost, &features, truth == "virginica");
+            let (truth, features): (String, Features) = row.unwrap();
 
-            // Make prediction using current expertise
-            let p_setosa = setosa.predict(&features);
-            let p_versicolor = versicolor.predict(&features);
-            let p_virginica = virginica.predict(&features);
-            let prediction = if p_setosa > p_versicolor {
-                if p_setosa > p_virginica { "setosa" } else { "virginica" }
-            } else {
-                if p_versicolor > p_virginica { "versicolor" } else { "virginica" }
+            let class = match truth.as_ref() {
+                "setosa" => 0,
+                "versicolor" => 1,
+                "virginica" => 2,
+                _ => panic!("unknown Iris class: {}", truth),
             };
 
-            if prediction == truth{
+            teacher.teach_event(&mut training, &mut model, &cost, &features, class);
+
+            // Make prediction using current expertise
+            let prediction = model.predict(&features)
+                .iter()
+                .enumerate()
+                .fold((0, 0.0), |m, (i, &v)| if v > m.1 { (i, v) } else { m })
+                .0;
+
+            if prediction == class {
                 hit += 1;
             } else {
                 miss += 1;

@@ -18,9 +18,13 @@ use std::iter::IntoIterator;
 ///
 /// Implementations of this trait can be found in
 /// [models](./model/index.html)
-pub trait Model{
+pub trait Model {
     /// Input from which to predict the target
     type Features;
+
+    /// f64 for Regressors or binary classifiers. For multi classification an array of `f64` with a
+    /// dimension equal to the number of classes.
+    type Target;
 
     /// The number of internal coefficients this model depends on
     fn num_coefficients(&self) -> usize;
@@ -29,10 +33,10 @@ pub trait Model{
     fn coefficient(&mut self, coefficient: usize) -> &mut f64;
 
     /// Predicts a target for the inputs based on the internal coefficients
-    fn predict(&self, &Self::Features) -> f64;
+    fn predict(&self, &Self::Features) -> Self::Target;
 
     /// Value predict derived by the n-th `coefficient` at `input`
-    fn gradient(&self, coefficient: usize, input: &Self::Features) -> f64;
+    fn gradient(&self, coefficient: usize, input: &Self::Features) -> Self::Target;
 }
 
 /// Representing a cost function whose value is supposed be minimized by the
@@ -51,13 +55,12 @@ pub trait Model{
 ///
 /// Implementations of this trait can be found in
 /// [cost](./cost/index.html)
-pub trait Cost<Truth> {
-
+pub trait Cost<Truth, Target = f64> {
     /// The outer derivative of the cost function with respect to the prediction.
-    fn outer_derivative(&self, prediction: f64, truth: Truth) -> f64;
+    fn outer_derivative(&self, prediction: &Target, truth: Truth) -> Target;
 
     /// Value of the cost function.
-    fn cost(&self, prediction: f64, truth: Truth) -> f64;
+    fn cost(&self, prediction: Target, truth: Truth) -> f64;
 }
 
 /// Algorithms used to adapt [Model](./trait.Model.html) coefficients
@@ -74,19 +77,19 @@ pub trait Teacher<M: Model> {
 
     /// Changes `model`s coefficients so they minimize the `cost` function (hopefully)
     fn teach_event<Y, C>(&self,
-                            training: &mut Self::Training,
-                            model: &mut M,
-                            cost: &C,
-                            features: &M::Features,
-                            truth: Y)
-        where C: Cost<Y>,
+                         training: &mut Self::Training,
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
+        where C: Cost<Y, M::Target>,
               Y: Copy;
 }
 
 /// Teaches `model` all events in `history`
 pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
     where M: Model,
-          C: Cost<Truth>,
+          C: Cost<Truth, M::Target>,
           T: Teacher<M>,
           H: IntoIterator<Item = (M::Features, Truth)>,
           Truth: Copy
@@ -97,7 +100,7 @@ pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, hi
         teacher.teach_event(&mut training, model, cost, &features, truth);
     }
 }
-
+mod array;
 /// Implementations of `Model` trait
 pub mod model;
 /// Implementations of `Cost` trait

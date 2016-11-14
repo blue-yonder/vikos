@@ -3,6 +3,7 @@
 use Teacher;
 use Model;
 use Cost;
+use linear_algebra::Vector;
 
 /// Calculates annealed learning rate
 ///
@@ -19,10 +20,11 @@ fn annealed_learning_rate(num_events: usize, start: f64, t: f64) -> f64 {
 ///
 /// This method is called by stochastic gradient descent (SGD)-based
 /// training algorithm in order to determine the delta of the coefficients
-fn gradient<T, C>(cost: &C, prediction: f64, truth: T, derivative_of_model: f64) -> f64
-    where C: Cost<T>
+fn gradient<T, P, C>(cost: &C, prediction: &P, truth: T, derivative_of_model: &P) -> f64
+    where C: Cost<T, P>,
+          P: Vector
 {
-    cost.outer_derivative(prediction, truth) * derivative_of_model
+    cost.outer_derivative(&prediction, truth).dot(derivative_of_model)
 }
 
 /// Gradient descent
@@ -34,7 +36,8 @@ pub struct GradientDescent {
 }
 
 impl<M> Teacher<M> for GradientDescent
-    where M: Model
+    where M: Model,
+          M::Target: Vector
 {
     type Training = ();
 
@@ -43,20 +46,21 @@ impl<M> Teacher<M> for GradientDescent
     }
 
     fn teach_event<Y, C>(&self,
-                            _training: &mut (),
-                            model: &mut M,
-                            cost: &C,
-                            features: &M::Features,
-                            truth: Y)
-        where C: Cost<Y>,
+                         _training: &mut (),
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
+        where C: Cost<Y, M::Target>,
               Y: Copy
     {
         let prediction = model.predict(features);
 
         for ci in 0..model.num_coefficients() {
-            *model.coefficient(ci) = *model.coefficient(ci) -
-                                    self.learning_rate *
-                                    gradient(cost, prediction, truth, model.gradient(ci, features));
+            *model.coefficient(ci) =
+                *model.coefficient(ci) -
+                self.learning_rate *
+                gradient(cost, &prediction, truth, &model.gradient(ci, features));
         }
     }
 }
@@ -76,7 +80,8 @@ pub struct GradientDescentAl {
 }
 
 impl<M> Teacher<M> for GradientDescentAl
-    where M: Model
+    where M: Model,
+          M::Target: Vector
 {
     type Training = usize;
 
@@ -85,21 +90,21 @@ impl<M> Teacher<M> for GradientDescentAl
     }
 
     fn teach_event<Y, C>(&self,
-                            num_events: &mut usize,
-                            model: &mut M,
-                            cost: &C,
-                            features: &M::Features,
-                            truth: Y)
-        where C: Cost<Y>,
+                         num_events: &mut usize,
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
+        where C: Cost<Y, M::Target>,
               Y: Copy
     {
         let prediction = model.predict(features);
         let learning_rate = annealed_learning_rate(*num_events, self.l0, self.t);
 
         for ci in 0..model.num_coefficients() {
-            *model.coefficient(ci) = *model.coefficient(ci) -
-                                    learning_rate *
-                                    gradient(cost, prediction, truth, model.gradient(ci, features));
+            *model.coefficient(ci) =
+                *model.coefficient(ci) -
+                learning_rate * gradient(cost, &prediction, truth, &model.gradient(ci, features));
         }
         *num_events += 1;
     }
@@ -122,7 +127,8 @@ pub struct Momentum {
 }
 
 impl<M> Teacher<M> for Momentum
-    where M: Model
+    where M: Model,
+          M::Target: Vector
 {
     type Training = (usize, Vec<f64>);
 
@@ -135,24 +141,22 @@ impl<M> Teacher<M> for Momentum
     }
 
     fn teach_event<Y, C>(&self,
-                            training: &mut (usize, Vec<f64>),
-                            model: &mut M,
-                            cost: &C,
-                            features: &M::Features,
-                            truth: Y)
-        where C: Cost<Y>,
+                         training: &mut (usize, Vec<f64>),
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
+        where C: Cost<Y, M::Target>,
               Y: Copy
     {
-        // let (ref mut num_events, ref mut velocity) = *training; ok?
-        let mut num_events = &mut training.0;
-        let mut velocity = &mut training.1;
+        let (ref mut num_events, ref mut velocity) = *training;
         let prediction = model.predict(features);
         let learning_rate = annealed_learning_rate(*num_events, self.l0, self.t);
 
         for ci in 0..model.num_coefficients() {
             velocity[ci] = self.inertia * velocity[ci] -
                            learning_rate *
-                           gradient(cost, prediction, truth, model.gradient(ci, features));
+                           gradient(cost, &prediction, truth, &model.gradient(ci, features));
             *model.coefficient(ci) = *model.coefficient(ci) + velocity[ci];
         }
         *num_events += 1;
@@ -182,7 +186,8 @@ pub struct Nesterov {
 }
 
 impl<M> Teacher<M> for Nesterov
-    where M: Model
+    where M: Model,
+          M::Target: Vector
 {
     type Training = (usize, Vec<f64>);
 
@@ -195,17 +200,15 @@ impl<M> Teacher<M> for Nesterov
     }
 
     fn teach_event<Y, C>(&self,
-                            training: &mut (usize, Vec<f64>),
-                            model: &mut M,
-                            cost: &C,
-                            features: &M::Features,
-                            truth: Y)
-        where C: Cost<Y>,
+                         training: &mut (usize, Vec<f64>),
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
+        where C: Cost<Y, M::Target>,
               Y: Copy
     {
-
-        let mut num_events = &mut training.0;
-        let mut velocity = &mut training.1;
+        let (ref mut num_events, ref mut velocity) = *training;
         let prediction = model.predict(features);
         let learning_rate = annealed_learning_rate(*num_events, self.l0, self.t);
 
@@ -214,7 +217,7 @@ impl<M> Teacher<M> for Nesterov
         }
         for ci in 0..model.num_coefficients() {
             let delta = -learning_rate *
-                        gradient(cost, prediction, truth, model.gradient(ci, features));
+                        gradient(cost, &prediction, truth, &model.gradient(ci, features));
             *model.coefficient(ci) = *model.coefficient(ci) + delta;
             velocity[ci] = self.inertia * velocity[ci] + delta;
         }
@@ -228,15 +231,16 @@ impl<M> Teacher<M> for Nesterov
 /// each coefficient. In effect the learning rate is smaller for frequent and larger for infrequent
 /// features.
 /// See [this paper](http://jmlr.org/papers/v12/duchi11a.html) for more information.
-pub struct Adagard{
+pub struct Adagard {
     /// The larger this parameter is, the more the coefficients will change with each iteration
-    pub learning_rate : f64,
+    pub learning_rate: f64,
     /// Small smoothing term, to avoid division by zero in first iteration
-    pub epsilon : f64
+    pub epsilon: f64,
 }
 
 impl<M> Teacher<M> for Adagard
-    where M: Model
+    where M: Model,
+          M::Target: Vector
 {
     type Training = Vec<f64>;
 
@@ -248,18 +252,18 @@ impl<M> Teacher<M> for Adagard
     }
 
     fn teach_event<Y, C>(&self,
-                        squared_gradients: &mut Vec<f64>,
-                        model: &mut M,
-                        cost: &C,
-                        features: &M::Features,
-                        truth: Y)
-    where C: Cost<Y>,
-            Y: Copy
+                         squared_gradients: &mut Vec<f64>,
+                         model: &mut M,
+                         cost: &C,
+                         features: &M::Features,
+                         truth: Y)
+        where C: Cost<Y, M::Target>,
+              Y: Copy
     {
 
         let prediction = model.predict(features);
         for ci in 0..model.num_coefficients() {
-            let gradient = gradient(cost, prediction, truth, model.gradient(ci, features));
+            let gradient = gradient(cost, &prediction, truth, &model.gradient(ci, features));
             let delta = -self.learning_rate * gradient / squared_gradients[ci].sqrt();
             *model.coefficient(ci) += delta;
             squared_gradients[ci] += gradient.powi(2);

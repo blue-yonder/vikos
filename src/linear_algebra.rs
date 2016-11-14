@@ -3,7 +3,12 @@
 /// Assumes the `Vector` is represented as a
 /// tuple of numbers representing its projection
 /// along orthogonal base vectors
-pub trait Vector: Clone{
+pub trait Vector: Clone {
+    /// Retuns a new instance of Vector with all elements set to zero
+    ///
+    /// Not every possible implementation knows its dimension at compiletime, therefore a size hint
+    /// is necessary to allocate the correct number of elements
+    fn zero(dimension: usize) -> Self;
     /// Maximum allowed index for `at` and `mut_at`
     fn dimension(&self) -> usize;
     /// Length of projection along `i`-th base
@@ -22,9 +27,35 @@ pub trait Vector: Clone{
     }
 }
 
+impl Vector for f64 {
+    fn zero(dimension: usize) -> f64 {
+        assert!(dimension == 1);
+        0.0
+    }
+
+    fn dimension(&self) -> usize {
+        1
+    }
+    fn at(&self, i: usize) -> f64 {
+        assert!(i == 0);
+        *self
+    }
+    fn mut_at(&mut self, i: usize) -> &mut f64 {
+        assert!(i == 0);
+        self
+    }
+
+    fn dot(&self, other: &Self) -> f64 {
+        self * other
+    }
+}
+
 macro_rules! vec_impl_for_array {
     ($v:expr) => {
         impl Vector for [f64; $v] {
+            fn zero(_ : usize) -> [f64; $v]{
+                [0.0; $v]
+            }
 
             fn dimension(&self) -> usize{ $v }
 
