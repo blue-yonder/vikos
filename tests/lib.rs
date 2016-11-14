@@ -1,4 +1,5 @@
 extern crate vikos;
+extern crate csv;
 
 use vikos::{cost, model, teacher};
 use std::default::Default;
@@ -282,7 +283,10 @@ fn logistic_adagard_2d_max_likelihood_bool() {
                    ([7.6, 3.5], true)];
 
     let mut model = model::Logistic::default();
-    let teacher = teacher::Adagard { learning_rate: 3.0, epsilon: 10000.0 };
+    let teacher = teacher::Adagard {
+        learning_rate: 3.0,
+        epsilon: 10000.0,
+    };
     let cost = cost::MaxLikelihood {};
 
     learn_history(&teacher,
@@ -331,4 +335,57 @@ fn generalized_linear_model_as_logistic_regression() {
               |errors, correct| if correct { errors } else { errors + 1 });
 
     assert_eq!(0, classification_errors);
+}
+
+#[test]
+fn iris() {
+    use vikos::{learn_history, Model};
+    use csv;
+
+
+    let mut model = model::OneVsRest::<[model::Logistic<[f64; 4]>; 3]>::default();
+    let teacher = vikos::teacher::Nesterov {
+        l0: 0.0001,
+        t: 1000.0,
+        inertia: 0.99,
+    };
+    let cost = cost::MaxLikelihood {};
+
+    let history: Vec<_> = csv::Reader::from_file("examples/data/iris.csv")
+        .expect("File is ok")
+        .decode()
+        .map(|row| {
+            let (t, f): (String, _) = row.unwrap();
+            (t, f)
+        })
+        .map(|(truth, features)| {
+            (features,
+             match truth.as_ref() {
+                "setosa" => 0,
+                "versicolor" => 1,
+                "virginica" => 2,
+                _ => panic!("unknow class"),
+            })
+        })
+        .collect();
+
+    learn_history(&teacher,
+                  &cost,
+                  &mut model,
+                  history.iter().cycle().take(3000).cloned());
+
+    println!("{:?}", model);
+
+    let classification_errors = history.iter()
+        .map(|&(input, truth)| {
+            model.predict(&input)
+                .iter()
+                .enumerate()
+                .fold((0, 0.0), |m, (i, &v)| if v > m.1 { (i, v) } else { m })
+                .0 == truth
+        })
+        .fold(0,
+              |errors, correct| if correct { errors } else { errors + 1 });
+
+    assert_eq!(3, classification_errors);
 }

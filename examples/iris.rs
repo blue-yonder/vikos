@@ -48,8 +48,11 @@ fn main() {
             teacher.teach_event(&mut training, &mut model, &cost, &features, class);
 
             // Make prediction using current expertise
-            let p = model.predict(&features);
-            let prediction = (0..3).fold(0, |m, c| if p[c] > p[m] { c } else { m });
+            let prediction = model.predict(&features)
+                .iter()
+                .enumerate()
+                .fold((0, 0.0), |m, (i, &v)| if v > m.1 { (i, v) } else { m })
+                .0;
 
             if prediction == class {
                 hit += 1;
