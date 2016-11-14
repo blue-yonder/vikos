@@ -17,23 +17,6 @@ pub trait Array {
     fn at_mut(&mut self, index: usize) -> &mut Self::Element;
 }
 
-// impl<T> Array for Vec<T> {
-//     type Element = T;
-//     type Vector = Vec<f64>;
-
-//     fn length(&self) -> usize {
-//         self.length()
-//     }
-
-//     fn at_ref(&self, index: usize) -> &T {
-//         &self[index]
-//     }
-
-//     fn at_mut(&mut self, index: usize) -> &mut T {
-//         &mut self[index]
-//     }
-// }
-
 macro_rules! array_impl_for {
     ($v:expr) => {
         impl<T> Array for [T; $v] {

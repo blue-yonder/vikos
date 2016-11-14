@@ -22,8 +22,8 @@ pub trait Model {
     /// Input from which to predict the target
     type Features;
 
-    /// f64 for Regressors or binary classifiers. Otherwise an array containing an with the
-    /// dimension of classes
+    /// f64 for Regressors or binary classifiers. For multi classification an array of `f64` with a
+    /// dimension equal to the number of classes.
     type Target;
 
     /// The number of internal coefficients this model depends on
