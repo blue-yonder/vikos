@@ -26,12 +26,10 @@ pub struct LeastAbsoluteDeviation;
 impl Cost<f64> for LeastAbsoluteDeviation {
     fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
         let error = prediction - truth;
-        if error > 0.0 {
-            1.0
-        } else if error < 0.0 {
-            -1.0
-        } else {
+        if error == 0.0 {
             0.0
+        } else {
+            error.signum()
         }
     }
     fn cost(&self, prediction: f64, truth: f64) -> f64 {
