@@ -26,11 +26,7 @@ pub struct LeastAbsoluteDeviation;
 impl Cost<f64> for LeastAbsoluteDeviation {
     fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
         let error = prediction - truth;
-        if error == 0.0 {
-            0.0
-        } else {
-            error.signum()
-        }
+        if error == 0.0 { 0.0 } else { error.signum() }
     }
     fn cost(&self, prediction: f64, truth: f64) -> f64 {
         (prediction - truth).abs()
@@ -98,7 +94,7 @@ impl<V> Cost<usize, V> for MaxLikelihood
     fn outer_derivative(&self, prediction: &V, truth: usize) -> V {
         let mut derivation = prediction.clone();
         for i in 0..prediction.dimension() {
-            *derivation.mut_at(i) = self.outer_derivative(&prediction.at(i), truth == i);
+            *derivation.at_mut(i) = self.outer_derivative(&prediction.at(i), truth == i);
         }
         derivation
     }

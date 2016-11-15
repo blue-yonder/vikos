@@ -9,12 +9,12 @@ pub trait Vector: Clone {
     /// Not every possible implementation knows its dimension at compiletime, therefore a size hint
     /// is necessary to allocate the correct number of elements
     fn zero(dimension: usize) -> Self;
-    /// Maximum allowed index for `at` and `mut_at`
+    /// Maximum allowed index for `at` and `at_mut`
     fn dimension(&self) -> usize;
     /// Length of projection along `i`-th base
     fn at(&self, i: usize) -> f64;
     /// Mutable access to length of projection along `i`-th base
-    fn mut_at(&mut self, i: usize) -> &mut f64;
+    fn at_mut(&mut self, i: usize) -> &mut f64;
     /// Scalar product
     ///
     /// Default implementation using `at` and `dimension` is provided
@@ -40,7 +40,7 @@ impl Vector for f64 {
         assert!(i == 0);
         *self
     }
-    fn mut_at(&mut self, i: usize) -> &mut f64 {
+    fn at_mut(&mut self, i: usize) -> &mut f64 {
         assert!(i == 0);
         self
     }
@@ -63,7 +63,7 @@ macro_rules! vec_impl_for_array {
                 self[index]
             }
 
-            fn mut_at(&mut self, index: usize) -> &mut f64 {
+            fn at_mut(&mut self, index: usize) -> &mut f64 {
                 &mut self[index]
             }
         }

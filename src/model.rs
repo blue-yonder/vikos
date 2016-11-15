@@ -52,7 +52,7 @@ impl<V> Model for Linear<V>
         if coefficient == self.m.dimension() {
             &mut self.c
         } else {
-            self.m.mut_at(coefficient)
+            self.m.at_mut(coefficient)
         }
     }
 
@@ -203,7 +203,7 @@ impl<T> Model for OneVsRest<T>
         let models = &self.0;
         let mut result = Self::Target::zero(models.length());
         for i in 0..models.length() {
-            *result.mut_at(i) = models.at_ref(i).predict(input);
+            *result.at_mut(i) = models.at_ref(i).predict(input);
         }
         result
     }
@@ -212,7 +212,7 @@ impl<T> Model for OneVsRest<T>
         let models = &self.0;
         let class = coefficient % models.length();
         let mut result = Self::Target::zero(models.length());
-        *result.mut_at(class) = models.at_ref(class).gradient(coefficient / models.length(), input);
+        *result.at_mut(class) = models.at_ref(class).gradient(coefficient / models.length(), input);
         result
     }
 }
