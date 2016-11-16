@@ -1,6 +1,6 @@
 [package]
 name = "vikos"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Holger Peters <holger.peters@blue-yonder.com>", "Markus Klein <markus.klein@blue-yonder.com>"]
 description = "A machine learning library for supervised training of parametrized models"
 license = "MIT"
@@ -10,9 +10,9 @@ readme = "README.md"
 keywords = ["machine","learning","machine-learning"]
 
 [dependencies]
-num = "0.1.35"
-rustc-serialize = "0.3.19"
-clippy = {version= "0.0.90", optional = true }
+num = "0.1.36"
+rustc-serialize = "0.3.21"
+clippy = {version= "0.0.98", optional = true }
 
 [dev-dependencies]
 csv = "0.14.7"

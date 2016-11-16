@@ -39,7 +39,7 @@ Getting Started
    authors = ["..."]
 
    [dependencies]
-   vikos = "0.1.6"
+   vikos = "0.1.8"
    ```
 6. Insert `extern crate vikos;` at the first line in `src/main.rs`
 7. You can now start replacing code in `main` with code from the [tutorial].
