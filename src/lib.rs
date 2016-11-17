@@ -1,9 +1,8 @@
-//! A machine learning library for supervised regression trainings
+//! A machine learning library for supervised regression and classifaction
 //!
-//! This library wants to enable its users to write teachers
-//! independently of the model trained or the cost function that is meant to
-//! be minimized. To get started right away, you may want to
-//! have a look at the [tutorial](./tutorial/index.html).
+//! This library wants to enable its users to write models independently of the teacher used for
+//! training or the cost function that is meant to be minimized. To get started right away, you may
+//! want to have a look at the [tutorial](./tutorial/index.html).
 
 #![warn(missing_docs)]
 #![cfg_attr(feature="clippy", feature(plugin))]
