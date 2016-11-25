@@ -227,15 +227,15 @@ fn logistic_sgd_2d_max_likelihood() {
 
     let classification_errors = history.iter()
         .map(|&(input, truth)| model.predict(&input).round() == truth)
-        .fold(0,
-              |errors, correct| if correct { errors } else { errors + 1 });
+        .map(|correct| if correct { 0 } else { 1 })
+        .sum();
 
     assert_eq!(0, classification_errors);
 }
 
 #[test]
 fn logistic_sgd_2d_max_likelihood_bool() {
-    use vikos::{learn_history, Model};
+    use vikos::{learn_history, Model, Crisp};
 
     let history = [([2.7, 2.5], false),
                    ([1.4, 2.3], false),
@@ -260,16 +260,16 @@ fn logistic_sgd_2d_max_likelihood_bool() {
     println!("{:?}", model);
 
     let classification_errors = history.iter()
-        .map(|&(input, truth)| model.predict(&input).round() == if truth { 1.0 } else { 0.0 })
-        .fold(0,
-              |errors, correct| if correct { errors } else { errors + 1 });
+        .map(|&(input, truth)| model.predict(&input).crisp() == truth)
+        .map(|correct| if correct { 0 } else { 1 })
+        .sum();
 
     assert_eq!(0, classification_errors);
 }
 
 #[test]
 fn logistic_adagard_2d_max_likelihood_bool() {
-    use vikos::{learn_history, Model};
+    use vikos::{learn_history, Model, Crisp};
 
     let history = [([2.7, 2.5], false),
                    ([1.4, 2.3], false),
@@ -297,16 +297,16 @@ fn logistic_adagard_2d_max_likelihood_bool() {
     println!("{:?}", model);
 
     let classification_errors = history.iter()
-        .map(|&(input, truth)| model.predict(&input).round() == if truth { 1.0 } else { 0.0 })
-        .fold(0,
-              |errors, correct| if correct { errors } else { errors + 1 });
+        .map(|&(input, truth)| model.predict(&input).crisp() == truth)
+        .map(|correct| if correct { 0 } else { 1 })
+        .sum();
 
     assert_eq!(0, classification_errors);
 }
 
 #[test]
 fn generalized_linear_model_as_logistic_regression() {
-    use vikos::{learn_history, Model};
+    use vikos::{learn_history, Model, Crisp};
 
     let history = [([2.7, 2.5], false),
                    ([1.4, 2.3], false),
@@ -330,16 +330,16 @@ fn generalized_linear_model_as_logistic_regression() {
                   history.iter().cycle().take(20).cloned());
 
     let classification_errors = history.iter()
-        .map(|&(input, truth)| model.predict(&input).round() == if truth { 1.0 } else { 0.0 })
-        .fold(0,
-              |errors, correct| if correct { errors } else { errors + 1 });
+        .map(|&(input, truth)| model.predict(&input).crisp() == truth)
+        .map(|correct| if correct { 0 } else { 1 })
+        .sum();
 
     assert_eq!(0, classification_errors);
 }
 
 #[test]
 fn iris() {
-    use vikos::{learn_history, Model};
+    use vikos::{learn_history, Model, Crisp};
     use csv;
 
 
@@ -377,15 +377,9 @@ fn iris() {
     println!("{:?}", model);
 
     let classification_errors = history.iter()
-        .map(|&(input, truth)| {
-            model.predict(&input)
-                .iter()
-                .enumerate()
-                .fold((0, 0.0), |m, (i, &v)| if v > m.1 { (i, v) } else { m })
-                .0 == truth
-        })
-        .fold(0,
-              |errors, correct| if correct { errors } else { errors + 1 });
+        .map(|&(input, truth)| model.predict(&input).crisp() == truth)
+        .map(|correct| if correct { 0 } else { 1 })
+        .sum();
 
     assert_eq!(3, classification_errors);
 }

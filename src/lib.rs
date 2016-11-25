@@ -85,6 +85,23 @@ pub trait Teacher<M: Model> {
               Y: Copy;
 }
 
+/// Define this trait over the target type of a classifier, to convert it into its truth type
+///
+/// i.e. for a binary classifier returning a `f64` this returns a `bool` which is true if the
+/// prediction is greater `0.5`. For a classifier returning an `[f64;n]` it returns the index of
+/// the largest discriminant, which should be equal to the class index.
+pub trait Crisp {
+    /// The crisp type of the prediction.
+    ///
+    /// Called `Truth` since it is identical to the `Truth` type used during learning. Although
+    /// the instances returned by crisp are obviously still a prediction, just their type is
+    /// identical to that of the truth.
+    type Truth;
+
+    /// Return crisp prediction
+    fn crisp(&self) -> Self::Truth;
+}
+
 /// Teaches `model` all events in `history`
 pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, history: H)
     where M: Model,
@@ -105,6 +122,7 @@ pub mod model;
 /// Implementations of `Cost` trait
 pub mod cost;
 pub mod teacher;
+pub mod crisp;
 /// Defines linear algebra traits used for some model parameters
 pub mod linear_algebra;
 pub mod tutorial;

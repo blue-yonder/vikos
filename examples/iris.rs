@@ -5,7 +5,7 @@ extern crate csv;
 extern crate vikos;
 extern crate rustc_serialize;
 
-use vikos::{Teacher, Model};
+use vikos::{Teacher, Model, Crisp};
 use std::default::Default;
 
 const PATH: &'static str = "examples/data/iris.csv";
@@ -48,11 +48,7 @@ fn main() {
             teacher.teach_event(&mut training, &mut model, &cost, &features, class);
 
             // Make prediction using current expertise
-            let prediction = model.predict(&features)
-                .iter()
-                .enumerate()
-                .fold((0, 0.0), |m, (i, &v)| if v > m.1 { (i, v) } else { m })
-                .0;
+            let prediction = model.predict(&features).crisp();
 
             if prediction == class {
                 hit += 1;
