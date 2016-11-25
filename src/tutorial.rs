@@ -145,17 +145,17 @@
 //! }
 //! println!("slope: {}, intercept: {}", model.m, model.c);
 //! ```
-//! Note the use of the [Expert](../trait.Expert.html) trait to predict the target based the input.
+//! Note the use of the [Model](../trait.Model.html) trait to predict the target based the input.
 //!
 //! # Summary
 //!
 //! Using Vikos, we can build a machine-learning model by composing
 //! implementations of three aspects:
 //!
-//!  * the describes how features and target relate to each other using an
-//!    [Expert](../trait.Expert.html) algorithm and what kind of estimated parameters/coefficients
-//!    mediate among the target and the feature space ([Model](../trait.Model.html)), the model is
-//!    fitted by
+//!  * the expert algorithm describes how features and target relate to each other using an
+//!    [Model](../trait.Model.html) trait and which also specifies what kind of estimated
+//!    parameters/coefficients mediate among the target and the feature space
+//!    ([Model](../trait.Model.html)), the model is fitted by
 //!  * the training algorithm, modelled with the [Teacher](../trait.Teacher.html) trait, that
 //!    contains the optimization algorithm minimizing the model coefficients.
 //!  * the [Cost](../trait.Cost.html) "function" describes the function that should be minimized by
