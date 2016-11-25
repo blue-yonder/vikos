@@ -1,3 +1,5 @@
+//! Defines linear algebra traits used for some model parameters
+
 /// Vector whose dimension is known at runtime
 ///
 /// Assumes the `Vector` is represented as a

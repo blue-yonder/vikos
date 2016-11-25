@@ -1,3 +1,5 @@
+//! Implementations of `Model` trait
+
 use Model;
 use linear_algebra::Vector;
 use array;

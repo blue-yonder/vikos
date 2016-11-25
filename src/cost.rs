@@ -1,3 +1,5 @@
+//! Implementations of `Cost` trait
+
 use Cost;
 use linear_algebra::Vector;
 

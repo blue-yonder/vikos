@@ -117,12 +117,9 @@ pub fn learn_history<M, C, T, H, Truth>(teacher: &T, cost: &C, model: &mut M, hi
     }
 }
 mod array;
-/// Implementations of `Model` trait
 pub mod model;
-/// Implementations of `Cost` trait
 pub mod cost;
 pub mod teacher;
 pub mod crisp;
-/// Defines linear algebra traits used for some model parameters
 pub mod linear_algebra;
 pub mod tutorial;
