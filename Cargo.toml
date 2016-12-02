@@ -16,6 +16,7 @@ clippy = {version= "0.0.98", optional = true }
 
 [dev-dependencies]
 csv = "0.14.7"
+byteorder = "0.5.3"
 
 [features]
 default = []
