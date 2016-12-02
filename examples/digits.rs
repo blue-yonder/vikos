@@ -25,7 +25,7 @@ fn main() {
             if index % 28 == 0 {
                 println!("");
             }
-            print!("{}", pixel);
+            print!("{:>4}", pixel);
         }
     }
 }
