@@ -18,10 +18,7 @@ use vikos::{Model, Teacher, Crisp};
 fn main() {
 
     let mut model = DigitsClassifier::new();
-    let teacher = vikos::teacher::Adagard {
-        learning_rate: 0.1,
-        epsilon: 0.01,
-    };
+    let teacher = vikos::teacher::GradientDescent { learning_rate: 0.0001 };
     let cost = vikos::cost::MaxLikelihood {};
     let mut training = teacher.new_training(&model);
 
@@ -70,8 +67,8 @@ fn main() {
 /// Output layer consits of 10 output nodes
 struct DigitsClassifier {
     input_to_hidden: [f64; 28 * 28 * 15],
-    hidden_to_output: [f64; 15 * 10],
     hidden_biases: [f64; 15],
+    hidden_to_output: [f64; 15 * 10],
     output_biases: [f64; 10],
 }
 
@@ -79,24 +76,24 @@ impl DigitsClassifier {
     /// Builds a new Neural Network with randomly choosen weights between -1.0 and 1.0
     fn new() -> DigitsClassifier {
         let layer_one = [0.0; 28 * 28 * 15];
-        let layer_two = [0.0; 15 * 10];
         let bias_one = [0.0; 15];
+        let layer_two = [0.0; 15 * 10];
         let bias_two = [0.0; 10];
 
-        let mut result = DigitsClassifierDigitsClassifier {
+        let mut result = DigitsClassifier {
             input_to_hidden: layer_one,
             hidden_to_output: layer_two,
             hidden_biases: bias_one,
             output_biases: bias_two,
-        }
+        };
 
         let between = rand::distributions::Normal::new(0.0, 1.0);
         let mut rng = rand::thread_rng();
 
         use rand::distributions::IndependentSample;
 
-        for i in 0..result.num_coefficients(){
-            *result.mut_at(i) = between.ind_sample(&mut rng);
+        for i in 0..result.num_coefficients() {
+            *result.coefficient(i) = between.ind_sample(&mut rng);
         }
 
         result
@@ -132,10 +129,10 @@ impl Model for DigitsClassifier {
     fn coefficient(&mut self, index: usize) -> &mut f64 {
         if index < 28 * 28 * 15 {
             &mut self.input_to_hidden[index]
-        } else if index < 28 * 28 * 15 + 15 * 10 {
-            &mut self.hidden_to_output[index - 28 * 28 * 15]
-        } else if index < 28 * 28 * 15 + 15 * 10 + 15 {
-            &mut self.hidden_biases[index - 28 * 28 * 15 - 15 * 10]
+        } else if index < 28 * 28 * 15 + 15 {
+            &mut self.hidden_biases[index - 28 * 28 * 15]
+        } else if index < 28 * 28 * 15 + 15 + 15 * 10 {
+            &mut self.hidden_to_output[index - 28 * 28 * 15 - 15]
         } else {
             &mut self.output_biases[index - 28 * 28 * 15 - 15 * 10 - 15]
         }
@@ -161,14 +158,14 @@ impl Model for DigitsClassifier {
             for i in 0..output.len() {
                 output[i] = (input[hidden] as f64 / 255.0) * self.hidden_to_output[i * 15 + hidden];
             }
-        } else if index < 28 * 28 * 15 + 15 * 10 {
+        } else if index < 28 * 28 * 15 + 15 {
             let index = index - 28 * 28 * 15;
-            output[index / 15] = self.activate_hidden_n(input, index % 15);
-        } else if index < 28 * 28 * 15 + 15 * 10 + 15 {
-            let index = index - 28 * 28 * 15 - 15 * 10;
             for i in 0..output.len() {
                 output[i] = self.hidden_to_output[i * 15 + index % 15];
             }
+        } else if index < 28 * 28 * 15 + 15 * 10 + 15 {
+            let index = index - 28 * 28 * 15 - 15;
+            output[index / 15] = self.activate_hidden_n(input, index % 15);
         } else {
             let index = index - 28 * 28 * 15 - 15 * 10 - 15;
             output[index % 10] = 1.0;
