@@ -78,38 +78,28 @@ struct DigitsClassifier {
 impl DigitsClassifier {
     /// Builds a new Neural Network with randomly choosen weights between -1.0 and 1.0
     fn new() -> DigitsClassifier {
-        let mut layer_one = [0.0; 28 * 28 * 15];
-        let mut layer_two = [0.0; 15 * 10];
-        let mut bias_one = [0.0; 15];
-        let mut bias_two = [0.0; 10];
+        let layer_one = [0.0; 28 * 28 * 15];
+        let layer_two = [0.0; 15 * 10];
+        let bias_one = [0.0; 15];
+        let bias_two = [0.0; 10];
+
+        let mut result = DigitsClassifierDigitsClassifier {
+            input_to_hidden: layer_one,
+            hidden_to_output: layer_two,
+            hidden_biases: bias_one,
+            output_biases: bias_two,
+        }
 
         let between = rand::distributions::Normal::new(0.0, 1.0);
         let mut rng = rand::thread_rng();
 
         use rand::distributions::IndependentSample;
 
-        for f in layer_one.iter_mut() {
-            *f = between.ind_sample(&mut rng);
+        for i in 0..result.num_coefficients(){
+            *result.mut_at(i) = between.ind_sample(&mut rng);
         }
 
-        for f in layer_two.iter_mut() {
-            *f = between.ind_sample(&mut rng);
-        }
-
-        for f in bias_one.iter_mut() {
-            *f = between.ind_sample(&mut rng);
-        }
-
-        for f in bias_two.iter_mut() {
-            *f = between.ind_sample(&mut rng);
-        }
-
-        DigitsClassifier {
-            input_to_hidden: layer_one,
-            hidden_to_output: layer_two,
-            hidden_biases: bias_one,
-            output_biases: bias_two,
-        }
+        result
     }
 
     /// Returns the activation values for the n-th hidden neuron
