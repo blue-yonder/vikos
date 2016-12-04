@@ -32,7 +32,7 @@ impl Model for f64 {
 }
 
 /// Models the target as `y = m * x + c`
-#[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
+#[derive(Debug, Clone, Copy, Default, RustcDecodable, RustcEncodable)]
 pub struct Linear<V> {
     /// Slope
     pub m: V,
@@ -73,8 +73,8 @@ impl<V> Model for Linear<V>
 }
 
 /// Models target as `y = 1/(1+e^(m * x + c))`
-#[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
-pub struct Logistic<V>(Linear<V>);
+#[derive(Debug, Clone, Copy, Default, RustcDecodable, RustcEncodable)]
+pub struct Logistic<V>(pub Linear<V>);
 
 impl<V> Model for Logistic<V>
     where Linear<V>: Model<Features = V, Target = f64>
@@ -177,8 +177,8 @@ impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
 ///
 /// Implementation assumes that the number of coefficients
 /// is the same for all models.
-#[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
-pub struct OneVsRest<T>(T);
+#[derive(Debug, Clone, Copy, Default, RustcDecodable, RustcEncodable)]
+pub struct OneVsRest<T>(pub T);
 
 impl<T> Model for OneVsRest<T>
     where T: array::Array,

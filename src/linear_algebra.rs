@@ -52,10 +52,27 @@ impl Vector for f64 {
     }
 }
 
+impl Vector for Vec<f64> {
+    fn zero(dimension: usize) -> Vec<f64> {
+        (0..dimension).map(|_| 0.0).collect()
+    }
+
+    fn dimension(&self) -> usize {
+        self.len()
+    }
+    fn at(&self, i: usize) -> f64 {
+        self[i]
+    }
+    fn at_mut(&mut self, i: usize) -> &mut f64 {
+        &mut self[i]
+    }
+}
+
 macro_rules! vec_impl_for_array {
     ($v:expr) => {
         impl Vector for [f64; $v] {
-            fn zero(_ : usize) -> [f64; $v]{
+            fn zero(dimension : usize) -> [f64; $v]{
+                assert!(dimension == $v);
                 [0.0; $v]
             }
 
