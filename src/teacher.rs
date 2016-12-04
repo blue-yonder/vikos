@@ -133,11 +133,7 @@ impl<M> Teacher<M> for Momentum
     type Training = (usize, Vec<f64>);
 
     fn new_training(&self, model: &M) -> (usize, Vec<f64>) {
-
-        let mut velocity = Vec::with_capacity(model.num_coefficients());
-        velocity.resize(model.num_coefficients(), 0.0);
-
-        (0, velocity)
+        (0, (0..model.num_coefficients()).map(|_| 0.0).collect::<Vec<_>>())
     }
 
     fn teach_event<Y, C>(&self,
@@ -192,11 +188,7 @@ impl<M> Teacher<M> for Nesterov
     type Training = (usize, Vec<f64>);
 
     fn new_training(&self, model: &M) -> (usize, Vec<f64>) {
-
-        let mut velocity = Vec::with_capacity(model.num_coefficients());
-        velocity.resize(model.num_coefficients(), 0.0);
-
-        (0, velocity)
+        (0, (0..model.num_coefficients()).map(|_| 0.0).collect::<Vec<_>>())
     }
 
     fn teach_event<Y, C>(&self,
@@ -245,10 +237,7 @@ impl<M> Teacher<M> for Adagard
     type Training = Vec<f64>;
 
     fn new_training(&self, model: &M) -> Vec<f64> {
-
-        let mut squared_gradients = Vec::with_capacity(model.num_coefficients());
-        squared_gradients.resize(model.num_coefficients(), self.epsilon);
-        squared_gradients
+        (0..model.num_coefficients()).map(|_| self.epsilon).collect::<Vec<_>>()
     }
 
     fn teach_event<Y, C>(&self,
