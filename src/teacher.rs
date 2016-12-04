@@ -237,7 +237,6 @@ impl<M> Teacher<M> for Adagard
     type Training = Vec<f64>;
 
     fn new_training(&self, model: &M) -> Vec<f64> {
-
         (0..model.num_coefficients()).map(|_| self.epsilon).collect::<Vec<_>>()
     }
 
