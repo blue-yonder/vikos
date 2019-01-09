@@ -12,11 +12,6 @@ keywords = ["machine","learning","machine-learning"]
 [dependencies]
 num = "0.1.36"
 rustc-serialize = "0.3.21"
-clippy = {version= "0.0.98", optional = true }
 
 [dev-dependencies]
-csv = "0.14.7"
-
-[features]
-default = []
-dev = [ "clippy" ]
+csv = "1"

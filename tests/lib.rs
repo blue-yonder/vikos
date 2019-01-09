@@ -351,9 +351,9 @@ fn iris() {
     };
     let cost = cost::MaxLikelihood {};
 
-    let history: Vec<_> = csv::Reader::from_file("examples/data/iris.csv")
+    let history: Vec<_> = csv::Reader::from_path("examples/data/iris.csv")
         .expect("File is ok")
-        .decode()
+        .deserialize()
         .map(|row| {
             let (t, f): (String, _) = row.unwrap();
             (t, f)

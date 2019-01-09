@@ -5,9 +5,6 @@
 //! want to have a look at the [tutorial](./tutorial/index.html).
 
 #![warn(missing_docs)]
-#![cfg_attr(feature="clippy", feature(plugin))]
-#![cfg_attr(feature="clippy", plugin(clippy))]
-
 extern crate rustc_serialize;
 extern crate num;
 

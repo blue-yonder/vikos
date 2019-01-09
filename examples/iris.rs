@@ -29,11 +29,11 @@ fn main() {
 
     // Read iris Data
     for epoch in 0..300 {
-        let mut rdr = csv::Reader::from_file(PATH).expect("File is ok");
+        let mut rdr = csv::Reader::from_path(PATH).expect("File is ok");
         let mut hit = 0;
         let mut miss = 0;
 
-        for row in rdr.decode() {
+        for row in rdr.deserialize() {
 
             // Learn event
             let (truth, features): (String, Features) = row.unwrap();
