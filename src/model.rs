@@ -142,8 +142,8 @@ where
     {
         GeneralizedLinearModel {
             linear: Linear::default(),
-            g: g,
-            g_derivate: g_derivate,
+            g,
+            g_derivate,
         }
     }
 }

@@ -22,7 +22,7 @@ pub trait Vector: Clone {
     fn dot(&self, other: &Self) -> f64 {
         let mut result = 0.0;
         for i in 0..self.dimension() {
-            result = result + self.at(i) * other.at(i)
+            result += self.at(i) * other.at(i)
         }
         result
     }

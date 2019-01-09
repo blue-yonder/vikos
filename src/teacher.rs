@@ -40,9 +40,7 @@ where
 {
     type Training = ();
 
-    fn new_training(&self, _: &M) -> () {
-        ()
-    }
+    fn new_training(&self, _: &M) {}
 
     fn teach_event<Y, C>(
         &self,

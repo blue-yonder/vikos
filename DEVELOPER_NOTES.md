@@ -1,13 +1,13 @@
-Overview of regular commands for working and developing vikos.
+Overview of regular commands for working and developing vikos
+=============================================================
 
 Building
 --------
 
 * `cargo build` makes a simple build.
-* When using the nightly build `cargo build --features clippy ` will build 
-  vikos with added checks and hints from the 
+* When using the nightly build `cargo build --features clippy` will build
+  vikos with added checks and hints from the
   [clippy](https://github.com/Manishearth/rust-clippy) package.
-
 
 Execute Tests
 -------------
@@ -27,5 +27,3 @@ Source Code Formatting
 [Rustfmt](https://github.com/rust-lang-nursery/rustfmt) is the appropriate tool
 to lay out code according to the community standards. You can invoke it with
 `cargo fmt` (you can install it via `cargo install rustfmt`).
-
-
