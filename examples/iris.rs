@@ -2,7 +2,7 @@
 ///
 /// Also demonstrates online training, and usage of custom feature type
 extern crate csv;
-extern crate rustc_serialize;
+extern crate serde;
 extern crate vikos;
 
 use std::default::Default;

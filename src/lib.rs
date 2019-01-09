@@ -6,7 +6,7 @@
 
 #![warn(missing_docs)]
 extern crate num;
-extern crate rustc_serialize;
+extern crate serde_derive;
 
 use std::iter::IntoIterator;
 

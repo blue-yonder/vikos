@@ -4,6 +4,8 @@ use array;
 use linear_algebra::Vector;
 use Model;
 
+use serde_derive::{Deserialize, Serialize};
+
 impl Model for f64 {
     type Features = ();
     type Target = f64;
@@ -32,7 +34,7 @@ impl Model for f64 {
 }
 
 /// Models the target as `y = m * x + c`
-#[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Linear<V> {
     /// Slope
     pub m: V,
@@ -73,7 +75,7 @@ where
 }
 
 /// Models target as `y = 1/(1+e^(m * x + c))`
-#[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Logistic<V>(Linear<V>);
 
 impl<V> Model for Logistic<V>
@@ -181,7 +183,7 @@ where
 ///
 /// Implementation assumes that the number of coefficients
 /// is the same for all models.
-#[derive(Debug, Clone, Default, RustcDecodable, RustcEncodable)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct OneVsRest<T>(T);
 
 impl<T> Model for OneVsRest<T>
