@@ -1,8 +1,8 @@
 //! Implementations of `Model` trait
 
-use Model;
-use linear_algebra::Vector;
 use array;
+use linear_algebra::Vector;
+use Model;
 
 impl Model for f64 {
     type Features = ();
@@ -41,7 +41,8 @@ pub struct Linear<V> {
 }
 
 impl<V> Model for Linear<V>
-    where V: Vector
+where
+    V: Vector,
 {
     type Features = V;
     type Target = f64;
@@ -63,7 +64,6 @@ impl<V> Model for Linear<V>
     }
 
     fn gradient(&self, coefficient: usize, input: &V) -> f64 {
-
         if coefficient == self.m.dimension() {
             1.0 //derive by c
         } else {
@@ -77,7 +77,8 @@ impl<V> Model for Linear<V>
 pub struct Logistic<V>(Linear<V>);
 
 impl<V> Model for Logistic<V>
-    where Linear<V>: Model<Features = V, Target = f64>
+where
+    Linear<V>: Model<Features = V, Target = f64>,
 {
     type Features = V;
     type Target = f64;
@@ -131,12 +132,14 @@ pub struct GeneralizedLinearModel<V, G, Dg> {
 }
 
 impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
-    where G: Fn(f64) -> f64,
-          Dg: Fn(f64) -> f64
+where
+    G: Fn(f64) -> f64,
+    Dg: Fn(f64) -> f64,
 {
     /// Creates new model with the coefficients set to zero
     pub fn new(g: G, g_derivate: Dg) -> GeneralizedLinearModel<V, G, Dg>
-        where V: Default
+    where
+        V: Default,
     {
         GeneralizedLinearModel {
             linear: Linear::default(),
@@ -147,9 +150,10 @@ impl<V, G, Dg> GeneralizedLinearModel<V, G, Dg>
 }
 
 impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
-    where F: Fn(f64) -> f64,
-          Df: Fn(f64) -> f64,
-          Linear<V>: Model<Features = V, Target = f64>
+where
+    F: Fn(f64) -> f64,
+    Df: Fn(f64) -> f64,
+    Linear<V>: Model<Features = V, Target = f64>,
 {
     type Features = V;
     type Target = f64;
@@ -181,8 +185,9 @@ impl<V, F, Df> Model for GeneralizedLinearModel<V, F, Df>
 pub struct OneVsRest<T>(T);
 
 impl<T> Model for OneVsRest<T>
-    where T: array::Array,
-          T::Element: Model<Target = f64>
+where
+    T: array::Array,
+    T::Element: Model<Target = f64>,
 {
     type Features = <T::Element as Model>::Features;
     type Target = T::Vector;
@@ -214,7 +219,9 @@ impl<T> Model for OneVsRest<T>
         let models = &self.0;
         let class = coefficient % models.length();
         let mut result = Self::Target::zero(models.length());
-        *result.at_mut(class) = models.at_ref(class).gradient(coefficient / models.length(), input);
+        *result.at_mut(class) = models
+            .at_ref(class)
+            .gradient(coefficient / models.length(), input);
         result
     }
 }

@@ -2,18 +2,17 @@
 ///
 /// Also demonstrates online training, and usage of custom feature type
 extern crate csv;
-extern crate vikos;
 extern crate rustc_serialize;
+extern crate vikos;
 
-use vikos::{Teacher, Model, Crisp};
 use std::default::Default;
+use vikos::{Crisp, Model, Teacher};
 
 const PATH: &'static str = "examples/data/iris.csv";
 
 type Features = [f64; 4];
 
 fn main() {
-
     let teacher = vikos::teacher::Nesterov {
         l0: 0.0001,
         t: 1000.0,
@@ -34,7 +33,6 @@ fn main() {
         let mut miss = 0;
 
         for row in rdr.deserialize() {
-
             // Learn event
             let (truth, features): (String, Features) = row.unwrap();
 

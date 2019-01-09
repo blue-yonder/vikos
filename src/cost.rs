@@ -1,7 +1,7 @@
 //! Implementations of `Cost` trait
 
-use Cost;
 use linear_algebra::Vector;
+use Cost;
 
 /// Pass an instance of this type to a training algorithm to optimize for C=Error^2
 ///
@@ -21,14 +21,18 @@ impl Cost<f64> for LeastSquares {
 
 /// Pass an instance of this type to a training algorithm to optimize for C=|Error|
 ///
-/// Optimizing a `model::Constant` for `LeastAbsoluteDeviation` should yield the median.
-/// Gradient for error == 0 is set to 0
+/// Optimizing a `model::Constant` for `LeastAbsoluteDeviation` should yield the median. Gradient
+/// for error == 0 is set to 0
 pub struct LeastAbsoluteDeviation;
 
 impl Cost<f64> for LeastAbsoluteDeviation {
     fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
         let error = prediction - truth;
-        if error == 0.0 { 0.0 } else { error.signum() }
+        if error == 0.0 {
+            0.0
+        } else {
+            error.signum()
+        }
     }
     fn cost(&self, prediction: f64, truth: f64) -> f64 {
         (prediction - truth).abs()
@@ -37,11 +41,9 @@ impl Cost<f64> for LeastAbsoluteDeviation {
 
 /// Maximizes the likelihood function `L` by defining `C=-ln(L)`
 ///
-/// You can use this function if your truth is a probability
-/// (i.e., a value between 0 and 1). Maximizing the likelihood
-/// function is equivalent to minimizing the least square error,
-/// yet this cost function has shown itself to converge quicker
-/// for some problems.
+/// You can use this function if your truth is a probability (i.e., a value between 0 and 1).
+/// Maximizing the likelihood function is equivalent to minimizing the least square error, yet this
+/// cost function has shown itself to converge quicker for some problems.
 ///
 /// #Examples
 ///
@@ -91,7 +93,8 @@ impl Cost<bool> for MaxLikelihood {
 }
 
 impl<V> Cost<usize, V> for MaxLikelihood
-    where V: Vector
+where
+    V: Vector,
 {
     fn outer_derivative(&self, prediction: &V, truth: usize) -> V {
         let mut derivation = prediction.clone();
@@ -109,16 +112,17 @@ impl<V> Cost<usize, V> for MaxLikelihood
 mod test {
 
     use super::super::Cost;
-    use super::{LeastSquares, LeastAbsoluteDeviation, MaxLikelihood};
+    use super::{LeastAbsoluteDeviation, LeastSquares, MaxLikelihood};
 
     // Approximates the derivation of the cost function
     fn approx_derivate<T: Copy>(cost: &Cost<T>, prediction: f64, truth: T) -> f64 {
         let epsilon = 0.00001;
         let f_plus_epsilon = cost.cost(prediction + epsilon, truth);
         let f_minus_epsilon = cost.cost(prediction - epsilon, truth);
-        println!("f_x_plus_epsilon: {}, f_x_minus_epsilon:: {}",
-                 f_plus_epsilon,
-                 f_minus_epsilon);
+        println!(
+            "f_x_plus_epsilon: {}, f_x_minus_epsilon:: {}",
+            f_plus_epsilon, f_minus_epsilon
+        );
         (f_plus_epsilon - f_minus_epsilon) / (2.0 * epsilon)
     }
 
@@ -132,14 +136,12 @@ mod test {
 
     #[test]
     fn least_squares_derivation() {
-
         let cost = LeastSquares {};
         assert!(check_derivate(&cost, 10.0, 12.0) < 0.001);
     }
 
     #[test]
     fn least_absolute_derivation() {
-
         let cost = LeastAbsoluteDeviation {};
         assert!(check_derivate(&cost, 0.0, 0.0) < 0.001);
         assert!(check_derivate(&cost, 1.0, 0.0) < 0.001);
@@ -148,15 +150,18 @@ mod test {
 
     #[test]
     fn neg_log_likelihood_derivation() {
-
         let cost = MaxLikelihood {};
         assert!(check_derivate(&cost, 0.2, false) < 0.001);
         assert!(check_derivate(&cost, 0.8, true) < 0.001);
         assert!(check_derivate(&cost, 0.2, 0.0) < 0.001);
         assert!(check_derivate(&cost, 0.8, 1.0) < 0.001);
-        assert_eq!(cost.outer_derivative(&0.2, false),
-                   cost.outer_derivative(&0.2, 0.0));
-        assert_eq!(cost.outer_derivative(&0.8, true),
-                   cost.outer_derivative(&0.8, 1.0));
+        assert_eq!(
+            cost.outer_derivative(&0.2, false),
+            cost.outer_derivative(&0.2, 0.0)
+        );
+        assert_eq!(
+            cost.outer_derivative(&0.8, true),
+            cost.outer_derivative(&0.8, 1.0)
+        );
     }
 }

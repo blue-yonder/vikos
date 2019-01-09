@@ -2,9 +2,8 @@
 
 /// Vector whose dimension is known at runtime
 ///
-/// Assumes the `Vector` is represented as a
-/// tuple of numbers representing its projection
-/// along orthogonal base vectors
+/// Assumes the `Vector` is represented as a tuple of numbers representing its projection along
+/// orthogonal base vectors
 pub trait Vector: Clone {
     /// Retuns a new instance of Vector with all elements set to zero
     ///
@@ -55,11 +54,13 @@ impl Vector for f64 {
 macro_rules! vec_impl_for_array {
     ($v:expr) => {
         impl Vector for [f64; $v] {
-            fn zero(_ : usize) -> [f64; $v]{
+            fn zero(_: usize) -> [f64; $v] {
                 [0.0; $v]
             }
 
-            fn dimension(&self) -> usize{ $v }
+            fn dimension(&self) -> usize {
+                $v
+            }
 
             fn at(&self, index: usize) -> f64 {
                 self[index]
@@ -69,7 +70,7 @@ macro_rules! vec_impl_for_array {
                 &mut self[index]
             }
         }
-    }
+    };
 }
 
 vec_impl_for_array! { 1 }
@@ -110,7 +111,6 @@ mod tests {
 
     #[test]
     fn dot() {
-
         use linear_algebra::Vector;
 
         let a = [1.0, 2.0];

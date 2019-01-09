@@ -23,7 +23,9 @@ macro_rules! array_impl_for {
             type Element = T;
             type Vector = [f64; $v];
 
-            fn length(&self) -> usize{ $v }
+            fn length(&self) -> usize {
+                $v
+            }
 
             fn at_ref(&self, index: usize) -> &T {
                 &self[index]
@@ -33,7 +35,7 @@ macro_rules! array_impl_for {
                 &mut self[index]
             }
         }
-    }
+    };
 }
 
 array_impl_for! { 1 }
