@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["machine","learning","machine-learning"]
 
 [dependencies]
-num = "0.1.36"
+num = "0.2"
 rustc-serialize = "0.3.21"
 
 [dev-dependencies]
