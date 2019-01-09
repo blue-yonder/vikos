@@ -1,10 +1,11 @@
+Vikos is a library for supervised training of parameterized, regression, and classification models
+==================================================================================================
+
 [![Build Status](https://travis-ci.org/blue-yonder/vikos.svg?branch=master)](https://travis-ci.org/blue-yonder/vikos)
 [![Docs](https://docs.rs/vikos/badge.svg)](https://docs.rs/vikos/)
 [![MIT licensed](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/blue-yonder/vikos/blob/master/LICENSE)
 [![Published](http://meritbadge.herokuapp.com/vikos)](https://crates.io/crates/vikos)
 [![Join the chat at https://gitter.im/vikos-optimization/Lobby](https://badges.gitter.im/vikos-optimization/Lobby.svg)](https://gitter.im/vikos-optimization/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-Vikos is a library for supervised training of parameterized, regression, and classification models.
 
 Design Goals
 ------------
@@ -19,6 +20,7 @@ Current State
 Just starting to get the traits right, by continuously trying new use cases
 and implementing the learning algorithms. If you are looking for more mature
 rust libraries in the domain of ML, you might want to check out:
+
 * [rusty-machine]
 * [leaf].
 
@@ -30,9 +32,10 @@ Getting Started
 2. Run `cargo new --bin hello_vikos`.
 3. switch to the `hello_vikos` directory.
 4. Run `cargo run` to execute the hello world program.
-5. Edit the `Cargo.toml` file. Add `vikos = "0.1.7"` to your dependencies. The file should
+5. Edit the `Cargo.toml` file. Add `vikos = "1.8"` to your dependencies. The file should
    now look somewhat like this:
-   ```
+
+   ```toml
    [package]
    name = "hello_vikos"
    version = "0.1.0"
@@ -41,10 +44,11 @@ Getting Started
    [dependencies]
    vikos = "0.1.8"
    ```
-6. Insert `extern crate vikos;` at the first line in `src/main.rs`
+
+6. Insert `use vikos;` at the first line in `src/main.rs`
 7. You can now start replacing code in `main` with code from the [tutorial].
 
-   ```
+   ```rust
    fn main() {
        /* tutorial code goes here */
    }
