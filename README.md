@@ -32,13 +32,13 @@ Getting Started
 2. Run `cargo new --bin hello_vikos`.
 3. switch to the `hello_vikos` directory.
 4. Run `cargo run` to execute the hello world program.
-5. Edit the `Cargo.toml` file. Add `vikos = "1.8"` to your dependencies. The file should
+5. Edit the `Cargo.toml` file. Add `vikos = "0.2"` to your dependencies. The file should
    now look somewhat like this:
 
    ```toml
    [package]
    name = "hello_vikos"
-   version = "0.1.0"
+   version = "0.2"
    authors = ["..."]
 
    [dependencies]
