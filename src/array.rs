@@ -1,5 +1,5 @@
 //! Helper Module to treat Vec and fixed sized arrays as generic in some contexts
-use linear_algebra::Vector;
+use crate::linear_algebra::Vector;
 
 /// This trait is used to make up for the lack of generics over array lengths
 pub trait Array {

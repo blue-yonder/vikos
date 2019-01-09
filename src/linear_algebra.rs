@@ -111,7 +111,7 @@ mod tests {
 
     #[test]
     fn dot() {
-        use linear_algebra::Vector;
+        use crate::linear_algebra::Vector;
 
         let a = [1.0, 2.0];
         let b = [3.0, 4.0];

@@ -1,11 +1,6 @@
 /// Multiclass analyses of the iris dataset build on binary logistic classifaction
 ///
 /// Also demonstrates online training, and usage of custom feature type
-extern crate csv;
-extern crate serde;
-extern crate vikos;
-
-use std::default::Default;
 use vikos::{Crisp, Model, Teacher};
 
 const PATH: &'static str = "examples/data/iris.csv";

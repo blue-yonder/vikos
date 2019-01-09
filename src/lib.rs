@@ -5,9 +5,6 @@
 //! want to have a look at the [tutorial](./tutorial/index.html).
 
 #![warn(missing_docs)]
-extern crate num;
-extern crate serde_derive;
-
 use std::iter::IntoIterator;
 
 /// A parameterized expert algorithm
@@ -28,7 +25,7 @@ pub trait Model {
     fn coefficient(&mut self, coefficient: usize) -> &mut f64;
 
     /// Predicts a target for the inputs based on the internal coefficients
-    fn predict(&self, &Self::Features) -> Self::Target;
+    fn predict(&self, _: &Self::Features) -> Self::Target;
 
     /// Value predict derived by the n-th `coefficient` at `input`
     fn gradient(&self, coefficient: usize, input: &Self::Features) -> Self::Target;

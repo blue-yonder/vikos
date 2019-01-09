@@ -8,6 +8,7 @@ repository = "https://github.com/blue-yonder/vikos"
 documentation = "https://docs.rs/vikos/"
 readme = "README.md"
 keywords = ["machine","learning","machine-learning"]
+edition = "2018"
 
 [dependencies]
 num = "0.2"

@@ -1,6 +1,5 @@
 //! Contains implementations for crisp trait
-use array::Array;
-use Crisp;
+use crate::{array::Array, Crisp};
 
 impl Crisp for f64 {
     type Truth = bool;

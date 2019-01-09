@@ -1,4 +1,3 @@
-extern crate vikos;
 use vikos::{cost, learn_history, teacher};
 
 fn main() {

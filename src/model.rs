@@ -1,9 +1,6 @@
 //! Implementations of `Model` trait
 
-use array;
-use linear_algebra::Vector;
-use Model;
-
+use crate::{array, linear_algebra::Vector, Model};
 use serde_derive::{Deserialize, Serialize};
 
 impl Model for f64 {
