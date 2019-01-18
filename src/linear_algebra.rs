@@ -20,6 +20,7 @@ pub trait Vector: Clone {
     ///
     /// Default implementation using `at` and `dimension` is provided
     fn dot(&self, other: &Self) -> f64 {
+        debug_assert_eq!(self.dimension(), other.dimension());
         let mut result = 0.0;
         for i in 0..self.dimension() {
             result += self.at(i) * other.at(i)
