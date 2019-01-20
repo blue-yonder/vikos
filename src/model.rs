@@ -1,6 +1,10 @@
 //! Implementations of `Model` trait
 
-use crate::{array, linear_algebra::Vector, Model};
+use crate::{
+    array,
+    linear_algebra::{FixDimension, Vector},
+    Model,
+};
 use serde_derive::{Deserialize, Serialize};
 
 impl Model for f64 {
@@ -31,12 +35,35 @@ impl Model for f64 {
 }
 
 /// Models the target as `y = m * x + c`
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Linear<V> {
     /// Slope
     pub m: V,
     /// Offset
     pub c: f64,
+}
+
+impl<V: Vector> Linear<V> {
+    /// Create a linear model whose features have the specified dimension. If the models internal
+    /// Vector type has a fixed dimension known at compile time you can use `default` instead.
+    pub fn with_feature_dimension(dimension: usize) -> Self {
+        Linear {
+            m: V::zero_from_dimension(dimension),
+            c: 0f64,
+        }
+    }
+}
+
+impl<V> Default for Linear<V>
+where
+    V: FixDimension,
+{
+    fn default() -> Self {
+        Linear {
+            m: V::zero(),
+            c: 0f64,
+        }
+    }
 }
 
 impl<V> Model for Linear<V>
@@ -72,8 +99,25 @@ where
 }
 
 /// Models target as `y = 1/(1+e^(m * x + c))`
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Logistic<V>(Linear<V>);
+
+impl<V: Vector> Logistic<V> {
+    /// Create a linear model whose features have the specified dimension. If the models internal
+    /// Vector type has a fixed dimension known at compile time you can use `default` instead.
+    pub fn with_feature_dimension(dimension: usize) -> Self {
+        Logistic(Linear::with_feature_dimension(dimension))
+    }
+}
+
+impl<V> Default for Logistic<V>
+where
+    V: FixDimension,
+{
+    fn default() -> Self {
+        Logistic(Linear::default())
+    }
+}
 
 impl<V> Model for Logistic<V>
 where
@@ -138,7 +182,7 @@ where
     /// Creates new model with the coefficients set to zero
     pub fn new(g: G, g_derivate: Dg) -> GeneralizedLinearModel<V, G, Dg>
     where
-        V: Default,
+        V: FixDimension,
     {
         GeneralizedLinearModel {
             linear: Linear::default(),
@@ -176,12 +220,20 @@ where
     }
 }
 
-/// One vs Rest strategy for multi classification
+/// One vs Rest strategy for multi classification.
 ///
-/// Implementation assumes that the number of coefficients
-/// is the same for all models.
+/// This model combines indivual binary classifactors to a new multi classification model.
+///
+/// Implementation assumes that the number of coefficients is the same for all models.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct OneVsRest<T>(T);
+
+impl<T> OneVsRest<T> {
+    /// Create a new One vs Rest model from an array of existing models.
+    pub fn new(t: T) -> Self {
+        OneVsRest(t)
+    }
+}
 
 impl<T> Model for OneVsRest<T>
 where
@@ -207,7 +259,7 @@ where
 
     fn predict(&self, input: &Self::Features) -> Self::Target {
         let models = &self.0;
-        let mut result = Self::Target::zero(models.length());
+        let mut result = Self::Target::zero_from_dimension(models.length());
         for i in 0..models.length() {
             *result.at_mut(i) = models.at_ref(i).predict(input);
         }
@@ -217,7 +269,7 @@ where
     fn gradient(&self, coefficient: usize, input: &Self::Features) -> Self::Target {
         let models = &self.0;
         let class = coefficient % models.length();
-        let mut result = Self::Target::zero(models.length());
+        let mut result = Self::Target::zero_from_dimension(models.length());
         *result.at_mut(class) = models
             .at_ref(class)
             .gradient(coefficient / models.length(), input);

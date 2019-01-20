@@ -1,6 +1,6 @@
 //! Implementations of `Cost` trait
 
-use crate::{Cost, linear_algebra::Vector};
+use crate::{linear_algebra::Vector, Cost};
 
 /// Pass an instance of this type to a training algorithm to optimize for C=Error^2
 ///

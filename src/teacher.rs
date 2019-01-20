@@ -1,6 +1,6 @@
 //! Learning algorithms implementing `Teacher` trait
 
-use crate::{Cost, linear_algebra::Vector, Model, Teacher};
+use crate::{linear_algebra::Vector, Cost, Model, Teacher};
 
 /// Calculates annealed learning rate
 ///

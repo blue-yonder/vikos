@@ -17,9 +17,3 @@ Executing Examples
 The examples in the `examples/` directory can be compiled and run using
 `cargo run --example <example-name>`. So `cargo run --example mean` will compile and run the file
 `examples/mean.rs`.
-
-Source Code Formatting
-----------------------
-
-[Rustfmt](https://github.com/rust-lang-nursery/rustfmt) is the appropriate tool to lay out code
-according to the community standards. You can invoke it with `cargo fmt`.

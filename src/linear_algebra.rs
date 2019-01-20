@@ -9,7 +9,7 @@ pub trait Vector: Clone {
     ///
     /// Not every possible implementation knows its dimension at compiletime, therefore a size hint
     /// is necessary to allocate the correct number of elements
-    fn zero(dimension: usize) -> Self;
+    fn zero_from_dimension(dimension: usize) -> Self;
     /// Maximum allowed index for `at` and `at_mut`
     fn dimension(&self) -> usize;
     /// Length of projection along `i`-th base
@@ -29,8 +29,14 @@ pub trait Vector: Clone {
     }
 }
 
+/// Vector with dimension known at compile time
+pub trait FixDimension {
+    /// Retuns a new instance of Vector with all elements set to zero
+    fn zero() -> Self;
+}
+
 impl Vector for f64 {
-    fn zero(dimension: usize) -> f64 {
+    fn zero_from_dimension(dimension: usize) -> f64 {
         assert!(dimension == 1);
         0.0
     }
@@ -52,9 +58,14 @@ impl Vector for f64 {
     }
 }
 
-impl Vector for Vec<f64> {
+impl FixDimension for f64 {
+    fn zero() -> Self {
+        0.
+    }
+}
 
-    fn zero(dimension: usize) -> Vec<f64> {
+impl Vector for Vec<f64> {
+    fn zero_from_dimension(dimension: usize) -> Vec<f64> {
         vec![0.; dimension]
     }
 
@@ -74,7 +85,8 @@ impl Vector for Vec<f64> {
 macro_rules! vec_impl_for_array {
     ($v:expr) => {
         impl Vector for [f64; $v] {
-            fn zero(_: usize) -> [f64; $v] {
+            fn zero_from_dimension(dimension: usize) -> [f64; $v] {
+                assert!(dimension == $v);
                 [0.0; $v]
             }
 
@@ -88,6 +100,12 @@ macro_rules! vec_impl_for_array {
 
             fn at_mut(&mut self, index: usize) -> &mut f64 {
                 &mut self[index]
+            }
+        }
+
+        impl FixDimension for [f64; $v] {
+            fn zero() -> Self {
+                [0.0; $v]
             }
         }
     };
