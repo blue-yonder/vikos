@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.3.1
+-----
+
+* `Teacher`s now support `serde::{Serialize, Deserialize}`
+
 0.3.0
 -----
 

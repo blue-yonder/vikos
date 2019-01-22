@@ -1,6 +1,7 @@
 //! Learning algorithms implementing `Teacher` trait
 
 use crate::{linear_algebra::Vector, Cost, Model, Teacher};
+use serde_derive::{Deserialize, Serialize};
 
 /// Calculates annealed learning rate
 ///
@@ -28,6 +29,7 @@ where
 /// Gradient descent
 ///
 /// Simplest possible implementation of gradient descent with fixed learning rate
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct GradientDescent {
     /// Defines how fast the coefficients of the trained `Model` will change
     pub learning_rate: f64,
@@ -66,6 +68,7 @@ where
 /// Gradient descent with annealing learning rate
 ///
 /// For the i-th event the learning rate is `l = l0 * (1 + i/t)`
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct GradientDescentAl {
     /// Start learning rate
     pub l0: f64,
@@ -112,6 +115,7 @@ where
 /// Gradient descent with annealing learning rate and momentum
 ///
 /// For the i-th event the learning rate is `l = l0 * (1 + i/t)`
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Momentum {
     /// Start learning rate
     pub l0: f64,
@@ -172,6 +176,7 @@ where
 /// Source:
 /// [G. Hinton's lecture 6c]
 /// (http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf)
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Nesterov {
     /// Start learning rate
     pub l0: f64,
@@ -234,6 +239,7 @@ where
 /// each coefficient. In effect the learning rate is smaller for frequent and larger for infrequent
 /// features.
 /// See [this paper](http://jmlr.org/papers/v12/duchi11a.html) for more information.
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Adagard {
     /// The larger this parameter is, the more the coefficients will change with each iteration
     pub learning_rate: f64,
