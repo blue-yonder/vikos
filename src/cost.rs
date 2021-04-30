@@ -75,7 +75,7 @@ pub struct MaxLikelihood;
 
 impl Cost<f64> for MaxLikelihood {
     fn outer_derivative(&self, prediction: &f64, truth: f64) -> f64 {
-        ((1.0 - truth) / (1.0 - prediction) - truth / prediction)
+        (1.0 - truth) / (1.0 - prediction) - truth / prediction
     }
     fn cost(&self, prediction: f64, truth: f64) -> f64 {
         -truth * prediction.ln() - (1.0 - truth) * (1.0 - prediction).ln()
@@ -114,7 +114,7 @@ mod test {
     use super::{LeastAbsoluteDeviation, LeastSquares, MaxLikelihood};
 
     // Approximates the derivation of the cost function
-    fn approx_derivate<T: Copy>(cost: &Cost<T>, prediction: f64, truth: T) -> f64 {
+    fn approx_derivate<T: Copy>(cost: &impl Cost<T>, prediction: f64, truth: T) -> f64 {
         let epsilon = 0.00001;
         let f_plus_epsilon = cost.cost(prediction + epsilon, truth);
         let f_minus_epsilon = cost.cost(prediction - epsilon, truth);
@@ -126,7 +126,7 @@ mod test {
     }
 
     // Returns absolute difference between derivate and approximation
-    fn check_derivate<T: Copy>(cost: &Cost<T>, prediction: f64, truth: T) -> f64 {
+    fn check_derivate<T: Copy>(cost: &impl Cost<T>, prediction: f64, truth: T) -> f64 {
         let derivate = cost.outer_derivative(&prediction, truth);
         let approx = approx_derivate(cost, prediction, truth);
         println!("derivation: {}, approximation: {}", derivate, approx);
