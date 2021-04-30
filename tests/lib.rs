@@ -1,6 +1,4 @@
-extern crate csv;
-extern crate vikos;
-
+use csv;
 use std::default::Default;
 use vikos::{cost, model, teacher};
 
